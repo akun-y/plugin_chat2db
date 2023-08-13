@@ -29,11 +29,11 @@ from plugins import *
 
 
 @plugins.register(
-    name="Save2db",
+    name="Chat2db",
     desire_priority=900,
     hidden=False,
     desc="存储聊天记录",
-    version="0.1",
+    version="0.2",
     author="akun.yunqi",
 )
 class Chat2db(Plugin):
