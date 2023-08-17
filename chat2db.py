@@ -17,7 +17,6 @@ from channel.chat_message import ChatMessage
 from config import conf
 import plugins
 from plugins import *
-from common.log import logger
 from common import const
 from chatgpt_tool_hub.chains.llm import LLMChain
 from chatgpt_tool_hub.models import build_model_params
@@ -77,6 +76,7 @@ class Chat2db(Plugin):
             logger.warn("[Save2db] init failed, ignore or see https://github.com/akun-y/plugin_save2db .")
             raise e
     def post_insert_record(self, userName: str, userid: str,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
+            logger.info("post_insert_record: {} {} {} {} {} {} {} {}" .format(userName, userid, conversation_id, action, content_type, role, content, response))
             query_json = {
                 "payload": {
                     "userAvator": "https://pix.veryjack.com/i/2023/04/04/fsxnkv.webp",
@@ -103,8 +103,11 @@ class Chat2db(Plugin):
                 },
                 "sig": "825ccf873738de91a77b0de19b0f2db7e549efcca36215743c184197173967d770b141201651b21d6d89d27dc8d6cde6ccdc3151af67ed29b5cdaed2cecf3950"
             }
+            post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
+            logger.info("post url:",post_url)
+
             response = requests.post(
-                self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A', json=query_json, verify=False)
+                post_url, json=query_json, verify=False)
             ret = response.text
             print("post chat to group api:", ret)
             return ret
