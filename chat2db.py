@@ -29,7 +29,6 @@ from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
 
-
 @plugins.register(
     name="Chat2db",
     desire_priority=900,

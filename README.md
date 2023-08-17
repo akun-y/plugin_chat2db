@@ -9,6 +9,7 @@
 ```
 #auth password
 ```
+如果没设置管理员密码，启动程序时会在输出信息中提示临时密码，否则设置 config.json 中Godcmd下 password
 2 安装插件
 ```
 #installp https://github.com/akun-y/plugin_chat2db.git
