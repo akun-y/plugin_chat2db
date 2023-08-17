@@ -1,5 +1,5 @@
 # 目的
-在iKow-on-wechat,chatgpt-on-wechat项目中，作为插件，用于保存聊天记录到数据库中（sqlite3)
+在iKow-on-wechat,chatgpt-on-wechat项目中，作为插件，用于保存聊天记录到数据库中（sqlite3)，同时通过API 同步到groupx.mfull.cn
 
 # 试用场景
 目前是在微信公众号下面使用过。
