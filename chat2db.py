@@ -33,7 +33,7 @@ from plugins import *
     desire_priority=900,
     hidden=False,
     desc="存储及同步聊天记录",
-    version="0.3.20230817",
+    version="0.4.20230817-2",
     author="akun.yunqi",
 )
 
@@ -42,6 +42,8 @@ class Chat2db(Plugin):
     def __init__(self):
         super().__init__()
         try:
+            u = conf().get("groupx_host_url")
+            logger.info(f"groupx_host_url: {u}")
             self.groupxHostUrl = "https://groupx.mfull.cn" #conf().get("groupx_host_url")
             self.model = conf().get("model")
             curdir = os.path.dirname(__file__)
@@ -104,7 +106,7 @@ class Chat2db(Plugin):
                 "sig": "825ccf873738de91a77b0de19b0f2db7e549efcca36215743c184197173967d770b141201651b21d6d89d27dc8d6cde6ccdc3151af67ed29b5cdaed2cecf3950"
             }
             post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
-            logger.info("post url:",post_url)
+            logger.info("post url: {}".format(post_url))
 
             response = requests.post(
                 post_url, json=query_json, verify=False)
