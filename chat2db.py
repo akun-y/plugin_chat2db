@@ -43,7 +43,7 @@ class Chat2db(Plugin):
         super().__init__()
         try:
             u = conf().get("groupx_host_url")
-            logger.info(f"groupx_host_url: {u}")
+            logger.info("groupx_host_url: {}".format(u))
             self.groupxHostUrl = "https://groupx.mfull.cn" #conf().get("groupx_host_url")
             self.model = conf().get("model")
             curdir = os.path.dirname(__file__)
