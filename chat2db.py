@@ -37,6 +37,8 @@ from plugins import *
     version="0.3.20230817",
     author="akun.yunqi",
 )
+
+
 class Chat2db(Plugin):
     def __init__(self):
         super().__init__()
