@@ -121,6 +121,7 @@ class Chat2db(Plugin):
                 user_id= cmsg.actual_user_id
                 avatar = self.get_head_img(user_id)
                 nickName = cmsg.actual_user_nickname
+                wxGroupId = cmsg.from_user_id
                 user={
                     'NickName': nickName,
                     'UserName': user_id,
@@ -131,6 +132,7 @@ class Chat2db(Plugin):
                 avatar = self.get_head_img(user_id)
                 nickName = cmsg.from_user_nickname
                 user=cmsg._rawmsg.user
+                wxGroupId=''
 
             #接收人头像
             recvAvatar = self.get_head_img(cmsg.to_user_id)
@@ -157,8 +159,9 @@ class Chat2db(Plugin):
 
                     "wxReceiver": cmsg.to_user_id,
                     "wxUser": user,
+                    "wxGroupId":wxGroupId,
 
-                    "source": "iKnow-on-wechat wx group" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
+                    "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 },
                 "params": {
                     "addr": "0xb8F33dAb7b6b24F089d916192E85D7403233328A",
