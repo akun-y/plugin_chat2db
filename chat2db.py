@@ -1,6 +1,7 @@
 # encoding:utf-8
 
 
+import logging
 import os
 import sqlite3
 
@@ -15,6 +16,7 @@ from bridge.reply import Reply, ReplyType
 from channel.chat_channel import check_contain, check_prefix
 from channel.chat_message import ChatMessage
 from config import conf
+from lib import itchat
 import plugins
 from plugins import *
 from common import const
@@ -27,13 +29,15 @@ from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
+from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
+
 
 @plugins.register(
     name="Chat2db",
     desire_priority=900,
     hidden=False,
     desc="存储及同步聊天记录",
-    version="0.4.20230817-2",
+    version="0.4.20231012",
     author="akun.yunqi",
 )
 
@@ -41,58 +45,114 @@ from plugins import *
 class Chat2db(Plugin):
     def __init__(self):
         super().__init__()
-        try:
-            #u = conf().get("groupx_host_url")
-            #logger.info("groupx_host_url: {}".format(u))
-            self.groupxHostUrl = "https://groupx.mfull.cn" #conf().get("groupx_host_url")
-            self.model = conf().get("model")
-            curdir = os.path.dirname(__file__)
-            db_path = os.path.join(curdir, "chat2db.db")
-            self.conn = sqlite3.connect(db_path, check_same_thread=False)
-            c = self.conn.cursor()
-            c.execute('''CREATE TABLE IF NOT EXISTS chat_records
-                        (sessionid TEXT, msgid INTEGER, user TEXT,recv TEXT,reply TEXT, type TEXT, timestamp INTEGER, is_triggered INTEGER,
-                        PRIMARY KEY (sessionid, msgid))''')
+        self.config = super().load_config()
+        if not self.config:
+            # 未加载到配置，使用模板中的配置
+            self.config = self._load_config_template()
+        if self.config:
+            self.groupxHostUrl = self.config.get("groupx_host_url")
 
-            # 后期增加了is_triggered字段，这里做个过渡，这段代码某天会删除
-            c = c.execute("PRAGMA table_info(chat_records);")
-            column_exists = False
-            for column in c.fetchall():
-                logger.debug("[Summary] column: {}" .format(column))
-                if column[1] == 'is_triggered':
-                    column_exists = True
-                    break
-            if not column_exists:
-                self.conn.execute("ALTER TABLE chat_records ADD COLUMN is_triggered INTEGER DEFAULT 0;")
-                self.conn.execute("UPDATE chat_records SET is_triggered = 0;")
+        self.model = conf().get("model")
+        curdir = os.path.dirname(__file__)
+        db_path = os.path.join(curdir, "chat2db.db")
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
+        c = self.conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS chat_records
+                    (sessionid TEXT, msgid INTEGER, user TEXT,recv TEXT,reply TEXT, type TEXT, timestamp INTEGER, is_triggered INTEGER,
+                    PRIMARY KEY (sessionid, msgid))''')
 
-            self.conn.commit()
+        # 后期增加了is_triggered字段，这里做个过渡，这段代码某天会删除
+        c = c.execute("PRAGMA table_info(chat_records);")
+        column_exists = False
+        for column in c.fetchall():
+            logger.debug("[Summary] column: {}" .format(column))
+            if column[1] == 'is_triggered':
+                column_exists = True
+                break
+        if not column_exists:
+            self.conn.execute("ALTER TABLE chat_records ADD COLUMN is_triggered INTEGER DEFAULT 0;")
+            self.conn.execute("UPDATE chat_records SET is_triggered = 0;")
 
-            btype = Bridge().btype['chat']
-            if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
-                raise Exception("[Summary] init failed, not supported bot type")
-            self.bot = bot_factory.create_bot(Bridge().btype['chat'])
-            self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
-            logger.info("[Summary] inited")
-        except Exception as e:
-            logger.warn("[Save2db] init failed, ignore or see https://github.com/akun-y/plugin_save2db .")
-            raise e
-    def post_insert_record(self, userName: str, userid: str,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
-            logger.info("post_insert_record: {} {} {} {} {} {} {} {}" .format(userName, userid, conversation_id, action, content_type, role, content, response))
+        self.conn.commit()
+
+        btype = Bridge().btype['chat']
+        if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
+            raise Exception("[Summary] init failed, not supported bot type")
+        self.bot = bot_factory.create_bot(Bridge().btype['chat'])
+        self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
+
+        self.saveFolder = os.path.join(os.getcwd(), 'saved')
+        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
+                               'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
+        # 腾讯cos上传参数设置
+
+        #----------------------
+
+        logger.info(f"[Chat2db] inited, config={self.config}")
+
+    def _saveFile(self, filename, data, api=None):
+        fn = filename
+        if self.saveSubFolders[api]:
+            dirName = os.path.join(self.saveFolder, self.saveSubFolders[api])
+            if not os.path.exists(dirName):
+                os.makedirs(dirName)
+            fn = os.path.join(dirName, filename)
+            logging.debug('Saved file: %s' % fn)
+            with open(fn, 'wb') as f:
+                f.write(data)
+                f.close()
+        return fn
+    #从itchat获取头像
+    def get_head_img_from_itchat(self, user_id):
+        return itchat.get_head_img(user_id)
+    
+    #优先从本地获取头像,如无,则远程获取并存储到本地
+    def get_head_img(self, user_id):
+        dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
+        avatar_file = os.path.join(dirName, f'headimg-{user_id}.png')
+        if os.path.exists(avatar_file):
+            avatar = qcloud_upload_file(self.groupxHostUrl, avatar_file)
+        else :
+            fileBody = self.get_head_img_from_itchat(user_id)
+            avatar = qcloud_upload_bytes(self.groupxHostUrl, fileBody)
+            
+            fn = self._saveFile(avatar_file, fileBody,'webwxgetheadimg')
+        return avatar
+    def post_insert_record(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
+            user = cmsg._rawmsg.User
+
+            #发送人头像
+            avatar = self.get_head_img(cmsg.from_user_id)
+
+            #接收人头像
+            recvAvatar = self.get_head_img(cmsg.to_user_id)
+
             query_json = {
                 "payload": {
-                    "userAvator": "https://pix.veryjack.com/i/2023/04/04/fsxnkv.webp",
-                    "userName": userName,
-                    "title": "iKonw-on-wechat",
-                    "message": content,
-                    "openId": userid,
-                    "conversationId": conversation_id,
-                    "action": action,
-                    "jailbreak": jailbreak,
-                    "contentType": content_type,
-                    "internetAccess": internet_access,
-                    "aiResponse": response,
-                    "model": self.model
+                    'receiver': cmsg.to_user_id,
+                    'receiverName': cmsg.to_user_nickname,
+                    'receiverAvatar': recvAvatar,
+
+                    'conversationId': conversation_id,
+                    'action': action,
+                    'model': self.model,
+                    'internetAccess': internet_access,
+                    'contentType': content_type,
+                    'aiResponse': response,
+
+                    'title': content,
+                    'userName': user.NickName,
+                    'userAvator': avatar,
+                    'userId': cmsg.from_user_id,
+                    'message': content,
+                    'messageId': cmsg.msg_id,
+                    'messageType': content_type,
+
+
+                    "wxReceiver": cmsg.to_user_id,
+                    "wxUser": cmsg._rawmsg.user,
+
+                    "source": "iKnow-on-wechat wx"
                 },
                 "params": {
                     "addr": "0xb8F33dAb7b6b24F089d916192E85D7403233328A",
@@ -154,8 +214,9 @@ class Chat2db(Plugin):
 
         self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time, int(is_triggered))
 
-        self.post_insert_record(username, cmsg.from_user_id, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
+        self.post_insert_record(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
         e_context.action = EventAction.CONTINUE
+
     def get_help_text(self, **kwargs):
         help_text = "存储聊天记录到数据库"
         return help_text
