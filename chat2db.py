@@ -45,6 +45,7 @@ from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_uplo
 class Chat2db(Plugin):
     def __init__(self):
         super().__init__()
+        
         self.config = super().load_config()
         if not self.config:
             # 未加载到配置，使用模板中的配置
@@ -53,9 +54,12 @@ class Chat2db(Plugin):
             self.groupxHostUrl = self.config.get("groupx_host_url")
 
         self.model = conf().get("model")
-        curdir = os.path.dirname(__file__)
-        db_path = os.path.join(curdir, "chat2db.db")
-        self.conn = sqlite3.connect(db_path, check_same_thread=False)
+        self.curdir = os.path.dirname(__file__)
+        self.saveFolder = os.path.join(self.curdir, 'saved')
+        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
+                               'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
+        
+        self.conn = sqlite3.connect(os.path.join(self.curdir, "chat2db.db"), check_same_thread=False)
         c = self.conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS chat_records
                     (sessionid TEXT, msgid INTEGER, user TEXT,recv TEXT,reply TEXT, type TEXT, timestamp INTEGER, is_triggered INTEGER,
@@ -80,13 +84,6 @@ class Chat2db(Plugin):
             raise Exception("[Summary] init failed, not supported bot type")
         self.bot = bot_factory.create_bot(Bridge().btype['chat'])
         self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
-
-        self.saveFolder = os.path.join(os.getcwd(), 'saved')
-        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
-                               'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
-        # 腾讯cos上传参数设置
-
-        #----------------------
 
         logger.info(f"[Chat2db] inited, config={self.config}")
 
@@ -137,7 +134,6 @@ class Chat2db(Plugin):
                     'action': action,
                     'model': self.model,
                     'internetAccess': internet_access,
-                    'contentType': content_type,
                     'aiResponse': response,
 
                     'title': content,
