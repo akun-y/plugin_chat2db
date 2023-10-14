@@ -7,19 +7,6 @@ import logging
 import requests
 
 
-# 强烈建议您以二进制模式(binary mode)打开文件,否则可能会导致错误
-def qcloud_upload_file() :
-    with open('picture.jpg', 'rb') as fp:
-        response = client.put_object(
-            Bucket='examplebucket-1250000000',
-            Body=fp,
-            Key='picture.jpg',
-            StorageClass='STANDARD',
-            EnableMD5=False
-        )
-    print(response['ETag'])
-
-
 def qcloud_get_cos_policy(groupx_url, ext_name) :
     # 传入文件后缀，后端生成随机的 COS 对象路径，并返回上传域名、PostObject 接口要用的 policy 签名
     # 参考服务端示例：https://github.com/tencentyun/cos-demo/server/post-policy/

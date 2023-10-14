@@ -43,6 +43,7 @@ from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_uplo
 
 
 class Chat2db(Plugin):
+
     def __init__(self):
         super().__init__()
 
@@ -59,25 +60,10 @@ class Chat2db(Plugin):
         self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
                                'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
 
-        self.conn = sqlite3.connect(os.path.join(self.curdir, "chat2db.db"), check_same_thread=False)
-        c = self.conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS chat_records
-                    (sessionid TEXT, msgid INTEGER, user TEXT,recv TEXT,reply TEXT, type TEXT, timestamp INTEGER, is_triggered INTEGER,
-                    PRIMARY KEY (sessionid, msgid))''')
+        self.conn = sqlite3.connect(os.path.join(self.saveFolder, "chat2db.db"), check_same_thread=False)
 
-        # 后期增加了is_triggered字段，这里做个过渡，这段代码某天会删除
-        c = c.execute("PRAGMA table_info(chat_records);")
-        column_exists = False
-        for column in c.fetchall():
-            logger.debug("[Summary] column: {}" .format(column))
-            if column[1] == 'is_triggered':
-                column_exists = True
-                break
-        if not column_exists:
-            self.conn.execute("ALTER TABLE chat_records ADD COLUMN is_triggered INTEGER DEFAULT 0;")
-            self.conn.execute("UPDATE chat_records SET is_triggered = 0;")
-
-        self.conn.commit()
+        self._create_table()
+        self._create_table_avatar()
 
         btype = Bridge().btype['chat']
         if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
@@ -105,6 +91,10 @@ class Chat2db(Plugin):
 
     #优先从本地获取头像,如无,则远程获取并存储到本地
     def get_head_img(self, user_id):
+        avatar = self._get_records_avatar(user_id)
+        if avatar:
+            return avatar
+
         dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
         avatar_file = os.path.join(dirName, f'headimg-{user_id}.png')
         if os.path.exists(avatar_file):
@@ -114,6 +104,9 @@ class Chat2db(Plugin):
             avatar = qcloud_upload_bytes(self.groupxHostUrl, fileBody)
 
             fn = self._saveFile(avatar_file, fileBody, 'webwxgetheadimg')
+
+        self._insert_record_avatar(user_id, avatar)
+
         return avatar
     def post_insert_record(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
             #发送人头像
@@ -131,7 +124,7 @@ class Chat2db(Plugin):
                 user_id= cmsg.from_user_id
                 avatar = self.get_head_img(user_id)
                 nickName = cmsg.from_user_nickname
-                user=cmsg._rawmsg.user
+                user= {**cmsg._rawmsg.user, 'HeadImgUrl': avatar}
                 wxGroupId=''
 
             #接收人头像
@@ -159,7 +152,7 @@ class Chat2db(Plugin):
 
                     "wxReceiver": cmsg.to_user_id,
                     "wxUser": user,
-                    "wxGroupId":wxGroupId,
+                    "wxGroupId": wxGroupId,
 
                     "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 },
@@ -182,18 +175,57 @@ class Chat2db(Plugin):
             ret = response.text
             print("post chat to group api:", ret)
             return ret
+    def _create_table(self):
+        c = self.conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS chat_records
+                    (sessionid TEXT, msgid INTEGER, user TEXT,recv TEXT,reply TEXT, type TEXT, timestamp INTEGER, is_triggered INTEGER,
+                    PRIMARY KEY (timestamp, msgid))''')
+
+        # 后期增加了is_triggered字段，这里做个过渡，这段代码某天会删除
+        c = c.execute("PRAGMA table_info(chat_records);")
+        column_exists = False
+        for column in c.fetchall():
+            logger.debug("[Summary] column: {}" .format(column))
+            if column[1] == 'is_triggered':
+                column_exists = True
+                break
+        if not column_exists:
+            self.conn.execute("ALTER TABLE chat_records ADD COLUMN is_triggered INTEGER DEFAULT 0;")
+            self.conn.execute("UPDATE chat_records SET is_triggered = 0;")
+
+        self.conn.commit()
 
     def _insert_record(self, session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered = 0):
         c = self.conn.cursor()
-        logger.debug("[Summary] insert record: {} {} {} {} {} {} {} {}" .format(session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
-        c.execute("INSERT OR REPLACE INTO chat_records VALUES (?,?,?,?,?,?,?,?)", (session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
+        logger.debug("[chat_records] insert record: {} {} {} {} {} {} {} {}" .format(session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
+        c.execute("INSERT INTO chat_records VALUES (?,?,?,?,?,?,?,?)", (session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
         self.conn.commit()
 
     def _get_records(self, session_id, start_timestamp=0, limit=9999):
         c = self.conn.cursor()
         c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?", (session_id, start_timestamp, limit))
         return c.fetchall()
-
+    # 存储头像到腾讯cos
+    def _create_table_avatar(self):
+        c = self.conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS avatar_records
+                    (user_id TEXT, avatar TEXT,timestamp INTEGER,PRIMARY KEY (user_id))''')
+        self.conn.commit()
+    def _insert_record_avatar(self, user_id, avatar):
+        c = self.conn.cursor()
+        timestamp = int(time.time())
+        logger.debug("[avatar_records] insert record: {} {} {}" .format(user_id, avatar, timestamp))
+        c.execute("INSERT OR REPLACE INTO avatar_records VALUES (?,?,?)", (user_id, avatar,  timestamp))
+        self.conn.commit()
+    # 查询是否已经存储过头像
+    def _get_records_avatar(self, user_id):
+        c = self.conn.cursor()
+        c.execute("SELECT avatar FROM avatar_records WHERE user_id=? ", (user_id,))
+        result = c.fetchone()
+        if result:
+            return result[0]  # 提取 avatar 字段的值
+        else:
+            return None
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
         if e_context["reply"].type not in [ReplyType.TEXT]:
