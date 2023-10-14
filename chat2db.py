@@ -45,7 +45,7 @@ from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_uplo
 class Chat2db(Plugin):
     def __init__(self):
         super().__init__()
-        
+
         self.config = super().load_config()
         if not self.config:
             # 未加载到配置，使用模板中的配置
@@ -58,7 +58,7 @@ class Chat2db(Plugin):
         self.saveFolder = os.path.join(self.curdir, 'saved')
         self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
                                'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
-        
+
         self.conn = sqlite3.connect(os.path.join(self.curdir, "chat2db.db"), check_same_thread=False)
         c = self.conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS chat_records
@@ -102,7 +102,7 @@ class Chat2db(Plugin):
     #从itchat获取头像
     def get_head_img_from_itchat(self, user_id):
         return itchat.get_head_img(user_id)
-    
+
     #优先从本地获取头像,如无,则远程获取并存储到本地
     def get_head_img(self, user_id):
         dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
@@ -112,14 +112,25 @@ class Chat2db(Plugin):
         else :
             fileBody = self.get_head_img_from_itchat(user_id)
             avatar = qcloud_upload_bytes(self.groupxHostUrl, fileBody)
-            
-            fn = self._saveFile(avatar_file, fileBody,'webwxgetheadimg')
+
+            fn = self._saveFile(avatar_file, fileBody, 'webwxgetheadimg')
         return avatar
     def post_insert_record(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
-            user = cmsg._rawmsg.User
-
             #发送人头像
-            avatar = self.get_head_img(cmsg.from_user_id)
+            if(cmsg.is_group) :
+                user_id= cmsg.actual_user_id
+                avatar = self.get_head_img(user_id)
+                nickName = cmsg.actual_user_nickname
+                user={
+                    'NickName': nickName,
+                    'UserName': user_id,
+                    'HeadImgUrl': avatar
+                    }
+            else :
+                user_id= cmsg.from_user_id
+                avatar = self.get_head_img(user_id)
+                nickName = cmsg.from_user_nickname
+                user=cmsg._rawmsg.user
 
             #接收人头像
             recvAvatar = self.get_head_img(cmsg.to_user_id)
@@ -137,18 +148,17 @@ class Chat2db(Plugin):
                     'aiResponse': response,
 
                     'title': content,
-                    'userName': user.NickName,
+                    'userName': nickName,
                     'userAvator': avatar,
-                    'userId': cmsg.from_user_id,
+                    'userId': user_id,
                     'message': content,
                     'messageId': cmsg.msg_id,
                     'messageType': content_type,
 
-
                     "wxReceiver": cmsg.to_user_id,
-                    "wxUser": cmsg._rawmsg.user,
+                    "wxUser": user,
 
-                    "source": "iKnow-on-wechat wx"
+                    "source": "iKnow-on-wechat wx group" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 },
                 "params": {
                     "addr": "0xb8F33dAb7b6b24F089d916192E85D7403233328A",
