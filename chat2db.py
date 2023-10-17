@@ -132,6 +132,7 @@ class Chat2db(Plugin):
                 nickName = cmsg.from_user_nickname
                 user= {**cmsg._rawmsg.user, 'HeadImgUrl': avatar}
                 wxGroupId=''
+                wxGroupName='' #用于判断是否群聊
 
             #接收人头像
             recvAvatar = self.get_head_img(cmsg.to_user_id)
@@ -159,7 +160,7 @@ class Chat2db(Plugin):
                     "wxReceiver": cmsg.to_user_id,
                     "wxUser": user,
                     "wxGroupId": wxGroupId,
-                    "wxGroupName": cmsg.other_user_nickname,
+                    "wxGroupName": wxGroupName,
 
                     "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 },

@@ -52,18 +52,19 @@ class UserRefreshThread(object):
         while True:
             # 定时检测
             self.timerCheck()
-            #time.sleep(int(600)) # 600秒检测一次
-            time.sleep(int(10)) # 调试时
+            time.sleep(int(600)) # 600秒检测一次
+            #time.sleep(int(10)) # 调试时
 
-    #定时检查
+    #定时检查,检测机器人是否重新登录了(服务器重启时变化)
     def timerCheck(self):
         #检测是否重新登录了
         self.check_isRelogin()
-        logger.info("定时检查,Bot UserName 为 {}".format(self.robot_user_id))
         #重新登录、未登录，均跳过
         if self.isRelogin:
+            logger.warn("服务器已重新登录,Bot UserName 更新为 {}".format(self.robot_user_id))
             return
-        logger.info("服务器已重新登录,Bot UserName 更新为 {}".format(self.robot_user_id))
+        logger.info("定时检测,bot UserName无变化 {}".format(self.robot_user_id))
+        
 
 
 #检测是否重新登录了
@@ -98,11 +99,14 @@ class UserRefreshThread(object):
             if channel_name == "ntchat":
                 self.isRelogin = False
                 return
-            temp_isRelogin =True
-            #取出任务中的一个模型
-            # if self.timeTasks is not None and len(self.timeTasks) > 0:
+            
+            #temp_isRelogin =True #调试时才用
+            
+            #取出好友中的机器人用户,
+            myself = self._get_friend(self.robot_user_nickname,self.robot_user_nickname)
+            myselfUserName = myself[0]
             #     model : TimeTaskModel = self.timeTasks[0]
-            #     temp_isRelogin = self.robot_user_id != model.toUser_id
+            temp_isRelogin = self.robot_user_id != myselfUserName
 
             if temp_isRelogin:
                 #更新为重新登录态
@@ -249,3 +253,7 @@ class UserRefreshThread(object):
         c = self._conn.cursor()
         c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?", (session_id, start_timestamp, limit))
         return c.fetchall()
+    def _get_friend(self,selfNickName,NickName):
+        c = self._conn.cursor()
+        c.execute("SELECT * FROM friends_records WHERE selfNickName=? and NickName>?", (selfNickName, NickName))
+        return c.fetchone()
