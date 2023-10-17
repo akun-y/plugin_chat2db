@@ -30,6 +30,7 @@ from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
 from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
+from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 
 
 @plugins.register(
@@ -64,12 +65,16 @@ class Chat2db(Plugin):
 
         self._create_table()
         self._create_table_avatar()
+        self._create_table_friends()
+        self._create_table_groups()
 
         btype = Bridge().btype['chat']
         if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
             raise Exception("[Summary] init failed, not supported bot type")
         self.bot = bot_factory.create_bot(Bridge().btype['chat'])
         self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
+
+        UserRefreshThread(self.conn, self.config)
 
         logger.info(f"[Chat2db] inited, config={self.config}")
 
@@ -108,13 +113,14 @@ class Chat2db(Plugin):
         self._insert_record_avatar(user_id, avatar)
 
         return avatar
-    def post_insert_record(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
+    def post_to_groupx(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
             #发送人头像
             if(cmsg.is_group) :
                 user_id= cmsg.actual_user_id
                 avatar = self.get_head_img(user_id)
                 nickName = cmsg.actual_user_nickname
-                wxGroupId = cmsg.from_user_id
+                wxGroupId = cmsg.other_user_id
+                wxGroupName = cmsg.other_user_nickname
                 user={
                     'NickName': nickName,
                     'UserName': user_id,
@@ -153,6 +159,7 @@ class Chat2db(Plugin):
                     "wxReceiver": cmsg.to_user_id,
                     "wxUser": user,
                     "wxGroupId": wxGroupId,
+                    "wxGroupName": cmsg.other_user_nickname,
 
                     "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 },
@@ -198,7 +205,7 @@ class Chat2db(Plugin):
     def _insert_record(self, session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered = 0):
         c = self.conn.cursor()
         logger.debug("[chat_records] insert record: {} {} {} {} {} {} {} {}" .format(session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
-        c.execute("INSERT INTO chat_records VALUES (?,?,?,?,?,?,?,?)", (session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
+        c.execute("INSERT OR REPLACE INTO chat_records VALUES (?,?,?,?,?,?,?,?)", (session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
         self.conn.commit()
 
     def _get_records(self, session_id, start_timestamp=0, limit=9999):
@@ -226,6 +233,21 @@ class Chat2db(Plugin):
             return result[0]  # 提取 avatar 字段的值
         else:
             return None
+    def _create_table_friends(self):
+        c = self.conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS friends_records
+                    (selfUserName TEXT, selfNickName TEXT, selfHeadImgUrl TEXT,
+                    UserName TEXT, NickName TEXT, HeadImgUrl TEXT,
+                    PRIMARY KEY (UserName))''')
+        self.conn.commit()
+    def _create_table_groups(self):
+        c = self.conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS groups_records
+                    (selfUserName TEXT, selfNickName TEXT, selfDisplayName TEXT,
+                    UserName TEXT, NickName TEXT, HeadImgUrl TEXT,
+                    PYQuanPin TEXT, EncryChatRoomId TEXT,
+                    PRIMARY KEY (UserName))''')
+        self.conn.commit()
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
         if e_context["reply"].type not in [ReplyType.TEXT]:
@@ -255,7 +277,7 @@ class Chat2db(Plugin):
 
         self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time, int(is_triggered))
 
-        self.post_insert_record(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
+        self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
         e_context.action = EventAction.CONTINUE
 
     def get_help_text(self, **kwargs):
