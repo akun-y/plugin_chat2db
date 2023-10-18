@@ -239,7 +239,7 @@ class Chat2db(Plugin):
         c.execute('''CREATE TABLE IF NOT EXISTS friends_records
                     (selfUserName TEXT, selfNickName TEXT, selfHeadImgUrl TEXT,
                     UserName TEXT, NickName TEXT, HeadImgUrl TEXT,
-                    PRIMARY KEY (UserName))''')
+                    PRIMARY KEY (NickName))''')
         self.conn.commit()
     def _create_table_groups(self):
         c = self.conn.cursor()
@@ -247,7 +247,7 @@ class Chat2db(Plugin):
                     (selfUserName TEXT, selfNickName TEXT, selfDisplayName TEXT,
                     UserName TEXT, NickName TEXT, HeadImgUrl TEXT,
                     PYQuanPin TEXT, EncryChatRoomId TEXT,
-                    PRIMARY KEY (UserName))''')
+                    PRIMARY KEY (NickName))''')
         self.conn.commit()
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):

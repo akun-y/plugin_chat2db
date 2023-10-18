@@ -33,10 +33,12 @@ class UserRefreshThread(object):
         self.robot_user_nickname=""
 
         self.isRelogin = False
-        
+
         self.postFriendsPos = 0
         self.postGroupsPos = 0
 
+        self.friends =[]
+        self.chatrooms = []
         # 创建子线程
         t = threading.Thread(target=self.timer_sub_thread)
         t.setDaemon(True)
@@ -64,7 +66,6 @@ class UserRefreshThread(object):
             logger.warn("服务器已重新登录,Bot UserName 更新为 {}".format(self.robot_user_id))
             return
         logger.info("定时检测,bot UserName无变化 {}".format(self.robot_user_id))
-        
 
 
 #检测是否重新登录了
@@ -99,12 +100,15 @@ class UserRefreshThread(object):
             if channel_name == "ntchat":
                 self.isRelogin = False
                 return
-            
+
             #temp_isRelogin =True #调试时才用
-            
+
             #取出好友中的机器人用户,
-            myself = self._get_friend(self.robot_user_nickname,self.robot_user_nickname)
-            myselfUserName = myself[0]
+            myself = self._get_friend(self.robot_user_nickname, self.robot_user_nickname)
+            if myself is None:
+                myselfUserName=""
+            else:
+                myselfUserName = myself[0]
             #     model : TimeTaskModel = self.timeTasks[0]
             temp_isRelogin = self.robot_user_id != myselfUserName
 
@@ -123,6 +127,7 @@ class UserRefreshThread(object):
             #置为重新登录态
             self.isRelogin = True
     def updateAllIds(self):
+
         self.saveFriends2DB()
         self.saveGroups2DB()
         self.postFriends2Groupx()
@@ -132,11 +137,12 @@ class UserRefreshThread(object):
         #好友处理
         try:
             #获取好友列表
-            friends = itchat.get_friends(update=True)[0:]
-            
+            if(len(self.friends) < 1):
+                self.friends = itchat.get_friends(update=True)
+
             c = self._conn.cursor()
-            logger.debug("[saveFriends2DB] insert record: {} 条" .format(len(friends)))
-            for friend in friends:
+            logger.debug("[saveFriends2DB] insert record: {} 条" .format(len(self.friends)))
+            for friend in self.friends:
                 c.execute("INSERT OR REPLACE INTO friends_records VALUES (?,?,?,?,?,?)", (
                     self.robot_user_id, self.robot_user_nickname, '',
                     friend.UserName, friend.NickName, friend.HeadImgUrl))
@@ -145,23 +151,11 @@ class UserRefreshThread(object):
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
             print("好友列表, 错误发生")
-    
-    def postFriends2Groupx(self):
-        #好友处理
-        try:
-            #获取好友列表,每次100条,越界后又从0开始
-            friends = itchat.get_friends(update=True)[self.postFriendsPos:self.postFriendsPos+100]
-            self.postFriendsPos += 100
-            if(len(friends) < 100):
-                self.postFriendsPos = 0
-            
-            json_data = {
-                "payload": {
-                    'NickName': self.robot_user_nickname,
-                    'UserName': self.robot_user_id,
-                    'friends': friends
-                },
-                "params": {
+
+    def makeGroupReq(self, payload):
+        json_data = {
+            'payload': payload,
+            "params": {
                     "addr": "0xb8F33dAb7b6b24F089d916192E85D7403233328A",
                     "random": "a9a58d316a16206ca2529720d01f8a9d10779eb330902f4ec05cf358a3418a9f",
                     "nonce": "1a9b1b1d9e854196143504b776b65e9fb5c87fe4930466a8fe68763fa6e48aed",
@@ -170,15 +164,35 @@ class UserRefreshThread(object):
                     "method": 2,
                     "msg": "Please sign this message"
                 },
-                "sig": "825ccf873738de91a77b0de19b0f2db7e549efcca36215743c184197173967d770b141201651b21d6d89d27dc8d6cde6ccdc3151af67ed29b5cdaed2cecf3950"
-            }
+            "sig": "825ccf873738de91a77b0de19b0f2db7e549efcca36215743c184197173967d770b141201651b21d6d89d27dc8d6cde6ccdc3151af67ed29b5cdaed2cecf3950"
+        }
+        return json_data
+    def postFriends2Groupx(self):
+        #好友处理
+        try:
+            #获取好友列表,每次100条,越界后又从0开始
+            if(len(self.friends) < 1): self.friends = itchat.get_friends(update=True)
 
+            friends = self.friends[self.postFriendsPos:self.postFriendsPos+100]
+            self.postFriendsPos += 100
+            if(len(friends) < 100):
+                #全部好友都发送完成了
+                self.postFriendsPos = 0
+            else :
+                # 每隔5秒执行一次,知道好友列表全部发送完成
+                threading.Timer(5.0, self.postFriends2Groupx).start()
+
+            json_data = self.makeGroupReq({
+                    'NickName': self.robot_user_nickname,
+                    'UserName': self.robot_user_id,
+                    'friends': friends
+                })
             post_url = self._config.get("groupx_host_url")+'/v1/wechat/itchat/user/friends/'
             logger.info("post url: {}".format(post_url))
 
             response = requests.post(post_url, json=json_data, verify=False)
             ret = response.text
-            print("post friends to groupx api:",self.postFriendsPos,len(friends), ret)
+            print("post friends to groupx api:", self.postFriendsPos, len(friends), ret)
             return ret
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
@@ -187,15 +201,16 @@ class UserRefreshThread(object):
             print(f"HTTP错误发生: {http_err}")
         except Exception as err:
             print(f"发生意外错误: {err}")
-            
+
     def saveGroups2DB(self):
         #群组
         try:
-            #群聊 （id组装 旧 ：新）
-            chatrooms = itchat.get_chatrooms()
+            #群聊 （id组装 旧
+            if len(self.chatrooms) < 1: self.chatrooms = itchat.get_chatrooms()
+
             c = self._conn.cursor()
-            logger.debug("[saveGroups2DB] insert record: {} 条" .format(len(chatrooms)))
-            for chatroom in chatrooms:
+            logger.debug("[saveGroups2DB] insert record: {} 条" .format(len(self.chatrooms)))
+            for chatroom in self.chatrooms:
                 c.execute("INSERT OR REPLACE INTO groups_records VALUES (?,?,?,?,?,?,?,?)", (
                 chatroom.Self.UserName, chatroom.Self.NickName, chatroom.Self.DisplayName,
                 chatroom.UserName, chatroom.NickName, chatroom.HeadImgUrl,
@@ -212,35 +227,28 @@ class UserRefreshThread(object):
         #好友处理
         try:
             #获取群列表,每次100条,越界后又从0开始
-            chatrooms = itchat.get_chatrooms()[self.postGroupsPos:self.postGroupsPos+100]
+            if len(self.chatrooms) < 1: self.chatrooms = itchat.get_chatrooms()
+
+            chatrooms = self.chatrooms[self.postGroupsPos:self.postGroupsPos+100]
             self.postGroupsPos += 100
             if(len(chatrooms) < 100):
-                self.postGroupsPos = 0            
-                
-            json_data = {
-                "payload": {
+                self.postGroupsPos = 0
+            else:
+                # 每隔8秒执行一次,知道好友列表全部发送完成
+                threading.Timer(8.0, self.postGroups2Groupx).start()
+
+            json_data = self.makeGroupReq(                 {
                     'NickName': self.robot_user_nickname,
                     'UserName': self.robot_user_id,
                     'groups': chatrooms
-                },
-                "params": {
-                    "addr": "0xb8F33dAb7b6b24F089d916192E85D7403233328A",
-                    "random": "a9a58d316a16206ca2529720d01f8a9d10779eb330902f4ec05cf358a3418a9f",
-                    "nonce": "1a9b1b1d9e854196143504b776b65e9fb5c87fe4930466a8fe68763fa6e48aed",
-                    "ts": "1680592645793",
-                    "hash": "0xc324d54dc3f613b8b33ce60d3085b5fc16b9012fa1df733361b370fec663bc67",
-                    "method": 2,
-                    "msg": "Please sign this message"
-                },
-                "sig": "825ccf873738de91a77b0de19b0f2db7e549efcca36215743c184197173967d770b141201651b21d6d89d27dc8d6cde6ccdc3151af67ed29b5cdaed2cecf3950"
-            }
+                })
 
             post_url = self._config.get("groupx_host_url")+'/v1/wechat/itchat/user/groups/'
             logger.info("post url: {}".format(post_url))
 
             response = requests.post(post_url, json=json_data, verify=False)
             ret = response.text
-            print("post groups to groupx api:", self.postGroupsPos,len(chatrooms),ret)
+            print("post groups to groupx api:", self.postGroupsPos, len(chatrooms), ret)
             return ret
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
@@ -253,7 +261,7 @@ class UserRefreshThread(object):
         c = self._conn.cursor()
         c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?", (session_id, start_timestamp, limit))
         return c.fetchall()
-    def _get_friend(self,selfNickName,NickName):
+    def _get_friend(self, selfNickName, NickName):
         c = self._conn.cursor()
-        c.execute("SELECT * FROM friends_records WHERE selfNickName=? and NickName>?", (selfNickName, NickName))
+        c.execute("SELECT * FROM friends_records WHERE selfNickName=? and NickName=?", (selfNickName, NickName))
         return c.fetchone()
