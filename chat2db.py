@@ -15,6 +15,7 @@ from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
 from channel.chat_channel import check_contain, check_prefix
 from channel.chat_message import ChatMessage
+from common.tmp_dir import TmpDir
 from config import conf
 from lib import itchat
 import plugins
@@ -30,6 +31,7 @@ from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
 from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
+from plugins.plugin_chat2db.comm import makeGroupReq
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 
 
@@ -72,6 +74,8 @@ class Chat2db(Plugin):
         if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
             raise Exception("[Summary] init failed, not supported bot type")
         self.bot = bot_factory.create_bot(Bridge().btype['chat'])
+
+        self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_recv_message
         self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
 
         UserRefreshThread(self.conn, self.config)
@@ -137,8 +141,7 @@ class Chat2db(Plugin):
             #接收人头像
             recvAvatar = self.get_head_img(cmsg.to_user_id)
 
-            query_json = {
-                "payload": {
+            query_json = makeGroupReq({
                     'receiver': cmsg.to_user_id,
                     'receiverName': cmsg.to_user_nickname,
                     'receiverAvatar': recvAvatar,
@@ -163,18 +166,8 @@ class Chat2db(Plugin):
                     "wxGroupName": wxGroupName,
 
                     "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
-                },
-                "params": {
-                    "addr": "0xb8F33dAb7b6b24F089d916192E85D7403233328A",
-                    "random": "a9a58d316a16206ca2529720d01f8a9d10779eb330902f4ec05cf358a3418a9f",
-                    "nonce": "1a9b1b1d9e854196143504b776b65e9fb5c87fe4930466a8fe68763fa6e48aed",
-                    "ts": "1680592645793",
-                    "hash": "0xc324d54dc3f613b8b33ce60d3085b5fc16b9012fa1df733361b370fec663bc67",
-                    "method": 2,
-                    "msg": "Please sign this message"
-                },
-                "sig": "825ccf873738de91a77b0de19b0f2db7e549efcca36215743c184197173967d770b141201651b21d6d89d27dc8d6cde6ccdc3151af67ed29b5cdaed2cecf3950"
-            }
+                })
+
             post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
             logger.info("post url: {}".format(post_url))
 
@@ -249,6 +242,32 @@ class Chat2db(Plugin):
                     PYQuanPin TEXT, EncryChatRoomId TEXT,
                     PRIMARY KEY (NickName))''')
         self.conn.commit()
+    #收到消息 ON_RECEIVE_MESSAGE
+    def on_recv_message(self, e_context: EventContext):
+        ctx = e_context['context']
+        if ctx.get("isgroup", False): return # 群聊天不处理图片
+        if ctx.type not in [ContextType.IMAGE]: return #只处理图片
+
+        # 单聊时发送的图片给作为消息发给服务器
+        cmsg : ChatMessage = ctx['msg']
+        logger.info("[save2db] on_recv_message. content: %s" % cmsg.content)
+
+        user = cmsg.from_user_nickname
+        session_id = ctx.get('session_id')
+
+        self._insert_record(session_id, cmsg.msg_id, user, cmsg.content, "", str(ctx.type), cmsg.create_time)
+
+        # 上传图片到腾讯cos
+        # 文件处理
+        ctx.get("msg").prepare()
+        file_path = ctx.content
+        img_url ="12"
+        img_file = os.path.abspath(cmsg.content)
+        if os.path.exists(img_file):
+            img_url = qcloud_upload_file(self.groupxHostUrl, img_file)
+
+        self.post_to_groupx(cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
+        e_context.action = EventAction.CONTINUE
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
         if e_context["reply"].type not in [ReplyType.TEXT]:
@@ -274,9 +293,7 @@ class Chat2db(Plugin):
             if username is None:
                 username = cmsg.from_user_id
 
-        is_triggered = False
-
-        self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time, int(is_triggered))
+        self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
 
         self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
         e_context.action = EventAction.CONTINUE
