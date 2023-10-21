@@ -11,7 +11,7 @@ class ApiGroupx:
         try:
             response = requests.post(
                 post_url, json=msg_json, verify=False)
-            logger.info("post chat to group api:", response.text)
+            logger.info(f"post chat to group api:{response.text}")
             return response.text
         except requests.HTTPError as http_err:
             logger.error(f"HTTP错误发生: {http_err}")
