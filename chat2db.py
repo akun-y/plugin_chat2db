@@ -33,6 +33,7 @@ from plugins import *
 from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
 from plugins.plugin_chat2db.comm import makeGroupReq
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
+from plugins.plugin_chat2db.api_groupx import ApiGroupx
 
 
 @plugins.register(
@@ -56,6 +57,7 @@ class Chat2db(Plugin):
             self.config = self._load_config_template()
         if self.config:
             self.groupxHostUrl = self.config.get("groupx_host_url")
+        self.groupx = ApiGroupx(self.groupxHostUrl)
 
         self.model = conf().get("model")
         self.curdir = os.path.dirname(__file__)
@@ -167,15 +169,15 @@ class Chat2db(Plugin):
 
                     "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 })
+            return self.groupx.post_chat_record(query_json)
+            # post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
+            # logger.info("post url: {}".format(post_url))
 
-            post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
-            logger.info("post url: {}".format(post_url))
-
-            response = requests.post(
-                post_url, json=query_json, verify=False)
-            ret = response.text
-            print("post chat to group api:", ret)
-            return ret
+            # response = requests.post(
+            #     post_url, json=query_json, verify=False)
+            # ret = response.text
+            # print("post chat to group api:", ret)
+            #return ret
     def _create_table(self):
         c = self.conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS chat_records
