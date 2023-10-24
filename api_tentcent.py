@@ -3,7 +3,7 @@
 import sys
 import os
 import logging
-
+from common.log import logger
 import requests
 
 
@@ -38,11 +38,11 @@ def qcloud_upload_bytes(groupx_url, data) :
 
     # 处理响应
     if response.status_code == 200:
-        print("文件上传成功!")
+        logger.info("文件上传成功!")
         file_url = f"https://{cos_policy['cosHost']}/{cos_policy['cosKey'].replace('%2F', '/')}"
     else:
-        print(f"文件上传失败，状态码: {response.status_code}")
-        print(response.text)  # 如果有错误信息，可以打印出来
+        logger.info(f"文件上传失败，状态码: {response.status_code}")
+        logger.info(response.text)  # 如果有错误信息，可以打印出来
         file_url=""
 
     return file_url
@@ -50,8 +50,8 @@ def qcloud_upload_bytes(groupx_url, data) :
 def qcloud_upload_file(groupx_url, file_path) :
     files = {'file': open(file_path, 'rb')}  # 'file' 是服务器上接受文件的字段名
     file_name, file_extension = os.path.splitext(file_path)
-    print(f'文件名: {file_name}')
-    print(f'扩展名: {file_extension}')
+    logger.info(f'文件名: {file_name}')
+    logger.info(f'扩展名: {file_extension}')
 
     cos_policy= qcloud_get_cos_policy(groupx_url, file_extension[1:])
     formData = {
@@ -72,11 +72,11 @@ def qcloud_upload_file(groupx_url, file_path) :
 
     # 处理响应
     if response.status_code == 200:
-        print("文件上传成功!")
+        logger.info("文件上传成功!")
         file_url = f"https://{cos_policy['cosHost']}/{cos_policy['cosKey'].replace('%2F', '/')}"
     else:
-        print(f"文件上传失败，状态码: {response.status_code}")
-        print(response.text)  # 如果有错误信息，可以打印出来
+        logger.info(f"文件上传失败，状态码: {response.status_code}")
+        logger.info(response.text)  # 如果有错误信息，可以打印出来
         file_url=""
 
     return file_url

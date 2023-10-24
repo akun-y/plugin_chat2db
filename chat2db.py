@@ -105,20 +105,28 @@ class Chat2db(Plugin):
         avatar = self._get_records_avatar(user_id)
         if avatar:
             return avatar
+        
+        try:
 
-        dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
-        avatar_file = os.path.join(dirName, f'headimg-{user_id}.png')
-        if os.path.exists(avatar_file):
-            avatar = qcloud_upload_file(self.groupxHostUrl, avatar_file)
-        else :
-            fileBody = self.get_head_img_from_itchat(user_id)
-            avatar = qcloud_upload_bytes(self.groupxHostUrl, fileBody)
+            dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
+            avatar_file = os.path.join(dirName, f'headimg-{user_id}.png')
+            if os.path.exists(avatar_file):
+                avatar = qcloud_upload_file(self.groupxHostUrl, avatar_file)
+            else :
+                fileBody = self.get_head_img_from_itchat(user_id)
+                avatar = qcloud_upload_bytes(self.groupxHostUrl, fileBody)
 
-            fn = self._saveFile(avatar_file, fileBody, 'webwxgetheadimg')
+                fn = self._saveFile(avatar_file, fileBody, 'webwxgetheadimg')
 
-        self._insert_record_avatar(user_id, avatar)
+            self._insert_record_avatar(user_id, avatar)
 
-        return avatar
+            return avatar
+        except requests.HTTPError as http_err:
+            logger.error(f"HTTP错误发生: {http_err}")
+            return None
+        except Exception as err:
+            logger.error(f"意外错误发生: {err}")
+            return None
     def post_to_groupx(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
             #发送人头像
             if(cmsg.is_group) :
@@ -132,11 +140,11 @@ class Chat2db(Plugin):
                     'UserName': user_id,
                     'HeadImgUrl': avatar
                     }
-            else :
+            else :                
                 user_id= cmsg.from_user_id
                 avatar = self.get_head_img(user_id)
                 nickName = cmsg.from_user_nickname
-                user= {**cmsg._rawmsg.user, 'HeadImgUrl': avatar}
+                user= {**cmsg._rawmsg.user, 'HeadImgUrl': avatar}                
                 wxGroupId=''
                 wxGroupName='' #用于判断是否群聊
 
@@ -170,14 +178,7 @@ class Chat2db(Plugin):
                     "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
                 })
             return self.groupx.post_chat_record(query_json)
-            # post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
-            # logger.info("post url: {}".format(post_url))
 
-            # response = requests.post(
-            #     post_url, json=query_json, verify=False)
-            # ret = response.text
-            # print("post chat to group api:", ret)
-            #return ret
     def _create_table(self):
         c = self.conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS chat_records
@@ -297,7 +298,15 @@ class Chat2db(Plugin):
 
         self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
 
-        self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
+        result = self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
+        if (result is not None):
+            #ethAddr存在到RemarkName 中
+            json_data = json.loads(result)
+            account = json_data['account']
+            oldAccount = cmsg._rawmsg.User.RemarkName
+            if(account and account != oldAccount):
+                itchat.set_alias( cmsg.from_user_id,account)
+    
         e_context.action = EventAction.CONTINUE
 
     def get_help_text(self, **kwargs):
