@@ -164,7 +164,7 @@ class Chat2db(Plugin):
 
                     'title': content,
                     'userName': nickName,
-                    'userAvator': avatar,
+                    'userAvatar': avatar,
                     'userId': user_id,
                     'message': content,
                     'messageId': cmsg.msg_id,
@@ -295,20 +295,23 @@ class Chat2db(Plugin):
             username = cmsg.from_user_nickname
             if username is None:
                 username = cmsg.from_user_id
+        try:
+            self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
 
-        self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
-
-        result = self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
-        if (result is not None):
-            #ethAddr存在到RemarkName 中
-            json_data = json.loads(result)
-            account = json_data['account']
-            oldAccount = cmsg._rawmsg.User.RemarkName
-            if(account and account != oldAccount):
-                itchat.set_alias( cmsg.from_user_id,account)
-    
+            result = self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
+            if (result is not None):
+                #ethAddr存在到RemarkName 中
+                json_data = json.loads(result)
+                account = json_data.get('account', None)
+                oldAccount = cmsg._rawmsg.User.RemarkName
+                if(account and account != oldAccount):
+                    itchat.set_alias( cmsg.from_user_id,account)
+        except Exception as e:
+            logger.error("on_send_reply: {}".format(e))            
+            
         e_context.action = EventAction.CONTINUE
 
+            
     def get_help_text(self, **kwargs):
         help_text = "存储聊天记录到数据库"
         return help_text
