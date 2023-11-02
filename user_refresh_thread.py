@@ -21,6 +21,8 @@ except Exception as e:
     print(f"未安装ntchat: {e}")
 
 #定时检测用户联系人及群组信息,同步最新的 wechat UserName
+
+
 class UserRefreshThread(object):
     def __init__(self, conn, config):
         super().__init__()
@@ -45,7 +47,7 @@ class UserRefreshThread(object):
 
     # 定义子线程函数
     def timer_sub_thread(self):
-        #延迟5秒后再检测，让初始化任务执行完
+        #延迟15秒后再检测，让初始化任务执行完
         time.sleep(15)
         #检测是否重新登录了
         self.isRelogin = False
@@ -53,6 +55,14 @@ class UserRefreshThread(object):
         while True:
             # 定时检测
             self.timerCheck()
+            # 群组列表有没有增减
+            chatrooms = itchat.get_chatrooms()
+            if(len(chatrooms) != len(self.chatrooms)):
+                self.chatrooms = chatrooms
+                self.updateAllIds()
+                
+                
+            
             time.sleep(int(600)) # 600秒检测一次
             #time.sleep(int(10)) # 调试时
 
@@ -115,7 +125,7 @@ class UserRefreshThread(object):
                 #更新为重新登录态
                 self.isRelogin = True
                 #等待登录完成
-                time.sleep(3)
+                time.sleep(10)
 
                 #更新userId
                 self.updateAllIds()
@@ -126,12 +136,10 @@ class UserRefreshThread(object):
             #置为重新登录态
             self.isRelogin = True
     def updateAllIds(self):
-
-        self.saveFriends2DB()
-        self.saveGroups2DB()
-        self.postFriends2Groupx()
-        self.postGroups2Groupx()
-
+        if(self.postFriends2Groupx()):
+            self.saveFriends2DB()
+        if(self.postGroups2Groupx()):
+            self.saveGroups2DB()
     def saveFriends2DB(self):
         #好友处理
         try:
@@ -177,7 +185,7 @@ class UserRefreshThread(object):
             response = requests.post(post_url, json=json_data, verify=False)
             ret = response.text
             print("post friends to groupx api:", self.postFriendsPos, len(friends), ret)
-            return ret
+            return ret=='"ok"'
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
             print("好友列表, 错误发生")
@@ -185,6 +193,7 @@ class UserRefreshThread(object):
             print(f"HTTP错误发生: {http_err}")
         except Exception as err:
             print(f"发生意外错误: {err}")
+        return False;
 
     def saveGroups2DB(self):
         #群组
@@ -218,13 +227,13 @@ class UserRefreshThread(object):
             if(len(chatrooms) < 100):
                 self.postGroupsPos = 0
             else:
-                # 每隔8秒执行一次,知道好友列表全部发送完成
+                # 每隔8秒执行一次,直到好友列表全部发送完成
                 threading.Timer(8.0, self.postGroups2Groupx).start()
 
             json_data = makeGroupReq(                 {
                     'NickName': self.robot_user_nickname,
                     'UserName': self.robot_user_id,
-                    'groups': chatrooms
+                    'groups': chatrooms,
                 })
 
             post_url = self._config.get("groupx_host_url")+'/v1/wechat/itchat/user/groups/'
@@ -233,7 +242,7 @@ class UserRefreshThread(object):
             response = requests.post(post_url, json=json_data, verify=False)
             ret = response.text
             print("post groups to groupx api:", self.postGroupsPos, len(chatrooms), ret)
-            return ret
+            return ret == '"ok"'
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
             print("好友列表, 错误发生")
@@ -241,6 +250,7 @@ class UserRefreshThread(object):
             print(f"HTTP错误发生: {http_err}")
         except Exception as err:
             print(f"发生意外错误: {err}")
+        return False
     def _get_friends(self, session_id, start_timestamp=0, limit=9999):
         c = self._conn.cursor()
         c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?", (session_id, start_timestamp, limit))
