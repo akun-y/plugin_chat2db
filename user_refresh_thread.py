@@ -136,6 +136,7 @@ class UserRefreshThread(object):
             #置为重新登录态
             self.isRelogin = True
     def updateAllIds(self):
+        logger.info("更新用户ID,Friends, Groups")
         if(self.postFriends2Groupx()):
             self.saveFriends2DB()
         if(self.postGroups2Groupx()):
@@ -174,7 +175,7 @@ class UserRefreshThread(object):
                 # 每隔5秒执行一次,知道好友列表全部发送完成
                 threading.Timer(5.0, self.postFriends2Groupx).start()
 
-            json_data = makeGroupReq({
+            json_data = makeGroupReq('',{
                     'NickName': self.robot_user_nickname,
                     'UserName': self.robot_user_id,
                     'friends': friends
@@ -230,7 +231,7 @@ class UserRefreshThread(object):
                 # 每隔8秒执行一次,直到好友列表全部发送完成
                 threading.Timer(8.0, self.postGroups2Groupx).start()
 
-            json_data = makeGroupReq(                 {
+            json_data = makeGroupReq('',{
                     'NickName': self.robot_user_nickname,
                     'UserName': self.robot_user_id,
                     'groups': chatrooms,

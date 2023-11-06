@@ -1,18 +1,21 @@
 import requests
 from common.log import logger
+
+
 class ApiGroupx:
-    
-    def __init__(self,host) -> None:
+
+    def __init__(self, host) -> None:
         self.groupxHostUrl = host
-        
-    def post_chat_record(self, msg_json):
-        post_url = self.groupxHostUrl+'/v1/chat/0xb8F33dAb7b6b24F089d916192E85D7403233328A'
+
+    def post_chat_record(self, account, msg_json):
+        account = account.strip() if account else "0x0000000000000000000000000000000000000000"
+        post_url = f"{self.groupxHostUrl}/v1/chat/{account}"
         logger.info("post url: {}".format(post_url))
         try:
             response = requests.post(
                 post_url, json=msg_json, verify=False)
-            logger.info(f"post chat to group api:{response.text}")
-            return response.text
+            logger.info(f"post chat to group api:{response.reason} len:{len(response.content)}")
+            return response.json()
         except requests.HTTPError as http_err:
             logger.error(f"HTTP错误发生: {http_err}")
             return None

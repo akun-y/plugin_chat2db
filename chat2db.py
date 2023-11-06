@@ -16,7 +16,7 @@ from bridge.reply import Reply, ReplyType
 from channel.chat_channel import check_contain, check_prefix
 from channel.chat_message import ChatMessage
 from common.tmp_dir import TmpDir
-from config import conf
+
 from lib import itchat
 import plugins
 from plugins import *
@@ -31,9 +31,10 @@ from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
 from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
-from plugins.plugin_chat2db.comm import makeGroupReq
+from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
+from config import conf, load_config, global_config
 
 
 @plugins.register(
@@ -41,7 +42,7 @@ from plugins.plugin_chat2db.api_groupx import ApiGroupx
     desire_priority=900,
     hidden=False,
     desc="存储及同步聊天记录",
-    version="0.4.20231012",
+    version="0.4.20231106",
     author="akun.yunqi",
 )
 
@@ -57,6 +58,14 @@ class Chat2db(Plugin):
             self.config = self._load_config_template()
         if self.config:
             self.groupxHostUrl = self.config.get("groupx_host_url")
+            self.receiver =  self.config.get("account")
+            self.systemName =  self.config.get("system_name")
+            self.registerUrl = self.config.get("register_url")
+            self.webQrCodeFile = self.config.get("web_qrcode_file")
+
+        #全局配置
+        self.channel_type = conf().get("channel_type", "wx")
+
         self.groupx = ApiGroupx(self.groupxHostUrl)
 
         self.model = conf().get("model")
@@ -105,7 +114,7 @@ class Chat2db(Plugin):
         avatar = self._get_records_avatar(user_id)
         if avatar:
             return avatar
-        
+
         try:
 
             dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
@@ -127,7 +136,7 @@ class Chat2db(Plugin):
         except Exception as err:
             logger.error(f"意外错误发生: {err}")
             return None
-    def post_to_groupx(self, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
+    def post_to_groupx(self, account, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
             #发送人头像
             if(cmsg.is_group) :
                 user_id= cmsg.actual_user_id
@@ -135,24 +144,24 @@ class Chat2db(Plugin):
                 nickName = cmsg.actual_user_nickname
                 wxGroupId = cmsg.other_user_id
                 wxGroupName = cmsg.other_user_nickname
-                user={
+                user={'account': account,
                     'NickName': nickName,
                     'UserName': user_id,
                     'HeadImgUrl': avatar
                     }
-            else :                
+            else :
                 user_id= cmsg.from_user_id
                 avatar = self.get_head_img(user_id)
                 nickName = cmsg.from_user_nickname
-                user= {**cmsg._rawmsg.user, 'HeadImgUrl': avatar}                
+                user= { **cmsg._rawmsg.user, 'account': account, 'HeadImgUrl': avatar}
                 wxGroupId=''
                 wxGroupName='' #用于判断是否群聊
 
             #接收人头像
             recvAvatar = self.get_head_img(cmsg.to_user_id)
-
-            query_json = makeGroupReq({
-                    'receiver': cmsg.to_user_id,
+            source = f"{self.systemName} {self.channel_type}"
+            query_json = makeGroupReq(account, {
+                    'receiver': self.receiver,
                     'receiverName': cmsg.to_user_nickname,
                     'receiverAvatar': recvAvatar,
 
@@ -162,7 +171,6 @@ class Chat2db(Plugin):
                     'internetAccess': internet_access,
                     'aiResponse': response,
 
-                    'title': content,
                     'userName': nickName,
                     'userAvatar': avatar,
                     'userId': user_id,
@@ -175,9 +183,9 @@ class Chat2db(Plugin):
                     "wxGroupId": wxGroupId,
                     "wxGroupName": wxGroupName,
 
-                    "source": f"iKnow-on-wechat wx group {wxGroupId}" if cmsg.is_group else "iKnow-on-wechat wx " +"personal",
+                    "source": f"{source} group" if cmsg.is_group else f"{source} personal",
                 })
-            return self.groupx.post_chat_record(query_json)
+            return self.groupx.post_chat_record(account, query_json)
 
     def _create_table(self):
         c = self.conn.cursor()
@@ -245,6 +253,12 @@ class Chat2db(Plugin):
                     PYQuanPin TEXT, EncryChatRoomId TEXT,
                     PRIMARY KEY (NickName))''')
         self.conn.commit()
+    def _send_reg_msg(self, UserName, ActNickName):
+        msg = f'首次使用,请点击链接或扫码登录后再次使用 \n {self.registerUrl}'
+        msg = f'@{ActNickName} {msg}' if ActNickName else msg
+        itchat.send_msg(msg, toUserName=UserName)
+        itchat.send_image(fileDir=self.webQrCodeFile, toUserName=UserName)
+
     #收到消息 ON_RECEIVE_MESSAGE
     def on_recv_message(self, e_context: EventContext):
         ctx = e_context['context']
@@ -258,6 +272,13 @@ class Chat2db(Plugin):
         user = cmsg.from_user_nickname
         session_id = ctx.get('session_id')
 
+        eth_addr = cmsg._rawmsg.User.RemarkName
+        logger.info("[save2db] on_recv_message. eth_addr: %s" % eth_addr)
+        #wechat_id = cmsg.from_contact_id
+        #print(wechat_id)
+        #wechat_id = cmsg.talker().contact_id
+        #print(wechat_id)
+
         self._insert_record(session_id, cmsg.msg_id, user, cmsg.content, "", str(ctx.type), cmsg.create_time)
 
         # 上传图片到腾讯cos
@@ -269,7 +290,7 @@ class Chat2db(Plugin):
         if os.path.exists(img_file):
             img_url = qcloud_upload_file(self.groupxHostUrl, img_file)
 
-        self.post_to_groupx(cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
+        self.post_to_groupx('', cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
         e_context.action = EventAction.CONTINUE
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
@@ -277,41 +298,43 @@ class Chat2db(Plugin):
             return
         ctx = e_context['context']
         reply = e_context["reply"]
-        recvMsg = ctx['msg'].content
+        recvMsg = ctx.content
         replyMsg = reply.content
         logger.debug("[save2db] on_decorate_reply. content: %s==>%s" % (recvMsg, replyMsg))
 
         cmsg : ChatMessage = e_context['context']['msg']
-        username = None
-        session_id = cmsg.from_user_id
-        if conf().get('channel_type', 'wx') == 'wx' and cmsg.from_user_nickname is not None:
-            session_id = cmsg.from_user_nickname # itchat channel id会变动，只好用群名作为session id
 
-        if ctx.get("isgroup", False):
-            username = cmsg.actual_user_nickname
-            if username is None:
-                username = cmsg.actual_user_id
-        else:
-            username = cmsg.from_user_nickname
-            if username is None:
-                username = cmsg.from_user_id
+        session_id = ctx.get('session_id')
+        isGroup = ctx.get("isgroup", False)
+
+        username = cmsg.actual_user_nickname if isGroup else cmsg.from_user_nickname
+        userid = cmsg.actual_user_id if isGroup else cmsg.from_user_id
+        act_user = itchat.update_friend(userid)
+        account = act_user.RemarkName
+
         try:
             self._insert_record(session_id, cmsg.msg_id, username, recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
 
-            result = self.post_to_groupx(cmsg, ctx.get('session_id'), "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
+            result = self.post_to_groupx(account, cmsg, session_id, "ask", "default", str(ctx.type), False, "user", recvMsg, replyMsg)
             if (result is not None):
+                logger.info(result)
                 #ethAddr存在到RemarkName 中
-                json_data = json.loads(result)
-                account = json_data.get('account', None)
-                oldAccount = cmsg._rawmsg.User.RemarkName
-                if(account and account != oldAccount):
-                    itchat.set_alias( cmsg.from_user_id,account)
+                retAccount = result.get('account', None)
+                if retAccount is None or retAccount == EthZero :
+                    self._send_reg_msg(cmsg.from_user_id, username if isGroup else None)
+                    e_context.action = EventAction.BREAK_PASS
+                    return
+                if(retAccount and account != retAccount):
+                    #更新account到 RemarkName中
+                    itchat.set_alias( act_user.UserName, retAccount)
+                    act_user.update()
+                    itchat.dump_login_status()
+
         except Exception as e:
-            logger.error("on_send_reply: {}".format(e))            
-            
+            logger.error("on_send_reply: {}".format(e))
+
         e_context.action = EventAction.CONTINUE
 
-            
     def get_help_text(self, **kwargs):
         help_text = "存储聊天记录到数据库"
         return help_text
