@@ -86,7 +86,7 @@ class Chat2db(Plugin):
             raise Exception("[Summary] init failed, not supported bot type")
         self.bot = bot_factory.create_bot(Bridge().btype['chat'])
 
-        self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_recv_message
+        self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
         self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
 
         UserRefreshThread(self.conn, self.config)
@@ -253,45 +253,78 @@ class Chat2db(Plugin):
                     PYQuanPin TEXT, EncryChatRoomId TEXT,
                     PRIMARY KEY (NickName))''')
         self.conn.commit()
+    #发送微信消息提醒用户登录或扫码
     def _send_reg_msg(self, UserName, ActNickName):
-        msg = f'首次使用,请点击链接或扫码登录后再次使用 \n {self.registerUrl}'
+        msg = f'首次使用,请点击链接或扫码登录后再次使用 \n {self.registerUrl} '
         msg = f'@{ActNickName} {msg}' if ActNickName else msg
         itchat.send_msg(msg, toUserName=UserName)
         itchat.send_image(fileDir=self.webQrCodeFile, toUserName=UserName)
 
+    # 上传图片到腾讯cos
+    def _upload_pic(self, ctx):
+        try:
+            # 单聊时发送的图片给作为消息发给服务器
+            cmsg : ChatMessage = ctx['msg']
+            logger.info("[save2db] on_handle_context. content: %s" % cmsg.content)
+
+            user = cmsg.from_user_nickname
+            session_id = ctx.get('session_id')
+
+            self._insert_record(session_id, cmsg.msg_id, user, cmsg.content, "", str(ctx.type), cmsg.create_time)
+
+            # 上传图片到腾讯cos
+            # 文件处理
+            ctx.get("msg").prepare()
+            file_path = ctx.content
+            img_url ="12"
+            img_file = os.path.abspath(cmsg.content)
+            if os.path.exists(img_file):
+                img_url = qcloud_upload_file(self.groupxHostUrl, img_file)
+
+            account = cmsg._rawmsg.User.RemarkName
+            logger.info("[save2db] on_handle_context. eth_addr: %s" % account)
+            return self.post_to_groupx(account, cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
+        except Exception as e:
+            logger.error(f"upload_img error: {e}")
+            return None
+
+    def _set_my_doctor(self, account, doctor_name):
+        logger.info("[save2db] set_my_doctor: %s " % doctor_name)
+
+        return self.groupx.set_my_doctor_info(account, self.receiver, doctor_name)
+
     #收到消息 ON_RECEIVE_MESSAGE
-    def on_recv_message(self, e_context: EventContext):
+    def on_handle_context(self, e_context: EventContext):
         ctx = e_context['context']
-        if ctx.get("isgroup", False): return # 群聊天不处理图片
-        if ctx.type not in [ContextType.IMAGE]: return #只处理图片
 
-        # 单聊时发送的图片给作为消息发给服务器
-        cmsg : ChatMessage = ctx['msg']
-        logger.info("[save2db] on_recv_message. content: %s" % cmsg.content)
+        if ctx.get("isgroup", False): return # 群聊天不处理图片,不处理医生分配
+        if ctx.type not in [ContextType.IMAGE, ContextType.TEXT]: return
 
-        user = cmsg.from_user_nickname
-        session_id = ctx.get('session_id')
+        content = ctx.content
 
-        eth_addr = cmsg._rawmsg.User.RemarkName
-        logger.info("[save2db] on_recv_message. eth_addr: %s" % eth_addr)
-        #wechat_id = cmsg.from_contact_id
-        #print(wechat_id)
-        #wechat_id = cmsg.talker().contact_id
-        #print(wechat_id)
+        if ctx.type == ContextType.IMAGE: #处理图片
+            upload = self._upload_pic(ctx)
+            logger.info("[save2db] upload image: %s " % upload)
+        if ctx.type == ContextType.TEXT and content.startswith('@'):
+            name = content[1:]
+            userid = e_context['context']['msg'].from_user_id
+            act_user = itchat.update_friend(userid)
+            account = act_user.RemarkName
 
-        self._insert_record(session_id, cmsg.msg_id, user, cmsg.content, "", str(ctx.type), cmsg.create_time)
+            result = self._set_my_doctor(account, name)
 
-        # 上传图片到腾讯cos
-        # 文件处理
-        ctx.get("msg").prepare()
-        file_path = ctx.content
-        img_url ="12"
-        img_file = os.path.abspath(cmsg.content)
-        if os.path.exists(img_file):
-            img_url = qcloud_upload_file(self.groupxHostUrl, img_file)
+            logger.info("[save2db] doctor: %s " % result)
 
-        self.post_to_groupx('', cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
+            if result:
+                doctor = result.get("doctor")
+                itchat.send_msg(f"医生对接成功!\n----------------\n医生:{name}({doctor.get('department')})\n{doctor.get('intro')}\n擅长:{doctor.get('skill')}", toUserName=userid)
+            else :
+                itchat.send_msg(f"没找到你要对接的医生:{name}\n请确认医生真实姓名.", toUserName=userid)
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         e_context.action = EventAction.CONTINUE
+
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
         if e_context["reply"].type not in [ReplyType.TEXT]:
@@ -321,6 +354,7 @@ class Chat2db(Plugin):
                 #ethAddr存在到RemarkName 中
                 retAccount = result.get('account', None)
                 if retAccount is None or retAccount == EthZero :
+                    # 发送微信消息提醒点击登录或扫码
                     self._send_reg_msg(cmsg.from_user_id, username if isGroup else None)
                     e_context.action = EventAction.BREAK_PASS
                     return

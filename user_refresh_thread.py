@@ -2,7 +2,8 @@
 
 from hashlib import md5
 import json
-from plugins.plugin_chat2db.comm import makeGroupReq
+from plugins.plugin_chat2db.api_groupx import ApiGroupx
+from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
 from plugins.timetask.Tool import ExcelTool
 from plugins.timetask.Tool import TimeTaskModel
 from common.log import logger
@@ -30,6 +31,9 @@ class UserRefreshThread(object):
         self._config = config
         self._conn = conn
 
+        self.groupx = ApiGroupx(config.get("groupx_host_url"))
+
+        self.robot_account =  config.get("account")
         self.robot_user_id = ""
         self.robot_user_nickname=""
 
@@ -60,9 +64,7 @@ class UserRefreshThread(object):
             if(len(chatrooms) != len(self.chatrooms)):
                 self.chatrooms = chatrooms
                 self.updateAllIds()
-                
-                
-            
+
             time.sleep(int(600)) # 600秒检测一次
             #time.sleep(int(10)) # 调试时
 
@@ -161,40 +163,36 @@ class UserRefreshThread(object):
             print("好友列表, 错误发生")
 
     def postFriends2Groupx(self):
-        #好友处理
-        try:
-            #获取好友列表,每次100条,越界后又从0开始
-            if(len(self.friends) < 1): self.friends = itchat.get_friends(update=True)
+        #获取好友列表,每次100条,越界后又从0开始
+        if(len(self.friends) < 1): self.friends = itchat.get_friends(update=True)
 
-            friends = self.friends[self.postFriendsPos:self.postFriendsPos+100]
-            self.postFriendsPos += 100
-            if(len(friends) < 100):
-                #全部好友都发送完成了
-                self.postFriendsPos = 0
-            else :
-                # 每隔5秒执行一次,知道好友列表全部发送完成
-                threading.Timer(5.0, self.postFriends2Groupx).start()
+        friends = self.friends[self.postFriendsPos:self.postFriendsPos+100]
+        self.postFriendsPos += 100
+        if(len(friends) < 100):
+            #全部好友都发送完成了
+            self.postFriendsPos = 0
+        else :
+            # 每隔5秒执行一次,直到好友列表全部发送完成
+            threading.Timer(5.0, self.postFriends2Groupx).start()
 
-            json_data = makeGroupReq('',{
-                    'NickName': self.robot_user_nickname,
-                    'UserName': self.robot_user_id,
-                    'friends': friends
-                })
-            post_url = self._config.get("groupx_host_url")+'/v1/wechat/itchat/user/friends/'
-            logger.info("post url: {}".format(post_url))
+        logger.info(f"post friends to groupx:{self.postFriendsPos-100}, {len(friends)}")
+        ret = self.groupx.post_friends(self.robot_account, self.robot_user_nickname, self.robot_user_id, friends)
+        filtered_data = [item for item in ret if item.get('friendAccount')]
+        logger.info(f"post friends have account :{len(filtered_data)}")
+        # 遍历字典的所有子项，为每个子项设置account字段
+        for friend in filtered_data:
+            _usr = itchat.update_friend(friend.get('friendUserName'))
+            account = _usr.get('RemarkName', None)
+            #ethAddr存在到RemarkName 中
+            retAccount = friend.get('friendAccount', None)
+            if(retAccount and account != retAccount):
+                #更新account到 RemarkName中
+                logger.info(f'更新好友 {_usr.get("NickName")} account 为 {retAccount}')
+                _usr.set_alias(retAccount)
+                _usr.update()
+                itchat.dump_login_status()
 
-            response = requests.post(post_url, json=json_data, verify=False)
-            ret = response.text
-            print("post friends to groupx api:", self.postFriendsPos, len(friends), ret)
-            return ret=='"ok"'
-        except ZeroDivisionError:
-            # 捕获并处理 ZeroDivisionError 异常
-            print("好友列表, 错误发生")
-        except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP错误发生: {http_err}")
-        except Exception as err:
-            print(f"发生意外错误: {err}")
-        return False;
+        return ret
 
     def saveGroups2DB(self):
         #群组
@@ -218,40 +216,21 @@ class UserRefreshThread(object):
         except Exception as err:
             print(f"发生意外错误: {err}")
     def postGroups2Groupx(self):
-        #好友处理
-        try:
-            #获取群列表,每次100条,越界后又从0开始
-            if len(self.chatrooms) < 1: self.chatrooms = itchat.get_chatrooms()
+        #获取群列表,每次100条,越界后又从0开始
+        if len(self.chatrooms) < 1: self.chatrooms = itchat.get_chatrooms()
 
-            chatrooms = self.chatrooms[self.postGroupsPos:self.postGroupsPos+100]
-            self.postGroupsPos += 100
-            if(len(chatrooms) < 100):
-                self.postGroupsPos = 0
-            else:
-                # 每隔8秒执行一次,直到好友列表全部发送完成
-                threading.Timer(8.0, self.postGroups2Groupx).start()
+        chatrooms = self.chatrooms[self.postGroupsPos:self.postGroupsPos+100]
+        self.postGroupsPos += 100
+        if(len(chatrooms) < 100):
+            self.postGroupsPos = 0
+        else:
+            # 每隔8秒执行一次,直到好友列表全部发送完成
+            threading.Timer(8.0, self.postGroups2Groupx).start()
 
-            json_data = makeGroupReq('',{
-                    'NickName': self.robot_user_nickname,
-                    'UserName': self.robot_user_id,
-                    'groups': chatrooms,
-                })
+        ret = self.groupx.post_groups(self.robot_account, self.robot_user_nickname, self.robot_user_id, chatrooms)
+        logger.info(f"post groups to groupx api:{self.postGroupsPos}, {len(chatrooms)}, {ret}")
+        return ret
 
-            post_url = self._config.get("groupx_host_url")+'/v1/wechat/itchat/user/groups/'
-            logger.info("post url: {}".format(post_url))
-
-            response = requests.post(post_url, json=json_data, verify=False)
-            ret = response.text
-            print("post groups to groupx api:", self.postGroupsPos, len(chatrooms), ret)
-            return ret == '"ok"'
-        except ZeroDivisionError:
-            # 捕获并处理 ZeroDivisionError 异常
-            print("好友列表, 错误发生")
-        except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP错误发生: {http_err}")
-        except Exception as err:
-            print(f"发生意外错误: {err}")
-        return False
     def _get_friends(self, session_id, start_timestamp=0, limit=9999):
         c = self._conn.cursor()
         c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?", (session_id, start_timestamp, limit))
