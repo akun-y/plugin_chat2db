@@ -4,6 +4,7 @@
 import logging
 import os
 import sqlite3
+import sys
 
 import requests
 from bridge.bridge import Bridge
@@ -18,6 +19,7 @@ from channel.chat_message import ChatMessage
 from common.tmp_dir import TmpDir
 
 from lib import itchat
+from lib.itchat.content import FRIENDS
 import plugins
 from plugins import *
 from common import const
@@ -35,6 +37,9 @@ from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from config import conf, load_config, global_config
+from IPython.core.ultratb import ColorTB
+
+sys.excepthook = ColorTB()
 
 
 @plugins.register(
@@ -62,6 +67,8 @@ class Chat2db(Plugin):
             self.systemName =  self.config.get("system_name")
             self.registerUrl = self.config.get("register_url")
             self.webQrCodeFile = self.config.get("web_qrcode_file")
+            self.agentQrCodeFile = self.config.get("agent_qrcode_file")
+            self.prefix_cmd = self.config.get("prefix_cmd") #修改后的命令前缀
 
         #全局配置
         self.channel_type = conf().get("channel_type", "wx")
@@ -76,6 +83,8 @@ class Chat2db(Plugin):
 
         self.conn = sqlite3.connect(os.path.join(self.saveFolder, "chat2db.db"), check_same_thread=False)
 
+        self.s = requests.Session()
+
         self._create_table()
         self._create_table_avatar()
         self._create_table_friends()
@@ -86,6 +95,7 @@ class Chat2db(Plugin):
             raise Exception("[Summary] init failed, not supported bot type")
         self.bot = bot_factory.create_bot(Bridge().btype['chat'])
 
+        #self.handlers[Event.ON_RECEIVE_MESSAGE] = self.on_handle_context
         self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
         self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
 
@@ -255,10 +265,11 @@ class Chat2db(Plugin):
         self.conn.commit()
     #发送微信消息提醒用户登录或扫码
     def _send_reg_msg(self, UserName, ActNickName):
-        msg = f'首次使用,请点击链接或扫码登录后再次使用 \n {self.registerUrl} '
+        msg = f'点击链接或扫码登录,有效提高答疑质量. \n {self.registerUrl} '
         msg = f'@{ActNickName} {msg}' if ActNickName else msg
         itchat.send_msg(msg, toUserName=UserName)
         itchat.send_image(fileDir=self.webQrCodeFile, toUserName=UserName)
+        #itchat.send_image(fileDir=self.agentQrCodeFile, toUserName=UserName)
 
     # 上传图片到腾讯cos
     def _upload_pic(self, ctx):
@@ -293,10 +304,105 @@ class Chat2db(Plugin):
 
         return self.groupx.set_my_doctor_info(account, self.receiver, doctor_name)
 
+    # 当收到好友请求时，执行以下函数
+    #@itchat.msg_register(FRIENDS)
+    #def add_friend(msg):
+        #aa = itchat.accept_friend(msg['Text'])
+        #msg.User.verify()
+        #logger.info(f"接受好友请求 {msg.user.UserName} - {aa}")
+        # 接受好友请求
+        #msg.user.verify()
+        # 向新好友发送问候消息
+        #msg.user.send('Nice to meet you!')
+    #Hello
+    def _reply_sharing(self, ctx):
+        pass
+        # ContextType.ACCEPT_FRIEND = 19 # 同意好友请求
+        # ContextType.JOIN_GROUP = 20  # 加入群聊
+        # ContextType.PATPAT = 21  # 拍了拍
+        # logger.warn("[save2db] on_handle_context. type: %s " % ctx.type)
+
+        # USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36'
+        # if ctx.type in [ContextType.SHARING]:
+        #     logger.info("[save2db] on_handle_context. type: %s " % ctx.type)
+        #     logger.info("接受好友邀请")
+
+        #     print(ctx.get('Type'))
+        #     print(ctx.kwargs['msg'])
+        #     print(ctx.content)
+        #     #itchat.accept_friend(msg)
+        #     headers = {
+        #     'ContentType': 'application/json; charset=UTF-8',
+        #     'User-Agent' : USER_AGENT, }
+        #     try:
+        #         r = self.s.get(ctx.content, headers=headers)
+        #     except:
+        #         logger.info("获取邀请失败")
+        #     return
+        # if ctx.type in [ContextType.ACCEPT_FRIEND, ContextType.JOIN_GROUP,ContextType.PATPAT]:
+        #     logger.warn("[save2db] on_handle_context. type: %s " % ctx.type)
+        #     logger.warn("这些操作需要处理下")
+
+    # 过滤掉原有命令
+    def _filter_command(self, e_context: EventContext):
+        ctx = e_context['context']
+        if ctx.type not in [ContextType.TEXT]: return
+        content = ctx.content
+
+        if content.startswith("#") or content.startswith("/") or content.startswith("!") or content.startswith("@") or content.startswith("$"):
+            logger.info("[save2db] _filter_command. 拒绝: %s" % content)
+            e_context.action = EventAction.BREAK_PASS
+            return True
+        if content.startswith(self.prefix_cmd):
+            logger.info("[save2db] _filter_command. 接力: %s" % content)
+            new_content = content[len(self.prefix_cmd):]
+            # 过滤并还原回原有命令
+            e_context.content = new_content
+            e_context['context']['content'] = new_content
+            e_context.action = EventAction.CONTINUE
+            return True
+        return False
+
+    def _reply_hello(self, e_context: EventContext):
+        try:
+            ctx = e_context['context']
+            if ctx.type not in [ContextType.TEXT]: return
+
+            msg = ctx.get("msg")
+            content = ctx.content
+
+            content = content.strip()
+            content = content.lower()
+            if content == "hello" :
+                reply = Reply()
+                reply.type = ReplyType.TEXT
+                msg: ChatMessage = e_context["context"]["msg"]
+                if e_context["context"]["isgroup"]:
+                    reply.content = f"Hello, {msg.actual_user_nickname} from {msg.from_user_nickname}"
+                else:
+                    reply.content = f"Hello, {msg.from_user_nickname}"
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+                return True
+            if content == "hi":
+                reply = Reply()
+                reply.type = ReplyType.TEXT
+                reply.content = "Hi"
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑，一般会覆写reply
+                return True
+        except Exception as e:
+            logger.error("_reply_hello: {}".format(e))
+        return False
+
     #收到消息 ON_RECEIVE_MESSAGE
     def on_handle_context(self, e_context: EventContext):
+        # 过滤掉原有的一些命令
+        if self._filter_command(e_context): return
+        
         ctx = e_context['context']
 
+        # 处理图片相关内容
         if ctx.get("isgroup", False): return # 群聊天不处理图片,不处理医生分配
         if ctx.type not in [ContextType.IMAGE, ContextType.TEXT]: return
 
@@ -327,8 +433,12 @@ class Chat2db(Plugin):
 
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
-        if e_context["reply"].type not in [ReplyType.TEXT]:
-            return
+
+        # 处理一些问候性提问及测试提问
+        if self._reply_hello(e_context) : return
+
+        if e_context["reply"].type not in [ReplyType.TEXT]: return
+
         ctx = e_context['context']
         reply = e_context["reply"]
         recvMsg = ctx.content
@@ -356,8 +466,8 @@ class Chat2db(Plugin):
                 if retAccount is None or retAccount == EthZero :
                     # 发送微信消息提醒点击登录或扫码
                     self._send_reg_msg(cmsg.from_user_id, username if isGroup else None)
-                    e_context.action = EventAction.BREAK_PASS
-                    return
+                    # 继续后续消息
+
                 if(retAccount and account != retAccount):
                     #更新account到 RemarkName中
                     itchat.set_alias( act_user.UserName, retAccount)

@@ -21,6 +21,7 @@ try:
 except Exception as e:
     print(f"未安装ntchat: {e}")
 
+
 #定时检测用户联系人及群组信息,同步最新的 wechat UserName
 
 
@@ -177,6 +178,12 @@ class UserRefreshThread(object):
 
         logger.info(f"post friends to groupx:{self.postFriendsPos-100}, {len(friends)}")
         ret = self.groupx.post_friends(self.robot_account, self.robot_user_nickname, self.robot_user_id, friends)
+        if ret is False:
+            logger.error(f"post friends to groupx failed")
+            return False
+        else:
+            logger.info(f"post friends to groupx success")
+            
         filtered_data = [item for item in ret if item.get('friendAccount')]
         logger.info(f"post friends have account :{len(filtered_data)}")
         # 遍历字典的所有子项，为每个子项设置account字段
