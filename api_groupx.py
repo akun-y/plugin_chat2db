@@ -59,7 +59,7 @@ class ApiGroupx:
             response = requests.post(post_url, json=json_data, verify=False)
 
             print("post friends to groupx api:", response.reason)
-            return response.json() if response.status_code == 200 else None
+            return response.json() if response.status_code == 200 else False
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
             print("好友列表, 错误发生")
@@ -78,6 +78,31 @@ class ApiGroupx:
                 })
 
             post_url = self.groupxHostUrl+'/v1/wechat/itchat/user/groups/'
+            logger.info("post url: {}".format(post_url))
+
+            response = requests.post(post_url, json=json_data, verify=False)
+            return response.json()
+        except ZeroDivisionError:
+            # 捕获并处理 ZeroDivisionError 异常
+            print("好友列表, 错误发生")
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP错误发生: {http_err}")
+        except Exception as err:
+            print(f"发生意外错误: {err}")
+        return False;
+    def get_myknowledge(self, bot_account, data):
+        try:
+            json_data = makeGroupReq(bot_account, {
+                'account': bot_account,
+                'receiver': data.get('receiver', ''),
+                'receiverName': data.get('receiver_name', ''),
+                'isGroup': data.get('isgroup', False),
+                'groupName': data.get('group_name', ''),
+                'groupId': data.get('group_id', ''),
+                'user': data.get('user', None),
+                })
+
+            post_url = self.groupxHostUrl+'/v1/user/friend/get-knowledge/'+bot_account
             logger.info("post url: {}".format(post_url))
 
             response = requests.post(post_url, json=json_data, verify=False)

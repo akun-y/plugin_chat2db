@@ -6,5 +6,6 @@
   "register_url":"http://192.168.15.223:8080/#/pages/reg",
   "web_qrcode_file":"M:\\dev\\iKnowModel\\qrcode-web.png",
   "agent_qrcode_file":"M:\\dev\\iKnowModel\\qrcode-shizizuo.jpg",
-  "prefix_cmd":"aa"
+  "prefix_cmd":"#a",
+  "prefix_deny":["#","/","!","$"]
 }

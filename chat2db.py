@@ -1,6 +1,4 @@
 # encoding:utf-8
-
-
 import logging
 import os
 import sqlite3
@@ -17,6 +15,7 @@ from bridge.reply import Reply, ReplyType
 from channel.chat_channel import check_contain, check_prefix
 from channel.chat_message import ChatMessage
 from common.tmp_dir import TmpDir
+from datetime import datetime, timedelta
 
 from lib import itchat
 from lib.itchat.content import FRIENDS
@@ -62,6 +61,8 @@ class Chat2db(Plugin):
             # 未加载到配置，使用模板中的配置
             self.config = self._load_config_template()
         if self.config:
+            self.robot_account =  self.config.get("account")
+            self.robot_name =  self.config.get("name")
             self.groupxHostUrl = self.config.get("groupx_host_url")
             self.receiver =  self.config.get("account")
             self.systemName =  self.config.get("system_name")
@@ -69,7 +70,7 @@ class Chat2db(Plugin):
             self.webQrCodeFile = self.config.get("web_qrcode_file")
             self.agentQrCodeFile = self.config.get("agent_qrcode_file")
             self.prefix_cmd = self.config.get("prefix_cmd") #修改后的命令前缀
-
+        self.prefix_deny = self.config.get("prefix_deny")
         #全局配置
         self.channel_type = conf().get("channel_type", "wx")
 
@@ -349,7 +350,7 @@ class Chat2db(Plugin):
         if ctx.type not in [ContextType.TEXT]: return
         content = ctx.content
 
-        if content.startswith("#") or content.startswith("/") or content.startswith("!") or content.startswith("@") or content.startswith("$"):
+        if content[0] in self.prefix_deny:
             logger.info("[save2db] _filter_command. 拒绝: %s" % content)
             e_context.action = EventAction.BREAK_PASS
             return True
@@ -395,11 +396,88 @@ class Chat2db(Plugin):
             logger.error("_reply_hello: {}".format(e))
         return False
 
+    def _refresh_myknowledge(self, e_context: EventContext):
+
+        try:
+            ctx = e_context['context']
+            if ctx.type == ContextType.TEXT:
+                msg = ctx.get("msg")
+
+                isgroup =  ctx.get("isgroup", False)
+                if isgroup: user= itchat.update_friend(msg.actual_user_id)
+                else: user= msg._rawmsg.user
+
+                session_id = ctx.get("session_id")
+                all_sessions = Bridge().get_bot("chat").sessions
+                user_session = all_sessions.build_session(session_id).messages
+                sess_len = len(user_session)
+                #已经使用过知识库了
+                if sess_len > 10 or (sess_len> 1 and user_session[1].get('role')== 'assistant'):
+                    #使用知识库如果超过1天了,那么再更新下.
+                    time_str = user_session[1].get('content')
+                    last_refresh_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+                    time_diff = datetime.now() - last_refresh_time
+                    if time_diff < timedelta(hours=24) and time_diff:
+                    #if time_diff < timedelta(seconds=40) and time_diff:
+                        return
+                    logger.info("===>原知识库已经超过24小时,更新知识库...")
+
+                data = self.groupx.get_myknowledge(self.robot_account, {
+                    "isgroup": isgroup,
+                    'group_name': msg.from_user_nickname if isgroup else None,
+                    'group_id' : msg.from_user_id if isgroup else None,
+                    'receiver' : msg.to_user_id,
+                    'receiver_name' : msg.to_user_nickname,
+                    "user": user
+                    })
+
+                know = data.get("knowledges", {})
+
+                # logger.info("chat2db knowledge:\n用户:%s \n %s" % (user.NickName, json.dumps(know, ensure_ascii=False, indent=2)))
+
+                count = 0
+                if len(know) > 0:
+                    now_time = datetime.now()
+                    if(len(user_session)>1): # 如果有会话,更新第一个会话的timestamp
+                        user_session[1]={
+                            'role': 'assistant',
+                            'content': now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                        logger.warn("更新user session 时间戳为现在")
+                    else: # 新用户,session为空
+                        user_session.append({
+                            'role': 'user',
+                            'content': '你好，我叫"'+user.NickName+'",后续我的提问请首先从会话中查询结果.如有重复或者类似问题,请优先使用会话中的内容;引用会话时"之前的对话中"之类的文字不要出现'})
+                        user_session.append({
+                            'role': 'assistant',
+                            'content': now_time.strftime("%Y-%m-%d %H:%M:%S")})
+                        logger.warn("新用户,初始化user session")
+
+                    # 倒序遍历
+                    for index, value in enumerate(know[::-1]):
+                        title = value.get('title', None)
+                        content = value.get('content', None)
+
+                        if title and content:
+                            user_session.append({'role': 'user', 'content': title})
+                            user_session.append({'role': 'assistant', 'content': content})
+                            count += 1
+                            logger.info(f'user session append user {title}')
+                            logger.info(f'user session append assistant {content}')
+                        if index >100:
+                            break
+                logger.warn(f"=====>添加{user.NickName}的医生{data.get('doctorProName')}的知识库成功,共{count}条知识库")
+        except Exception as e:
+            logger.error(e)
     #收到消息 ON_RECEIVE_MESSAGE
     def on_handle_context(self, e_context: EventContext):
         # 过滤掉原有的一些命令
         if self._filter_command(e_context): return
-        
+        # 匹配用户知识库,从服务器拉取知识库并更新到本地
+        self._refresh_myknowledge(e_context)
+        # 处理一些问候性提问及测试提问
+        if self._reply_hello(e_context) : return
+
         ctx = e_context['context']
 
         # 处理图片相关内容
@@ -433,9 +511,6 @@ class Chat2db(Plugin):
 
      # 发送回复前
     def on_send_reply(self, e_context: EventContext):
-
-        # 处理一些问候性提问及测试提问
-        if self._reply_hello(e_context) : return
 
         if e_context["reply"].type not in [ReplyType.TEXT]: return
 

@@ -167,7 +167,11 @@ class UserRefreshThread(object):
         #获取好友列表,每次100条,越界后又从0开始
         if(len(self.friends) < 1): self.friends = itchat.get_friends(update=True)
 
-        friends = self.friends[self.postFriendsPos:self.postFriendsPos+100]
+        end = self.postFriendsPos + 100
+        if(end > len(self.friends)) : end = len(self.friends) -1
+        friends = self.friends[self.postFriendsPos:end]
+        logger.info(f"post friends to groupx:{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}")
+        
         self.postFriendsPos += 100
         if(len(friends) < 100):
             #全部好友都发送完成了
@@ -176,14 +180,14 @@ class UserRefreshThread(object):
             # 每隔5秒执行一次,直到好友列表全部发送完成
             threading.Timer(5.0, self.postFriends2Groupx).start()
 
-        logger.info(f"post friends to groupx:{self.postFriendsPos-100}, {len(friends)}")
+        
         ret = self.groupx.post_friends(self.robot_account, self.robot_user_nickname, self.robot_user_id, friends)
         if ret is False:
             logger.error(f"post friends to groupx failed")
             return False
         else:
             logger.info(f"post friends to groupx success")
-            
+
         filtered_data = [item for item in ret if item.get('friendAccount')]
         logger.info(f"post friends have account :{len(filtered_data)}")
         # 遍历字典的所有子项，为每个子项设置account字段
@@ -233,6 +237,18 @@ class UserRefreshThread(object):
         else:
             # 每隔8秒执行一次,直到好友列表全部发送完成
             threading.Timer(8.0, self.postGroups2Groupx).start()
+        
+        update_chatroom = 0
+        for index, value in enumerate(chatrooms):
+            if(value['MemberList']== []):
+                room = itchat.update_chatroom(value['UserName'], True)
+                chatrooms[index] = room
+                update_chatroom += 1
+                room.update()
+                logger.info(f"从腾讯服务器获取群最新信息：{room['NickName']} 成员:{len(room['MemberList'])}个)")
+        if update_chatroom>0:
+            logger.info(f"更新{update_chatroom}个群信息成功,保存登录状态")
+            itchat.dump_login_status()
 
         ret = self.groupx.post_groups(self.robot_account, self.robot_user_nickname, self.robot_user_id, chatrooms)
         logger.info(f"post groups to groupx api:{self.postGroupsPos}, {len(chatrooms)}, {ret}")
