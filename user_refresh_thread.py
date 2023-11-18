@@ -36,7 +36,7 @@ class UserRefreshThread(object):
 
         self.robot_account =  config.get("account")
         self.robot_user_id = ""
-        self.robot_user_nickname=""
+        self.robot_user_nickname=config.get("name")
 
         self.isRelogin = False
 
@@ -66,7 +66,7 @@ class UserRefreshThread(object):
                 self.chatrooms = chatrooms
                 self.updateAllIds()
 
-            time.sleep(int(600)) # 600秒检测一次
+            time.sleep(int(100*60)) # 100*60秒(100分钟)检测一次
             #time.sleep(int(10)) # 调试时
 
     #定时检查,检测机器人是否重新登录了(服务器重启时变化)

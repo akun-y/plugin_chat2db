@@ -2,11 +2,9 @@
 import logging
 import os
 import sqlite3
-import sys
 
 import requests
 from bridge.bridge import Bridge
-import json
 import time
 from bot import bot_factory
 from bridge.bridge import Bridge
@@ -31,14 +29,12 @@ from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
+from plugins.plugin_chat2db.UserManager import UserManager
 from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
 from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from config import conf, load_config, global_config
-from IPython.core.ultratb import ColorTB
-
-sys.excepthook = ColorTB()
 
 
 @plugins.register(
@@ -90,7 +86,8 @@ class Chat2db(Plugin):
         self._create_table_avatar()
         self._create_table_friends()
         self._create_table_groups()
-
+        # 用于管理用户的知识库,确定是否可以更新.
+        self.user_manager = UserManager()
         btype = Bridge().btype['chat']
         if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
             raise Exception("[Summary] init failed, not supported bot type")
@@ -396,8 +393,24 @@ class Chat2db(Plugin):
             logger.error("_reply_hello: {}".format(e))
         return False
 
-    def _refresh_myknowledge(self, e_context: EventContext):
+    def _append_know(self, user_session, know):
+        count = 0
+        # 倒序遍历
+        for index, value in enumerate(know[::-1]):
+            title = value.get('title', None)
+            content = value.get('content', None)
 
+            if title and content:
+                user_session.append({'role': 'user', 'content': title})
+                user_session.append({'role': 'assistant', 'content': content})
+                count += 1
+                logger.info(f'user session append user {title}')
+                logger.info(f'user session append assistant {content}')
+            if index >40:
+                logger.warn("知识库内容太多了,超过了40条")
+                break;
+        return count;
+    def _refresh_myknowledge(self, e_context: EventContext):
         try:
             ctx = e_context['context']
             if ctx.type == ContextType.TEXT:
@@ -411,17 +424,16 @@ class Chat2db(Plugin):
                 all_sessions = Bridge().get_bot("chat").sessions
                 user_session = all_sessions.build_session(session_id).messages
                 sess_len = len(user_session)
+                logger.info(f"===>用户 user session 长度为{sess_len}")
                 #已经使用过知识库了
-                if sess_len > 10 or (sess_len> 1 and user_session[1].get('role')== 'assistant'):
+                if sess_len > 0:
                     #使用知识库如果超过1天了,那么再更新下.
-                    time_str = user_session[1].get('content')
-                    last_refresh_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
-                    time_diff = datetime.now() - last_refresh_time
-                    if time_diff < timedelta(hours=24) and time_diff:
-                    #if time_diff < timedelta(seconds=40) and time_diff:
-                        return
+                    if self.user_manager.should_update(user.UserName) == False:
+                        know = self.user_manager.get_knowledge(user.UserName)
+                        self._append_know(user_session, know)
+                        return False
                     logger.info("===>原知识库已经超过24小时,更新知识库...")
-
+                # 从groupx 获取know
                 data = self.groupx.get_myknowledge(self.robot_account, {
                     "isgroup": isgroup,
                     'group_name': msg.from_user_nickname if isgroup else None,
@@ -437,44 +449,30 @@ class Chat2db(Plugin):
 
                 count = 0
                 if len(know) > 0:
-                    now_time = datetime.now()
-                    if(len(user_session)>1): # 如果有会话,更新第一个会话的timestamp
-                        user_session[1]={
-                            'role': 'assistant',
-                            'content': now_time.strftime("%Y-%m-%d %H:%M:%S")
-                            }
-                        logger.warn("更新user session 时间戳为现在")
-                    else: # 新用户,session为空
+                    if(len(user_session)<1): # 新用户,session为空
                         user_session.append({
                             'role': 'user',
-                            'content': '你好，我叫"'+user.NickName+'",后续我的提问请首先从会话中查询结果.如有重复或者类似问题,请优先使用会话中的内容;引用会话时"之前的对话中"之类的文字不要出现'})
+                            'content': '你好，我叫"'+user.NickName+'",后续我的提问请从会话中查询结果.如请优先使用会话中的内容做答疑解,不要在提问中说明你是机器人,引用会话时不要解释,不要有其他说明'})
                         user_session.append({
                             'role': 'assistant',
-                            'content': now_time.strftime("%Y-%m-%d %H:%M:%S")})
+                            'content': '好的,我记住了'})
+
                         logger.warn("新用户,初始化user session")
 
-                    # 倒序遍历
-                    for index, value in enumerate(know[::-1]):
-                        title = value.get('title', None)
-                        content = value.get('content', None)
-
-                        if title and content:
-                            user_session.append({'role': 'user', 'content': title})
-                            user_session.append({'role': 'assistant', 'content': content})
-                            count += 1
-                            logger.info(f'user session append user {title}')
-                            logger.info(f'user session append assistant {content}')
-                        if index >100:
-                            break
+                    self.user_manager.update_knowledge(user.UserName, know)
+                    count = self._append_know(user_session,know)
+                    
                 logger.warn(f"=====>添加{user.NickName}的医生{data.get('doctorProName')}的知识库成功,共{count}条知识库")
+                return False
         except Exception as e:
             logger.error(e)
+            return False
     #收到消息 ON_RECEIVE_MESSAGE
     def on_handle_context(self, e_context: EventContext):
         # 过滤掉原有的一些命令
         if self._filter_command(e_context): return
         # 匹配用户知识库,从服务器拉取知识库并更新到本地
-        self._refresh_myknowledge(e_context)
+        if self._refresh_myknowledge(e_context): return
         # 处理一些问候性提问及测试提问
         if self._reply_hello(e_context) : return
 
@@ -489,7 +487,7 @@ class Chat2db(Plugin):
         if ctx.type == ContextType.IMAGE: #处理图片
             upload = self._upload_pic(ctx)
             logger.info("[save2db] upload image: %s " % upload)
-        if ctx.type == ContextType.TEXT and content.startswith('@'):
+        if ctx.type == ContextType.TEXT and content.startswith('@'): # 对接医生
             name = content[1:]
             userid = e_context['context']['msg'].from_user_id
             act_user = itchat.update_friend(userid)
