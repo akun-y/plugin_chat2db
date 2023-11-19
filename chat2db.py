@@ -29,8 +29,9 @@ from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
 from common.log import logger
 from plugins import *
+from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.UserManager import UserManager
-from plugins.plugin_chat2db.api_tentcent import qcloud_upload_bytes, qcloud_upload_file
+from plugins.plugin_chat2db.api_tentcent import ApiTencent
 from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
@@ -39,10 +40,10 @@ from config import conf, load_config, global_config
 
 @plugins.register(
     name="Chat2db",
-    desire_priority=900,
+    desire_priority=990,
     hidden=False,
     desc="存储及同步聊天记录",
-    version="0.4.20231106",
+    version="0.4.20231119",
     author="akun.yunqi",
 )
 
@@ -71,6 +72,10 @@ class Chat2db(Plugin):
         self.channel_type = conf().get("channel_type", "wx")
 
         self.groupx = ApiGroupx(self.groupxHostUrl)
+        self.tencent = ApiTencent(self.groupxHostUrl)
+
+        # 用于管理用户的知识库,确定是否可以更新.
+        self.user_manager = UserManager()
 
         self.model = conf().get("model")
         self.curdir = os.path.dirname(__file__)
@@ -83,11 +88,9 @@ class Chat2db(Plugin):
         self.s = requests.Session()
 
         self._create_table()
-        self._create_table_avatar()
         self._create_table_friends()
         self._create_table_groups()
-        # 用于管理用户的知识库,确定是否可以更新.
-        self.user_manager = UserManager()
+
         btype = Bridge().btype['chat']
         if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
             raise Exception("[Summary] init failed, not supported bot type")
@@ -99,56 +102,16 @@ class Chat2db(Plugin):
 
         UserRefreshThread(self.conn, self.config)
 
-        logger.info(f"[Chat2db] inited, config={self.config}")
+        # 管理用户及群的头像
+        self.img_service = HeadImgManager(self.conn, self.groupxHostUrl)
 
-    def _saveFile(self, filename, data, api=None):
-        fn = filename
-        if self.saveSubFolders[api]:
-            dirName = os.path.join(self.saveFolder, self.saveSubFolders[api])
-            if not os.path.exists(dirName):
-                os.makedirs(dirName)
-            fn = os.path.join(dirName, filename)
-            logging.debug('Saved file: %s' % fn)
-            with open(fn, 'wb') as f:
-                f.write(data)
-                f.close()
-        return fn
-    #从itchat获取头像
-    def get_head_img_from_itchat(self, user_id):
-        return itchat.get_head_img(user_id)
+        logger.info(f"======>[Chat2db] inited, config={self.config}")
 
-    #优先从本地获取头像,如无,则远程获取并存储到本地
-    def get_head_img(self, user_id):
-        avatar = self._get_records_avatar(user_id)
-        if avatar:
-            return avatar
-
-        try:
-
-            dirName = os.path.join(self.saveFolder, self.saveSubFolders['webwxgetheadimg'])
-            avatar_file = os.path.join(dirName, f'headimg-{user_id}.png')
-            if os.path.exists(avatar_file):
-                avatar = qcloud_upload_file(self.groupxHostUrl, avatar_file)
-            else :
-                fileBody = self.get_head_img_from_itchat(user_id)
-                avatar = qcloud_upload_bytes(self.groupxHostUrl, fileBody)
-
-                fn = self._saveFile(avatar_file, fileBody, 'webwxgetheadimg')
-
-            self._insert_record_avatar(user_id, avatar)
-
-            return avatar
-        except requests.HTTPError as http_err:
-            logger.error(f"HTTP错误发生: {http_err}")
-            return None
-        except Exception as err:
-            logger.error(f"意外错误发生: {err}")
-            return None
     def post_to_groupx(self, account, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
             #发送人头像
             if(cmsg.is_group) :
                 user_id= cmsg.actual_user_id
-                avatar = self.get_head_img(user_id)
+                avatar = self.img_service.get_head_img_url(user_id)
                 nickName = cmsg.actual_user_nickname
                 wxGroupId = cmsg.other_user_id
                 wxGroupName = cmsg.other_user_nickname
@@ -159,14 +122,14 @@ class Chat2db(Plugin):
                     }
             else :
                 user_id= cmsg.from_user_id
-                avatar = self.get_head_img(user_id)
+                avatar = self.img_service.get_head_img_url(user_id)
                 nickName = cmsg.from_user_nickname
                 user= { **cmsg._rawmsg.user, 'account': account, 'HeadImgUrl': avatar}
                 wxGroupId=''
                 wxGroupName='' #用于判断是否群聊
 
             #接收人头像
-            recvAvatar = self.get_head_img(cmsg.to_user_id)
+            recvAvatar = self.img_service.get_head_img_url(cmsg.to_user_id)
             source = f"{self.systemName} {self.channel_type}"
             query_json = makeGroupReq(account, {
                     'receiver': self.receiver,
@@ -225,27 +188,7 @@ class Chat2db(Plugin):
         c = self.conn.cursor()
         c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?", (session_id, start_timestamp, limit))
         return c.fetchall()
-    # 存储头像到腾讯cos
-    def _create_table_avatar(self):
-        c = self.conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS avatar_records
-                    (user_id TEXT, avatar TEXT,timestamp INTEGER,PRIMARY KEY (user_id))''')
-        self.conn.commit()
-    def _insert_record_avatar(self, user_id, avatar):
-        c = self.conn.cursor()
-        timestamp = int(time.time())
-        logger.debug("[avatar_records] insert record: {} {} {}" .format(user_id, avatar, timestamp))
-        c.execute("INSERT OR REPLACE INTO avatar_records VALUES (?,?,?)", (user_id, avatar,  timestamp))
-        self.conn.commit()
-    # 查询是否已经存储过头像
-    def _get_records_avatar(self, user_id):
-        c = self.conn.cursor()
-        c.execute("SELECT avatar FROM avatar_records WHERE user_id=? ", (user_id,))
-        result = c.fetchone()
-        if result:
-            return result[0]  # 提取 avatar 字段的值
-        else:
-            return None
+
     def _create_table_friends(self):
         c = self.conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS friends_records
@@ -288,7 +231,7 @@ class Chat2db(Plugin):
             img_url ="12"
             img_file = os.path.abspath(cmsg.content)
             if os.path.exists(img_file):
-                img_url = qcloud_upload_file(self.groupxHostUrl, img_file)
+                img_url = tencent.qcloud_upload_file(self.groupxHostUrl, img_file)
 
             account = cmsg._rawmsg.User.RemarkName
             logger.info("[save2db] on_handle_context. eth_addr: %s" % account)
@@ -460,8 +403,8 @@ class Chat2db(Plugin):
                         logger.warn("新用户,初始化user session")
 
                     self.user_manager.update_knowledge(user.UserName, know)
-                    count = self._append_know(user_session,know)
-                    
+                    count = self._append_know(user_session, know)
+
                 logger.warn(f"=====>添加{user.NickName}的医生{data.get('doctorProName')}的知识库成功,共{count}条知识库")
                 return False
         except Exception as e:

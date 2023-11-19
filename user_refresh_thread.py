@@ -2,6 +2,7 @@
 
 from hashlib import md5
 import json
+from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
 from plugins.timetask.Tool import ExcelTool
@@ -15,6 +16,8 @@ from plugins.timetask.config import conf, load_config
 from lib import itchat
 from lib.itchat.content import *
 import config as RobotConfig
+
+from plugins.plugin_chat2db.api_tentcent import ApiTencent
 import requests
 try:
     from channel.wechatnt.ntchat_channel import wechatnt
@@ -32,7 +35,10 @@ class UserRefreshThread(object):
         self._config = config
         self._conn = conn
 
-        self.groupx = ApiGroupx(config.get("groupx_host_url"))
+        self.groupxHostUrl = self._config.get("groupx_host_url")
+        self.groupx = ApiGroupx(self.groupxHostUrl)
+        self.tencent = ApiTencent(self.groupxHostUrl)
+        self.img_service = HeadImgManager(conn, self.groupxHostUrl)
 
         self.robot_account =  config.get("account")
         self.robot_user_id = ""
@@ -171,7 +177,7 @@ class UserRefreshThread(object):
         if(end > len(self.friends)) : end = len(self.friends) -1
         friends = self.friends[self.postFriendsPos:end]
         logger.info(f"post friends to groupx:{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}")
-        
+
         self.postFriendsPos += 100
         if(len(friends) < 100):
             #全部好友都发送完成了
@@ -180,7 +186,6 @@ class UserRefreshThread(object):
             # 每隔5秒执行一次,直到好友列表全部发送完成
             threading.Timer(5.0, self.postFriends2Groupx).start()
 
-        
         ret = self.groupx.post_friends(self.robot_account, self.robot_user_nickname, self.robot_user_id, friends)
         if ret is False:
             logger.error(f"post friends to groupx failed")
@@ -237,15 +242,18 @@ class UserRefreshThread(object):
         else:
             # 每隔8秒执行一次,直到好友列表全部发送完成
             threading.Timer(8.0, self.postGroups2Groupx).start()
-        
+
         update_chatroom = 0
         for index, value in enumerate(chatrooms):
+            value['HeadImgUrl'] = self.img_service.get_head_img_url(value.get('UserName'), True)
+            
             if(value['MemberList']== []):
                 room = itchat.update_chatroom(value['UserName'], True)
                 chatrooms[index] = room
                 update_chatroom += 1
                 room.update()
                 logger.info(f"从腾讯服务器获取群最新信息：{room['NickName']} 成员:{len(room['MemberList'])}个)")
+            logger.info(f'群:{value.NickName}({len(value["MemberList"])})头像:{value.HeadImgUrl}')
         if update_chatroom>0:
             logger.info(f"更新{update_chatroom}个群信息成功,保存登录状态")
             itchat.dump_login_status()

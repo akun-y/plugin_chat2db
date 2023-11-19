@@ -115,3 +115,11 @@ class ApiGroupx:
         except Exception as err:
             print(f"发生意外错误: {err}")
         return False;
+    def qcloud_get_cos_policy(self, ext_name) :
+        # 传入文件后缀，后端生成随机的 COS 对象路径，并返回上传域名、PostObject 接口要用的 policy 签名
+        # 参考服务端示例：https://github.com/tencentyun/cos-demo/server/post-policy/
+        response = requests.get(f"{self.groupxHostUrl}/v1/util/tencent-cos/post-policy/{ext_name}")
+        if response.status_code == 200:
+            return response.json().get('data')
+        else:
+            return f"Error: {response.status_code}"
