@@ -5,14 +5,11 @@ import json
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
-from plugins.timetask.Tool import ExcelTool
-from plugins.timetask.Tool import TimeTaskModel
 from common.log import logger
 import time
 import arrow
 import threading
 from typing import List
-from plugins.timetask.config import conf, load_config
 from lib import itchat
 from lib.itchat.content import *
 import config as RobotConfig
