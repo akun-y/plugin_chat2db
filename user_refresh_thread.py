@@ -246,7 +246,6 @@ class UserRefreshThread(object):
         update_chatroom = 0
         for index, value in enumerate(chatrooms):
             value['HeadImgUrl'] = self.img_service.get_head_img_url(value.get('UserName'), True)
-            
             if(value['MemberList']== []):
                 room = itchat.update_chatroom(value['UserName'], True)
                 chatrooms[index] = room

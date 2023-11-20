@@ -1,5 +1,6 @@
 import datetime
 
+
 class UserManager:
     def __init__(self):
         self.user_knowledge = {}
@@ -15,7 +16,7 @@ class UserManager:
         if self.should_update(user_id):
             self.user_knowledge[user_id] = {'know': new_knowledge, 'last_update': datetime.datetime.now()}
             self.cleanup()
-    def get_knowledge(self,user_id):
+    def get_knowledge(self, user_id):
         return self.user_knowledge[user_id]['know']
     def cleanup(self):
         current_time = datetime.datetime.now()
