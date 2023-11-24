@@ -314,7 +314,7 @@ class Chat2db(Plugin):
 
             content = content.strip()
             content = content.lower()
-            if content == "hello" :
+            if content == "hello":
                 reply = Reply()
                 reply.type = ReplyType.TEXT
                 msg: ChatMessage = e_context["context"]["msg"]
@@ -325,7 +325,18 @@ class Chat2db(Plugin):
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
                 return True
-            if content == "hi":
+            elif content.startswith("你好") or content.startswith("您好"):
+                reply = Reply()
+                reply.type = ReplyType.TEXT
+                msg: ChatMessage = e_context["context"]["msg"]
+                if e_context["context"]["isgroup"]:
+                    reply.content = f"你好, {msg.actual_user_nickname} 来自群:{msg.from_user_nickname}"
+                else:
+                    reply.content = f"你好啊, {msg.from_user_nickname}"
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+                return True
+            elif content == "hi":
                 reply = Reply()
                 reply.type = ReplyType.TEXT
                 reply.content = "Hi"
@@ -381,7 +392,7 @@ class Chat2db(Plugin):
                     "isgroup": isgroup,
                     'group_name': msg.from_user_nickname if isgroup else None,
                     'group_id' : msg.from_user_id if isgroup else None,
-                    'receiver' : msg.to_user_id,
+                    'receiver' : self.robot_account,
                     'receiver_name' : msg.to_user_nickname,
                     "user": user
                     })
@@ -405,7 +416,7 @@ class Chat2db(Plugin):
                     self.user_manager.update_knowledge(user.UserName, know)
                     count = self._append_know(user_session, know)
 
-                logger.warn(f"=====>添加{user.NickName}的医生{data.get('doctorProName')}的知识库成功,共{count}条知识库")
+                logger.warn(f"=====>添加({user.NickName})的医生({data.get('doctorProName')})的知识库成功,共({count})条知识库")
                 return False
         except Exception as e:
             logger.error(e)
