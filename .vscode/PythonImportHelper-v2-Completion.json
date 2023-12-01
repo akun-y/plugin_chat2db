@@ -1,0 +1,1139 @@
+[
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
+        "isExtraImport": true,
+        "detail": "common.log",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "quote",
+        "importPath": "urllib.parse",
+        "description": "urllib.parse",
+        "isExtraImport": true,
+        "detail": "urllib.parse",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "ApiGroupx",
+        "importPath": "plugins.plugin_chat2db.api_groupx",
+        "description": "plugins.plugin_chat2db.api_groupx",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_groupx",
+        "documentation": {}
+    },
+    {
+        "label": "ApiGroupx",
+        "importPath": "plugins.plugin_chat2db.api_groupx",
+        "description": "plugins.plugin_chat2db.api_groupx",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_groupx",
+        "documentation": {}
+    },
+    {
+        "label": "ApiGroupx",
+        "importPath": "plugins.plugin_chat2db.api_groupx",
+        "description": "plugins.plugin_chat2db.api_groupx",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_groupx",
+        "documentation": {}
+    },
+    {
+        "label": "ApiGroupx",
+        "importPath": "plugins.plugin_chat2db.api_groupx",
+        "description": "plugins.plugin_chat2db.api_groupx",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_groupx",
+        "documentation": {}
+    },
+    {
+        "label": "ApiGroupx",
+        "importPath": "plugins.plugin_chat2db.api_groupx",
+        "description": "plugins.plugin_chat2db.api_groupx",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_groupx",
+        "documentation": {}
+    },
+    {
+        "label": "sqlite3",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sqlite3",
+        "description": "sqlite3",
+        "detail": "sqlite3",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "traceback",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "traceback",
+        "description": "traceback",
+        "detail": "traceback",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "datetime",
+        "description": "datetime",
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "plugins",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "plugins",
+        "description": "plugins",
+        "detail": "plugins",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "plugins",
+        "description": "plugins",
+        "isExtraImport": true,
+        "detail": "plugins",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "plugins",
+        "description": "plugins",
+        "isExtraImport": true,
+        "detail": "plugins",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "plugins",
+        "description": "plugins",
+        "isExtraImport": true,
+        "detail": "plugins",
+        "documentation": {}
+    },
+    {
+        "label": "CustomReply",
+        "importPath": "plugins.plugin_chat2db.chat2db_reply",
+        "description": "plugins.plugin_chat2db.chat2db_reply",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.chat2db_reply",
+        "documentation": {}
+    },
+    {
+        "label": "CustomReply",
+        "importPath": "plugins.plugin_chat2db.chat2db_reply",
+        "description": "plugins.plugin_chat2db.chat2db_reply",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.chat2db_reply",
+        "documentation": {}
+    },
+    {
+        "label": "bot_factory",
+        "importPath": "bot",
+        "description": "bot",
+        "isExtraImport": true,
+        "detail": "bot",
+        "documentation": {}
+    },
+    {
+        "label": "bot_factory",
+        "importPath": "bot",
+        "description": "bot",
+        "isExtraImport": true,
+        "detail": "bot",
+        "documentation": {}
+    },
+    {
+        "label": "bot_factory",
+        "importPath": "bot",
+        "description": "bot",
+        "isExtraImport": true,
+        "detail": "bot",
+        "documentation": {}
+    },
+    {
+        "label": "Bridge",
+        "importPath": "bridge.bridge",
+        "description": "bridge.bridge",
+        "isExtraImport": true,
+        "detail": "bridge.bridge",
+        "documentation": {}
+    },
+    {
+        "label": "Bridge",
+        "importPath": "bridge.bridge",
+        "description": "bridge.bridge",
+        "isExtraImport": true,
+        "detail": "bridge.bridge",
+        "documentation": {}
+    },
+    {
+        "label": "Bridge",
+        "importPath": "bridge.bridge",
+        "description": "bridge.bridge",
+        "isExtraImport": true,
+        "detail": "bridge.bridge",
+        "documentation": {}
+    },
+    {
+        "label": "ContextType",
+        "importPath": "bridge.context",
+        "description": "bridge.context",
+        "isExtraImport": true,
+        "detail": "bridge.context",
+        "documentation": {}
+    },
+    {
+        "label": "ContextType",
+        "importPath": "bridge.context",
+        "description": "bridge.context",
+        "isExtraImport": true,
+        "detail": "bridge.context",
+        "documentation": {}
+    },
+    {
+        "label": "ContextType",
+        "importPath": "bridge.context",
+        "description": "bridge.context",
+        "isExtraImport": true,
+        "detail": "bridge.context",
+        "documentation": {}
+    },
+    {
+        "label": "Reply",
+        "importPath": "bridge.reply",
+        "description": "bridge.reply",
+        "isExtraImport": true,
+        "detail": "bridge.reply",
+        "documentation": {}
+    },
+    {
+        "label": "ReplyType",
+        "importPath": "bridge.reply",
+        "description": "bridge.reply",
+        "isExtraImport": true,
+        "detail": "bridge.reply",
+        "documentation": {}
+    },
+    {
+        "label": "Reply",
+        "importPath": "bridge.reply",
+        "description": "bridge.reply",
+        "isExtraImport": true,
+        "detail": "bridge.reply",
+        "documentation": {}
+    },
+    {
+        "label": "ReplyType",
+        "importPath": "bridge.reply",
+        "description": "bridge.reply",
+        "isExtraImport": true,
+        "detail": "bridge.reply",
+        "documentation": {}
+    },
+    {
+        "label": "Reply",
+        "importPath": "bridge.reply",
+        "description": "bridge.reply",
+        "isExtraImport": true,
+        "detail": "bridge.reply",
+        "documentation": {}
+    },
+    {
+        "label": "ReplyType",
+        "importPath": "bridge.reply",
+        "description": "bridge.reply",
+        "isExtraImport": true,
+        "detail": "bridge.reply",
+        "documentation": {}
+    },
+    {
+        "label": "check_contain",
+        "importPath": "channel.chat_channel",
+        "description": "channel.chat_channel",
+        "isExtraImport": true,
+        "detail": "channel.chat_channel",
+        "documentation": {}
+    },
+    {
+        "label": "check_prefix",
+        "importPath": "channel.chat_channel",
+        "description": "channel.chat_channel",
+        "isExtraImport": true,
+        "detail": "channel.chat_channel",
+        "documentation": {}
+    },
+    {
+        "label": "check_contain",
+        "importPath": "channel.chat_channel",
+        "description": "channel.chat_channel",
+        "isExtraImport": true,
+        "detail": "channel.chat_channel",
+        "documentation": {}
+    },
+    {
+        "label": "check_prefix",
+        "importPath": "channel.chat_channel",
+        "description": "channel.chat_channel",
+        "isExtraImport": true,
+        "detail": "channel.chat_channel",
+        "documentation": {}
+    },
+    {
+        "label": "check_contain",
+        "importPath": "channel.chat_channel",
+        "description": "channel.chat_channel",
+        "isExtraImport": true,
+        "detail": "channel.chat_channel",
+        "documentation": {}
+    },
+    {
+        "label": "check_prefix",
+        "importPath": "channel.chat_channel",
+        "description": "channel.chat_channel",
+        "isExtraImport": true,
+        "detail": "channel.chat_channel",
+        "documentation": {}
+    },
+    {
+        "label": "ChatMessage",
+        "importPath": "channel.chat_message",
+        "description": "channel.chat_message",
+        "isExtraImport": true,
+        "detail": "channel.chat_message",
+        "documentation": {}
+    },
+    {
+        "label": "ChatMessage",
+        "importPath": "channel.chat_message",
+        "description": "channel.chat_message",
+        "isExtraImport": true,
+        "detail": "channel.chat_message",
+        "documentation": {}
+    },
+    {
+        "label": "ChatMessage",
+        "importPath": "channel.chat_message",
+        "description": "channel.chat_message",
+        "isExtraImport": true,
+        "detail": "channel.chat_message",
+        "documentation": {}
+    },
+    {
+        "label": "LLMChain",
+        "importPath": "chatgpt_tool_hub.chains.llm",
+        "description": "chatgpt_tool_hub.chains.llm",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.chains.llm",
+        "documentation": {}
+    },
+    {
+        "label": "LLMChain",
+        "importPath": "chatgpt_tool_hub.chains.llm",
+        "description": "chatgpt_tool_hub.chains.llm",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.chains.llm",
+        "documentation": {}
+    },
+    {
+        "label": "LLMChain",
+        "importPath": "chatgpt_tool_hub.chains.llm",
+        "description": "chatgpt_tool_hub.chains.llm",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.chains.llm",
+        "documentation": {}
+    },
+    {
+        "label": "build_model_params",
+        "importPath": "chatgpt_tool_hub.models",
+        "description": "chatgpt_tool_hub.models",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models",
+        "documentation": {}
+    },
+    {
+        "label": "build_model_params",
+        "importPath": "chatgpt_tool_hub.models",
+        "description": "chatgpt_tool_hub.models",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models",
+        "documentation": {}
+    },
+    {
+        "label": "build_model_params",
+        "importPath": "chatgpt_tool_hub.models",
+        "description": "chatgpt_tool_hub.models",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models",
+        "documentation": {}
+    },
+    {
+        "label": "ModelFactory",
+        "importPath": "chatgpt_tool_hub.models.model_factory",
+        "description": "chatgpt_tool_hub.models.model_factory",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models.model_factory",
+        "documentation": {}
+    },
+    {
+        "label": "ModelFactory",
+        "importPath": "chatgpt_tool_hub.models.model_factory",
+        "description": "chatgpt_tool_hub.models.model_factory",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models.model_factory",
+        "documentation": {}
+    },
+    {
+        "label": "ModelFactory",
+        "importPath": "chatgpt_tool_hub.models.model_factory",
+        "description": "chatgpt_tool_hub.models.model_factory",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models.model_factory",
+        "documentation": {}
+    },
+    {
+        "label": "PromptTemplate",
+        "importPath": "chatgpt_tool_hub.prompts",
+        "description": "chatgpt_tool_hub.prompts",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.prompts",
+        "documentation": {}
+    },
+    {
+        "label": "PromptTemplate",
+        "importPath": "chatgpt_tool_hub.prompts",
+        "description": "chatgpt_tool_hub.prompts",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.prompts",
+        "documentation": {}
+    },
+    {
+        "label": "PromptTemplate",
+        "importPath": "chatgpt_tool_hub.prompts",
+        "description": "chatgpt_tool_hub.prompts",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.prompts",
+        "documentation": {}
+    },
+    {
+        "label": "const",
+        "importPath": "common",
+        "description": "common",
+        "isExtraImport": true,
+        "detail": "common",
+        "documentation": {}
+    },
+    {
+        "label": "const",
+        "importPath": "common",
+        "description": "common",
+        "isExtraImport": true,
+        "detail": "common",
+        "documentation": {}
+    },
+    {
+        "label": "const",
+        "importPath": "common",
+        "description": "common",
+        "isExtraImport": true,
+        "detail": "common",
+        "documentation": {}
+    },
+    {
+        "label": "TmpDir",
+        "importPath": "common.tmp_dir",
+        "description": "common.tmp_dir",
+        "isExtraImport": true,
+        "detail": "common.tmp_dir",
+        "documentation": {}
+    },
+    {
+        "label": "TmpDir",
+        "importPath": "common.tmp_dir",
+        "description": "common.tmp_dir",
+        "isExtraImport": true,
+        "detail": "common.tmp_dir",
+        "documentation": {}
+    },
+    {
+        "label": "TmpDir",
+        "importPath": "common.tmp_dir",
+        "description": "common.tmp_dir",
+        "isExtraImport": true,
+        "detail": "common.tmp_dir",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "config",
+        "description": "config",
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "global_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "global_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "global_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "itchat",
+        "importPath": "lib",
+        "description": "lib",
+        "isExtraImport": true,
+        "detail": "lib",
+        "documentation": {}
+    },
+    {
+        "label": "itchat",
+        "importPath": "lib",
+        "description": "lib",
+        "isExtraImport": true,
+        "detail": "lib",
+        "documentation": {}
+    },
+    {
+        "label": "itchat",
+        "importPath": "lib",
+        "description": "lib",
+        "isExtraImport": true,
+        "detail": "lib",
+        "documentation": {}
+    },
+    {
+        "label": "itchat",
+        "importPath": "lib",
+        "description": "lib",
+        "isExtraImport": true,
+        "detail": "lib",
+        "documentation": {}
+    },
+    {
+        "label": "itchat",
+        "importPath": "lib",
+        "description": "lib",
+        "isExtraImport": true,
+        "detail": "lib",
+        "documentation": {}
+    },
+    {
+        "label": "FRIENDS",
+        "importPath": "lib.itchat.content",
+        "description": "lib.itchat.content",
+        "isExtraImport": true,
+        "detail": "lib.itchat.content",
+        "documentation": {}
+    },
+    {
+        "label": "FRIENDS",
+        "importPath": "lib.itchat.content",
+        "description": "lib.itchat.content",
+        "isExtraImport": true,
+        "detail": "lib.itchat.content",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "lib.itchat.content",
+        "description": "lib.itchat.content",
+        "isExtraImport": true,
+        "detail": "lib.itchat.content",
+        "documentation": {}
+    },
+    {
+        "label": "ApiTencent",
+        "importPath": "plugins.plugin_chat2db.api_tentcent",
+        "description": "plugins.plugin_chat2db.api_tentcent",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "documentation": {}
+    },
+    {
+        "label": "ApiTencent",
+        "importPath": "plugins.plugin_chat2db.api_tentcent",
+        "description": "plugins.plugin_chat2db.api_tentcent",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "documentation": {}
+    },
+    {
+        "label": "ApiTencent",
+        "importPath": "plugins.plugin_chat2db.api_tentcent",
+        "description": "plugins.plugin_chat2db.api_tentcent",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "documentation": {}
+    },
+    {
+        "label": "ApiTencent",
+        "importPath": "plugins.plugin_chat2db.api_tentcent",
+        "description": "plugins.plugin_chat2db.api_tentcent",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
+        "description": "plugins.plugin_chat2db.user_refresh_thread",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.user_refresh_thread",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
+        "description": "plugins.plugin_chat2db.user_refresh_thread",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.user_refresh_thread",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
+        "description": "plugins.plugin_chat2db.user_refresh_thread",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.user_refresh_thread",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "importPath": "plugins.plugin_chat2db.UserManager",
+        "description": "plugins.plugin_chat2db.UserManager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "importPath": "plugins.plugin_chat2db.UserManager",
+        "description": "plugins.plugin_chat2db.UserManager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "importPath": "plugins.plugin_chat2db.UserManager",
+        "description": "plugins.plugin_chat2db.UserManager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "chat2db_refresh_knowledge",
+        "importPath": "plugins.plugin_chat2db.chat2db_knowledge",
+        "description": "plugins.plugin_chat2db.chat2db_knowledge",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.chat2db_knowledge",
+        "documentation": {}
+    },
+    {
+        "label": "hashlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "md5",
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "isExtraImport": true,
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "MyFileStory",
+        "importPath": "plugins.plugin_chat2db.file_store",
+        "description": "plugins.plugin_chat2db.file_store",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.file_store",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "arrow",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "arrow",
+        "description": "arrow",
+        "detail": "arrow",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "ApiGroupx",
+        "kind": 6,
+        "importPath": "api_groupx",
+        "description": "api_groupx",
+        "peekOfCode": "class ApiGroupx:\n    def __init__(self, host) -> None:\n        self.groupxHostUrl = host\n    def post_chat_record(self, account, msg_json):\n        account = account.strip() if account else \"0x0000000000000000000000000000000000000000\"\n        post_url = f\"{self.groupxHostUrl}/v1/chat/{account}\"\n        logger.info(\"post url: {}\".format(post_url))\n        try:\n            response = requests.post(\n                post_url, json=msg_json, verify=False)",
+        "detail": "api_groupx",
+        "documentation": {}
+    },
+    {
+        "label": "ApiTencent",
+        "kind": 6,
+        "importPath": "api_tentcent",
+        "description": "api_tentcent",
+        "peekOfCode": "class ApiTencent(object):\n    def __init__(self, groupxHostUrl) -> None:\n        self.groupxHostUrl = groupxHostUrl\n        self.groupx = ApiGroupx(groupxHostUrl)\n    def qcloud_upload_bytes(self, data) :\n        files = {'file': data}  # 'file' 是服务器上接受文件的字段名\n        cos_policy= self.groupx.qcloud_get_cos_policy(\"jpg\")\n        formData = {\n            \"key\": cos_policy['cosKey'],\n            \"policy\": cos_policy['policy'],",
+        "detail": "api_tentcent",
+        "documentation": {}
+    },
+    {
+        "label": "Chat2db",
+        "kind": 6,
+        "importPath": "chat2db",
+        "description": "chat2db",
+        "peekOfCode": "class Chat2db(Plugin):\n    def __init__(self):\n        super().__init__()\n        self.config = super().load_config()\n        if not self.config:\n            # 未加载到配置，使用模板中的配置\n            self.config = self._load_config_template()\n        if self.config:\n            self.robot_account =  self.config.get(\"account\")\n            self.robot_name =  self.config.get(\"name\")",
+        "detail": "chat2db",
+        "documentation": {}
+    },
+    {
+        "label": "chat2db_refresh_knowledge",
+        "kind": 2,
+        "importPath": "chat2db_knowledge",
+        "description": "chat2db_knowledge",
+        "peekOfCode": "def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: EventContext):\n    try:\n        ctx = e_context['context']\n        if ctx.type == ContextType.TEXT:\n            msg = ctx.get(\"msg\")\n            isgroup =  ctx.get(\"isgroup\", False)\n            if isgroup: user= itchat.update_friend(msg.actual_user_id)\n            else: user= msg._rawmsg.user\n            session_id = ctx.get(\"session_id\")\n            all_sessions = Bridge().get_bot(\"chat\").sessions",
+        "detail": "chat2db_knowledge",
+        "documentation": {}
+    },
+    {
+        "label": "CustomReply",
+        "kind": 6,
+        "importPath": "chat2db_reply",
+        "description": "chat2db_reply",
+        "peekOfCode": "class CustomReply:\n    def __init__(self, config, groupx, user_manager):\n        self.config = config\n        self.groupx = groupx\n        self.user_manager = user_manager\n        self.robot_account =  self.config.get(\"account\")\n        self.robot_name =  self.config.get(\"name\")\n        self.robot_desc =  self.config.get(\"description\")\n    def reply_join_group(self, e_context: EventContext):\n        ctx = e_context[\"context\"]",
+        "detail": "chat2db_reply",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "kind": 2,
+        "importPath": "comm",
+        "description": "comm",
+        "peekOfCode": "def makeGroupReq(account,payload):\n    json_data = {\n        'payload': payload,\n        \"params\": {\n                \"addr\": account if account else \"0x0000000000000000000000000000000000000000\",\n                \"random\": \"a9a58d316a16206ca2529720d01f8a9d10779eb330902f4ec05cf358a3418a9f\",\n                \"nonce\": \"1a9b1b1d9e854196143504b776b65e9fb5c87fe4930466a8fe68763fa6e48aed\",\n                \"ts\": \"1680592645793\",\n                \"hash\": \"0xc324d54dc3f613b8b33ce60d3085b5fc16b9012fa1df733361b370fec663bc67\",\n                \"method\": 2,",
+        "detail": "comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "kind": 5,
+        "importPath": "comm",
+        "description": "comm",
+        "peekOfCode": "EthZero = \"0x0000000000000000000000000000000000000000\"",
+        "detail": "comm",
+        "documentation": {}
+    },
+    {
+        "label": "MyFileStory",
+        "kind": 6,
+        "importPath": "file_store",
+        "description": "file_store",
+        "peekOfCode": "class MyFileStory(object) :\n    def __init__(self):\n        self.curdir = os.path.dirname(__file__)\n        self.saveFolder = os.path.join(self.curdir, 'saved')\n        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs',      'webwxgetmsgimg': 'msgimgs', 'webwxgetvideo': 'videos',\n        'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}\n    def _save_file(self, filename, data, api=None):\n        fn = filename\n        if self.saveSubFolders[api]:\n            dirName = os.path.join(self.saveFolder, self.saveSubFolders[api])",
+        "detail": "file_store",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "kind": 6,
+        "importPath": "head_img_manager",
+        "description": "head_img_manager",
+        "peekOfCode": "class HeadImgManager(object):\n    def __init__(self, conn, groupHostUrl):\n        super().__init__()\n        self.curdir = os.path.dirname(__file__)\n        self.saveFolder = os.path.join(self.curdir, 'saved')\n        self.conn = conn\n        #创建用于记录avatar的表\n        self._create_table_avatar()\n        self.my_store = MyFileStory()\n        self.tencent = ApiTencent(groupHostUrl)",
+        "detail": "head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "kind": 6,
+        "importPath": "UserManager",
+        "description": "UserManager",
+        "peekOfCode": "class UserManager:\n    def __init__(self, groupx):\n        self.groupx = groupx\n        self.user_knowledge = {}\n        self.doctor_of_user={}\n        self.group_info ={}\n        self.users={}\n    def should_update(self, user_id):\n        if user_id in self.user_knowledge:\n            last_update_time = self.user_knowledge[user_id]['last_update']",
+        "detail": "UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "kind": 6,
+        "importPath": "user_refresh_thread",
+        "description": "user_refresh_thread",
+        "peekOfCode": "class UserRefreshThread(object):\n    def __init__(self, conn, config):\n        super().__init__()\n        #保存定时任务回调\n        self._config = config\n        self._conn = conn\n        self.groupxHostUrl = self._config.get(\"groupx_host_url\")\n        self.groupx = ApiGroupx(self.groupxHostUrl)\n        self.tencent = ApiTencent(self.groupxHostUrl)\n        self.img_service = HeadImgManager(conn, self.groupxHostUrl)",
+        "detail": "user_refresh_thread",
+        "documentation": {}
+    }
+]

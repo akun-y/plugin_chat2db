@@ -1,9 +1,18 @@
 import datetime
 
+from lib import itchat
+from plugins.plugin_chat2db.comm import EthZero
 
+
+# 用于管理所有用户的知识库及用户基本信息,按时更新信息.
 class UserManager:
-    def __init__(self):
+    def __init__(self, groupx):
+        self.groupx = groupx
         self.user_knowledge = {}
+        self.doctor_of_user={}
+        self.doctor_of_group={}
+        self.group_info ={}
+        self.users={}
 
     def should_update(self, user_id):
         if user_id in self.user_knowledge:
@@ -28,6 +37,48 @@ class UserManager:
             # 超过 3 天没有更新的知识进行删除
             if time_difference.total_seconds() > 3 * 24 * 60 * 60:
                 del self.user_knowledge[user_id]
+    #-----------------------------------------
+    # 用户
+    def get_user(self, user_id) :
+        user = self.users.get(user_id, None)
+        if user: return user
+
+        user = itchat.update_friend(user_id)
+        if user:
+            self.users[user_id] = user
+            return user
+        return None
+    #-----------------------------------------
+    # 对应的医生信息
+    def _fetch_doctor_of_user(self, account, agent, user_id, user_name):
+        result = self.groupx.get_my_doctor_info(account=account, agent=agent, user_id=user_id, user_name=user_name)
+        self.doctor_of_user[user_id] = result
+        return self.doctor_of_user[user_id]
+    def get_my_doctor(self, account, agent, user_id, user_name):
+        if not account: account = EthZero
+        doctor = self.doctor_of_user.get(user_id, None)
+        return doctor if doctor else self._fetch_doctor_of_user(account, agent, user_id, user_name)
+
+    def _fetch_doctor_of_group(self, group_id):
+        result = self.groupx.get_doctor_of_group(group_id)
+        self.doctor_of_group[group_id] = result
+        return self.doctor_of_group[group_id]
+    def get_doctor_of_group(self, group_id):
+        doctor = self.doctor_of_group.get(group_id, None)
+        return doctor if doctor else self._fetch_doctor_of_group(group_id)
+    #-----------------------------------------
+    # 微信群信息
+    def _fetch_group_info(self,  group_id):
+        result = self.groupx.get_wxgroup_info(group_id)
+        self.group_info[group_id] = result;
+        return self.group_info[group_id]
+
+    def get_group_info(self, group_id):
+        group = self.group_info.get(group_id, None)
+
+        if group:  return group
+        return group if group else  self._fetch_group_info(group_id)
+    #-----------------------------------------
 
 # # 示例用法
 # user_manager = UserManager()

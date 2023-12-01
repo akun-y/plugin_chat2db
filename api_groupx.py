@@ -2,6 +2,9 @@ import requests
 from common.log import logger
 from plugins.plugin_chat2db.comm import makeGroupReq
 
+from plugins.plugin_chat2db.comm import EthZero
+from urllib.parse import quote
+
 
 class ApiGroupx:
 
@@ -42,8 +45,43 @@ class ApiGroupx:
             logger.error(f"HTTP错误发生: {http_err}")
             return None
         except Exception as err:
-            logger.error()
+            logger.error(f"set_my_doctor_info 意外错误发生: {err}")
+    # 获取我的医生
+    def get_my_doctor_info(self, account, agent, user_id=None, user_name=None, doctor_name=None):
+        if not account : return None
 
+        url = f"{self.groupxHostUrl}/v1/chat/my-doctor/get/{account}"
+        data = {'account': account,
+                'doctorName': doctor_name,
+                'agent': agent,
+                'wxUserId': user_id,
+                'wxUserName': user_name,
+                }
+        return self._request(url, account, data)
+    def get_doctor_of_group(self, group_id):
+        url = f"{self.groupxHostUrl}/v1/chat/doctor-group/get/{group_id}"
+        return self._request(url, EthZero)
+
+    # 获取微信群信息
+    def get_wxgroup_info(self, group_id):
+        url = f"{self.groupxHostUrl}/v1/user/wxgroup/get/{group_id}"
+        return self._request(url, EthZero)
+
+    def _request(self, url, account, data=None):
+        try:
+            logger.info(f"_request url:{url}")
+            if data :
+                data_req = makeGroupReq(account, data)
+                response = requests.post(url, json=data_req, verify=False)
+            else:
+                response = requests.get(url, verify=False)
+            logger.info(f"_response:{response.reason} len:{len(response.content)}")
+            return response.json() if response.status_code == 200 else None
+        except requests.HTTPError as http_err:
+            logger.error(f"HTTP错误发生: {http_err}")
+            return None
+        except Exception as err:
+            logger.error(f"set_my_doctor_info 意外错误发生: {err}")
     def post_friends(self, bot_account, bot_nickname, bot_id, friends):
         #好友处理
         try:

@@ -2,40 +2,39 @@
 import logging
 import os
 import sqlite3
-
-import requests
-from bridge.bridge import Bridge
 import time
+import traceback
+from datetime import datetime, timedelta
+
+import plugins
+from plugins.plugin_chat2db.chat2db_reply import CustomReply
+import requests
 from bot import bot_factory
 from bridge.bridge import Bridge
 from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
 from channel.chat_channel import check_contain, check_prefix
 from channel.chat_message import ChatMessage
-from common.tmp_dir import TmpDir
-from datetime import datetime, timedelta
-
-from lib import itchat
-from lib.itchat.content import FRIENDS
-import plugins
-from plugins import *
-from common import const
 from chatgpt_tool_hub.chains.llm import LLMChain
 from chatgpt_tool_hub.models import build_model_params
 from chatgpt_tool_hub.models.model_factory import ModelFactory
 from chatgpt_tool_hub.prompts import PromptTemplate
-import plugins
-from bridge.context import ContextType
-from bridge.reply import Reply, ReplyType
+from common import const
 from common.log import logger
+from common.tmp_dir import TmpDir
+from config import conf, global_config, load_config
+from lib import itchat
+from lib.itchat.content import FRIENDS
 from plugins import *
-from plugins.plugin_chat2db.head_img_manager import HeadImgManager
-from plugins.plugin_chat2db.UserManager import UserManager
+from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tentcent import ApiTencent
 from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
+from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
-from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from config import conf, load_config, global_config
+from plugins.plugin_chat2db.UserManager import UserManager
+
+from plugins.plugin_chat2db.chat2db_reply import CustomReply
+from plugins.plugin_chat2db.chat2db_knowledge import chat2db_refresh_knowledge
 
 
 @plugins.register(
@@ -73,15 +72,15 @@ class Chat2db(Plugin):
 
         self.groupx = ApiGroupx(self.groupxHostUrl)
         self.tencent = ApiTencent(self.groupxHostUrl)
-
         # 用于管理用户的知识库,确定是否可以更新.
-        self.user_manager = UserManager()
+        self.user_manager = UserManager(self.groupx)
+        # 应答一些自定义的回复信息
+        self.my_reply = CustomReply(self.config, self.groupx, self.user_manager)
 
         self.model = conf().get("model")
         self.curdir = os.path.dirname(__file__)
         self.saveFolder = os.path.join(self.curdir, 'saved')
-        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
-                               'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
+        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs', 'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
 
         self.conn = sqlite3.connect(os.path.join(self.saveFolder, "chat2db.db"), check_same_thread=False)
 
@@ -231,7 +230,7 @@ class Chat2db(Plugin):
             img_url ="12"
             img_file = os.path.abspath(cmsg.content)
             if os.path.exists(img_file):
-                img_url = tencent.qcloud_upload_file(self.groupxHostUrl, img_file)
+                img_url = self.tencent.qcloud_upload_file(self.groupxHostUrl, img_file)
 
             account = cmsg._rawmsg.User.RemarkName
             logger.info("[save2db] on_handle_context. eth_addr: %s" % account)
@@ -239,11 +238,6 @@ class Chat2db(Plugin):
         except Exception as e:
             logger.error(f"upload_img error: {e}")
             return None
-
-    def _set_my_doctor(self, account, doctor_name):
-        logger.info("[save2db] set_my_doctor: %s " % doctor_name)
-
-        return self.groupx.set_my_doctor_info(account, self.receiver, doctor_name)
 
     # 当收到好友请求时，执行以下函数
     #@itchat.msg_register(FRIENDS)
@@ -304,160 +298,105 @@ class Chat2db(Plugin):
             return True
         return False
 
-    def _reply_hello(self, e_context: EventContext):
-        try:
-            ctx = e_context['context']
-            if ctx.type not in [ContextType.TEXT]: return
-
-            msg = ctx.get("msg")
-            content = ctx.content
-
-            content = content.strip()
-            content = content.lower()
-            if content == "hello":
-                reply = Reply()
-                reply.type = ReplyType.TEXT
-                msg: ChatMessage = e_context["context"]["msg"]
-                if e_context["context"]["isgroup"]:
-                    reply.content = f"Hello, {msg.actual_user_nickname} from {msg.from_user_nickname}"
-                else:
-                    reply.content = f"Hello, {msg.from_user_nickname}"
-                e_context["reply"] = reply
-                e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
-                return True
-            elif content.startswith("你好") or content.startswith("您好"):
-                reply = Reply()
-                reply.type = ReplyType.TEXT
-                msg: ChatMessage = e_context["context"]["msg"]
-                if e_context["context"]["isgroup"]:
-                    reply.content = f"你好, {msg.actual_user_nickname} 来自群:{msg.from_user_nickname}"
-                else:
-                    reply.content = f"你好啊, {msg.from_user_nickname}"
-                e_context["reply"] = reply
-                e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
-                return True
-            elif content == "hi":
-                reply = Reply()
-                reply.type = ReplyType.TEXT
-                reply.content = "Hi"
-                e_context["reply"] = reply
-                e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑，一般会覆写reply
-                return True
-        except Exception as e:
-            logger.error("_reply_hello: {}".format(e))
-        return False
-
-    def _append_know(self, user_session, know):
-        count = 0
-        # 倒序遍历
-        for index, value in enumerate(know[::-1]):
-            title = value.get('title', None)
-            content = value.get('content', None)
-
-            if title and content:
-                user_session.append({'role': 'user', 'content': title})
-                user_session.append({'role': 'assistant', 'content': content})
-                count += 1
-                logger.info(f'user session append user {title}')
-                logger.info(f'user session append assistant {content}')
-            if index >40:
-                logger.warn("知识库内容太多了,超过了40条")
-                break;
-        return count;
-    def _refresh_myknowledge(self, e_context: EventContext):
-        try:
-            ctx = e_context['context']
-            if ctx.type == ContextType.TEXT:
-                msg = ctx.get("msg")
-
-                isgroup =  ctx.get("isgroup", False)
-                if isgroup: user= itchat.update_friend(msg.actual_user_id)
-                else: user= msg._rawmsg.user
-
-                session_id = ctx.get("session_id")
-                all_sessions = Bridge().get_bot("chat").sessions
-                user_session = all_sessions.build_session(session_id).messages
-                sess_len = len(user_session)
-                logger.info(f"===>用户 user session 长度为{sess_len}")
-                #已经使用过知识库了
-                if sess_len > 0:
-                    #使用知识库如果超过1天了,那么再更新下.
-                    if self.user_manager.should_update(user.UserName) == False:
-                        know = self.user_manager.get_knowledge(user.UserName)
-                        self._append_know(user_session, know)
-                        return False
-                    logger.info("===>原知识库已经超过24小时,更新知识库...")
-                # 从groupx 获取know
-                data = self.groupx.get_myknowledge(self.robot_account, {
-                    "isgroup": isgroup,
-                    'group_name': msg.from_user_nickname if isgroup else None,
-                    'group_id' : msg.from_user_id if isgroup else None,
-                    'receiver' : self.robot_account,
-                    'receiver_name' : msg.to_user_nickname,
-                    "user": user
-                    })
-
-                know = data.get("knowledges", {})
-
-                # logger.info("chat2db knowledge:\n用户:%s \n %s" % (user.NickName, json.dumps(know, ensure_ascii=False, indent=2)))
-
-                count = 0
-                if len(know) > 0:
-                    if(len(user_session)<1): # 新用户,session为空
-                        user_session.append({
-                            'role': 'user',
-                            'content': '你好，我叫"'+user.NickName+'",后续我的提问请从会话中查询结果.如请优先使用会话中的内容做答疑解,不要在提问中说明你是机器人,引用会话时不要解释,不要有其他说明'})
-                        user_session.append({
-                            'role': 'assistant',
-                            'content': '好的,我记住了'})
-
-                        logger.warn("新用户,初始化user session")
-
-                    self.user_manager.update_knowledge(user.UserName, know)
-                    count = self._append_know(user_session, know)
-
-                logger.warn(f"=====>添加({user.NickName})的医生({data.get('doctorProName')})的知识库成功,共({count})条知识库")
-                return False
-        except Exception as e:
-            logger.error(e)
-            return False
-    #收到消息 ON_RECEIVE_MESSAGE
-    def on_handle_context(self, e_context: EventContext):
-        # 过滤掉原有的一些命令
-        if self._filter_command(e_context): return
-        # 匹配用户知识库,从服务器拉取知识库并更新到本地
-        if self._refresh_myknowledge(e_context): return
-        # 处理一些问候性提问及测试提问
-        if self._reply_hello(e_context) : return
+    # 处理医生分配
+    def _set_my_doctor(self, e_context: EventContext, is_group: bool):
+        if is_group: return False # 群中不允许设置医生
 
         ctx = e_context['context']
-
-        # 处理图片相关内容
-        if ctx.get("isgroup", False): return # 群聊天不处理图片,不处理医生分配
-        if ctx.type not in [ContextType.IMAGE, ContextType.TEXT]: return
-
+        msg = ctx.get("msg")
         content = ctx.content
 
-        if ctx.type == ContextType.IMAGE: #处理图片
-            upload = self._upload_pic(ctx)
-            logger.info("[save2db] upload image: %s " % upload)
-        if ctx.type == ContextType.TEXT and content.startswith('@'): # 对接医生
-            name = content[1:]
-            userid = e_context['context']['msg'].from_user_id
+        name = content[3:]
+
+        userid = msg.from_user_id
+        act_user = itchat.update_friend(userid)
+        account = act_user.RemarkName
+
+        result = self.groupx.set_my_doctor_info(account, self.receiver, name)
+
+        logger.info("[save2db] doctor: %s " % result)
+
+        if result:
+            doctor = result.get("doctor")
+            if doctor:
+                itchat.send_msg(f"医生对接成功!\n----------------\n医生:{name}({doctor.get('department')})\n{doctor.get('intro')}\n擅长:{doctor.get('skill')}", toUserName=userid)
+            else :
+                doctorName = result.get("doctorName") or result.get("name")
+                doctorDepartment = result.get("doctorDepartment", '')
+                itchat.send_msg(f"医生对接失败!\n----------------\n但是你已对接医生:{doctorName}({doctorDepartment})", toUserName=userid)
+        else :
+            itchat.send_msg(f"没找到你要对接的医生:‘{name}’\n请确认医生真实姓名.", toUserName=userid)
+        e_context.action = EventAction.BREAK_PASS
+        return True
+    # 查询已经分配的医生
+    def _get_my_doctor(self, e_context: EventContext, is_group: bool):
+        ctx = e_context['context']
+        msg = ctx.get("msg")
+        content = ctx.content
+        name = content[3:]
+
+        if is_group:
+            userid = msg.actual_user_id
+            act_user = itchat.update_friend(userid)
+            account = act_user.RemarkName
+            group_id = msg.from_user_id
+        else:
+            userid = msg.from_user_id
             act_user = itchat.update_friend(userid)
             account = act_user.RemarkName
 
-            result = self._set_my_doctor(account, name)
+        result = self.groupx.get_my_doctor_info(account, self.receiver, name)
 
-            logger.info("[save2db] doctor: %s " % result)
+        logger.info("[save2db] doctor: %s " % result)
 
-            if result:
-                doctor = result.get("doctor")
-                itchat.send_msg(f"医生对接成功!\n----------------\n医生:{name}({doctor.get('department')})\n{doctor.get('intro')}\n擅长:{doctor.get('skill')}", toUserName=userid)
-            else :
-                itchat.send_msg(f"没找到你要对接的医生:{name}\n请确认医生真实姓名.", toUserName=userid)
-            e_context.action = EventAction.BREAK_PASS
-            return
+        if result:
+            doctorName = result.get("doctorName") or result.get("name")
+            doctorDepartment = result.get("doctorDepartment", '')
+            if is_group:
+                itchat.send_msg(f"@{act_user.NickName}\n查询医生成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=group_id)
+            else:
+                itchat.send_msg(f"查询成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=userid)
+        else :
+            itchat.send_msg(f"没找到你的医生.", toUserName=userid)
+        e_context.action = EventAction.BREAK_PASS
+        return True
+    #收到消息 ON_RECEIVE_MESSAGE
+    def on_handle_context(self, e_context: EventContext):
+        #self.sessionid = e_context["context"]["session_id"]
+        #self.bot.sessions.build_session(self.sessionid, system_prompt="self.desc")
+        # 过滤掉原有的一些命令
+        if self._filter_command(e_context): return
+
+        # 匹配用户知识库,从服务器拉取知识库并更新到本地
+        if chat2db_refresh_knowledge(self.groupx, self.robot_account, self.user_manager, e_context): return
+
+        # 处理一些问候性提问及测试提问
+        if self.my_reply.reply_hello(e_context) : return
+        # 用户加群
+        if self.my_reply.reply_join_group(e_context) : return        
+        # 用户拍一拍机器人
+        if self.my_reply.reply_patpat(e_context) : return
+        
+
+        ctx = e_context['context']
+        if ctx.type not in [ContextType.IMAGE, ContextType.TEXT]: return
+
+        content = ctx.content
+        is_group = ctx.get("isgroup", False)
+        if is_group:
+            if(content.startswith('@医生')):
+                self._get_my_doctor(e_context, is_group)
+            return # 群聊天不处理图片,不处理医生分配
+        # 处理图片相关内容
+        if ctx.type == ContextType.IMAGE: #处理图片
+            upload = self._upload_pic(ctx)
+            logger.info("[save2db] upload image: %s " % upload)
+        if ctx.type == ContextType.TEXT and content.startswith('@医生'): # 对接医生
+            name = content[3:]
+            if len(name) < 1 :
+                self._get_my_doctor(e_context, is_group)
+                return
+            if self._set_my_doctor(e_context, is_group): return
 
         e_context.action = EventAction.CONTINUE
 
