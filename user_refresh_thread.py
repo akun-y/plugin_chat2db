@@ -39,9 +39,10 @@ class UserRefreshThread(object):
 
         self.robot_account =  config.get("account")
         self.robot_user_id = ""
-        self.robot_user_nickname=config.get("name")
+        self.robot_user_nickname="" #config.get("name")
+        self.check_login_second_interval = config.get("check_login_second_interval", 60*100) #默认100分钟
 
-        self.isRelogin = False
+        self.is_relogin = False
 
         self.postFriendsPos = 0
         self.postGroupsPos = 0
@@ -58,33 +59,33 @@ class UserRefreshThread(object):
         #延迟15秒后再检测，让初始化任务执行完
         time.sleep(15)
         #检测是否重新登录了
-        self.isRelogin = False
+        self.is_relogin = False
 
         while True:
             # 定时检测
-            self.timerCheck()
+            self.timer_check()
             # 群组列表有没有增减
             chatrooms = itchat.get_chatrooms()
             if(len(chatrooms) != len(self.chatrooms)):
                 self.chatrooms = chatrooms
-                self.updateAllIds()
+                self.update_friends_groups()
 
-            time.sleep(int(100*60)) # 100*60秒(100分钟)检测一次
-            #time.sleep(int(10)) # 调试时
+            #time.sleep(int(100*60)) # 100*60秒(100分钟)检测一次
+            time.sleep(int(self.check_login_second_interval)) 
 
     #定时检查,检测机器人是否重新登录了(服务器重启时变化)
-    def timerCheck(self):
+    def timer_check(self):
         #检测是否重新登录了
-        self.check_isRelogin()
+        self.check_is_relogin()
         #重新登录、未登录，均跳过
-        if self.isRelogin:
-            logger.warn("服务器已重新登录,Bot UserName 更新为 {}".format(self.robot_user_id))
+        if self.is_relogin:
+            logger.warn(f"=====》服务器已重新登录,Bot UserName 更新为 {self.robot_user_id}")
             return
-        logger.info("定时检测,bot UserName无变化 {}".format(self.robot_user_id))
+        logger.info(f"定时检测,bot UserName无变化 {self.robot_user_id}")
 
 
 #检测是否重新登录了
-    def check_isRelogin(self):
+    def check_is_relogin(self):
         #机器人ID
         self.robot_user_id = ""
         #通道
@@ -102,18 +103,18 @@ class UserRefreshThread(object):
             except Exception as e:
                 print(f"获取 ntchat的 userid 失败: {e}")
                 #nt
-                self.isRelogin = False
+                self.is_relogin = False
                 return
         else:
             #其他通道，默认不更新用户ID
-            self.isRelogin = False
+            self.is_relogin = False
             return
 
         #登录后
         if self.robot_user_id is not None and len(self.robot_user_id) > 0:
             #NTChat的userID不变
             if channel_name == "ntchat":
-                self.isRelogin = False
+                self.is_relogin = False
                 return
 
             #temp_isRelogin =True #调试时才用
@@ -124,24 +125,25 @@ class UserRefreshThread(object):
                 myselfUserName=""
             else:
                 myselfUserName = myself[0]
+                logger.info(f"从本地表中读取bot的UserName:\n{myself[0]}\n{myself[3]}")
             #     model : TimeTaskModel = self.timeTasks[0]
             temp_isRelogin = self.robot_user_id != myselfUserName
 
             if temp_isRelogin:
                 #更新为重新登录态
-                self.isRelogin = True
+                self.is_relogin = True
                 #等待登录完成
-                time.sleep(10)
+                time.sleep(30)
 
                 #更新userId
-                self.updateAllIds()
+                self.update_friends_groups()
 
                 #更新为非重新登录态
-                self.isRelogin = False
+                self.is_relogin = False
         else:
             #置为重新登录态
-            self.isRelogin = True
-    def updateAllIds(self):
+            self.is_relogin = True
+    def update_friends_groups(self):
         logger.info("更新用户ID,Friends, Groups")
         if(self.postFriends2Groupx()):
             self.saveFriends2DB()

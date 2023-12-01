@@ -1,7 +1,7 @@
 import datetime
 
 from lib import itchat
-from plugins.plugin_chat2db.comm import EthZero
+from plugins.plugin_chat2db.comm import EthZero, is_eth_address
 
 
 # 用于管理所有用户的知识库及用户基本信息,按时更新信息.
@@ -58,7 +58,12 @@ class UserManager:
         if not account: account = EthZero
         doctor = self.doctor_of_user.get(user_id, None)
         return doctor if doctor else self._fetch_doctor_of_user(account, agent, user_id, user_name)
-
+    def set_my_doctor(self, user_id,  doctor_account):
+        if not user_id: return
+        if is_eth_address(doctor_account):
+            self.doctor_of_user[user_id] = doctor_account
+            
+        
     def _fetch_doctor_of_group(self, group_id):
         result = self.groupx.get_doctor_of_group(group_id)
         self.doctor_of_group[group_id] = result

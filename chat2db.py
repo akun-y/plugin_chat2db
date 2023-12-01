@@ -28,13 +28,14 @@ from lib.itchat.content import FRIENDS
 from plugins import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tentcent import ApiTencent
-from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
+from plugins.plugin_chat2db.comm import EthZero, is_eth_address, makeGroupReq
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager
 
 from plugins.plugin_chat2db.chat2db_reply import CustomReply
 from plugins.plugin_chat2db.chat2db_knowledge import chat2db_refresh_knowledge
+from lib.itchat.async_components.contact import update_friend
 
 
 @plugins.register(
@@ -66,7 +67,7 @@ class Chat2db(Plugin):
             self.webQrCodeFile = self.config.get("web_qrcode_file")
             self.agentQrCodeFile = self.config.get("agent_qrcode_file")
             self.prefix_cmd = self.config.get("prefix_cmd") #修改后的命令前缀
-        self.prefix_deny = self.config.get("prefix_deny")
+            self.prefix_deny = self.config.get("prefix_deny")
         #全局配置
         self.channel_type = conf().get("channel_type", "wx")
 
@@ -306,7 +307,7 @@ class Chat2db(Plugin):
         msg = ctx.get("msg")
         content = ctx.content
 
-        name = content[3:]
+        name = content[3:].strip()
 
         userid = msg.from_user_id
         act_user = itchat.update_friend(userid)
@@ -317,13 +318,13 @@ class Chat2db(Plugin):
         logger.info("[save2db] doctor: %s " % result)
 
         if result:
-            doctor = result.get("doctor")
+            doctor = result
             if doctor:
                 itchat.send_msg(f"医生对接成功!\n----------------\n医生:{name}({doctor.get('department')})\n{doctor.get('intro')}\n擅长:{doctor.get('skill')}", toUserName=userid)
             else :
-                doctorName = result.get("doctorName") or result.get("name")
-                doctorDepartment = result.get("doctorDepartment", '')
-                itchat.send_msg(f"医生对接失败!\n----------------\n但是你已对接医生:{doctorName}({doctorDepartment})", toUserName=userid)
+                name = result.get("professionalName") or result.get("name")
+                department = result.get("department", '')
+                itchat.send_msg(f"医生对接失败!\n----------------\n先前已自动对接医生:{name}({department})", toUserName=userid)
         else :
             itchat.send_msg(f"没找到你要对接的医生:‘{name}’\n请确认医生真实姓名.", toUserName=userid)
         e_context.action = EventAction.BREAK_PASS
@@ -334,14 +335,12 @@ class Chat2db(Plugin):
         msg = ctx.get("msg")
         content = ctx.content
         name = content[3:]
+        userid = msg.from_user_id
 
         if is_group:
-            userid = msg.actual_user_id
-            act_user = itchat.update_friend(userid)
+            act_user = itchat.update_friend(msg.actual_user_id)
             account = act_user.RemarkName
-            group_id = msg.from_user_id
         else:
-            userid = msg.from_user_id
             act_user = itchat.update_friend(userid)
             account = act_user.RemarkName
 
@@ -350,10 +349,10 @@ class Chat2db(Plugin):
         logger.info("[save2db] doctor: %s " % result)
 
         if result:
-            doctorName = result.get("doctorName") or result.get("name")
-            doctorDepartment = result.get("doctorDepartment", '')
+            doctorName = result.get("professionalName") or result.get("name")
+            doctorDepartment = result.get("department", '')
             if is_group:
-                itchat.send_msg(f"@{act_user.NickName}\n查询医生成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=group_id)
+                itchat.send_msg(f"@{act_user.NickName}\n查询医生成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=userid)
             else:
                 itchat.send_msg(f"查询成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=userid)
         else :
@@ -373,10 +372,9 @@ class Chat2db(Plugin):
         # 处理一些问候性提问及测试提问
         if self.my_reply.reply_hello(e_context) : return
         # 用户加群
-        if self.my_reply.reply_join_group(e_context) : return        
+        if self.my_reply.reply_join_group(e_context) : return
         # 用户拍一拍机器人
         if self.my_reply.reply_patpat(e_context) : return
-        
 
         ctx = e_context['context']
         if ctx.type not in [ContextType.IMAGE, ContextType.TEXT]: return
@@ -392,7 +390,7 @@ class Chat2db(Plugin):
             upload = self._upload_pic(ctx)
             logger.info("[save2db] upload image: %s " % upload)
         if ctx.type == ContextType.TEXT and content.startswith('@医生'): # 对接医生
-            name = content[3:]
+            name = content[3:].strip()
             if len(name) < 1 :
                 self._get_my_doctor(e_context, is_group)
                 return
@@ -429,22 +427,36 @@ class Chat2db(Plugin):
                 logger.info(result)
                 #ethAddr存在到RemarkName 中
                 retAccount = result.get('account', None)
-                if retAccount is None or retAccount == EthZero :
+
+                if is_eth_address(retAccount):
+                    if(account != retAccount):
+                        #更新account到 RemarkName中
+                        itchat.set_alias( act_user.UserName, retAccount)
+                        act_user.update()
+                        itchat.dump_login_status()
+                else:
                     # 发送微信消息提醒点击登录或扫码
                     self._send_reg_msg(cmsg.from_user_id, username if isGroup else None)
-                    # 继续后续消息
 
-                if(retAccount and account != retAccount):
-                    #更新account到 RemarkName中
-                    itchat.set_alias( act_user.UserName, retAccount)
-                    act_user.update()
-                    itchat.dump_login_status()
+                self.user_manager.set_my_doctor(userid, result.get('myDoctor', None))
+                self.user_manager.update_knowledge(userid, replyMsg)
 
         except Exception as e:
             logger.error("on_send_reply: {}".format(e))
 
         e_context.action = EventAction.CONTINUE
-
+    def _load_config_template(self):
+        logger.error("No Chat2db plugin config.json, use plugins/plugin_Chat2db/config.json.template")
+        try:
+            plugin_config_path = os.path.join(os.getcwd(), "config.json.template")
+            if os.path.exists(plugin_config_path):
+                with open(plugin_config_path, "r", encoding="utf-8") as f:
+                    plugin_conf = json.load(f)
+                    plugin_conf["midjourney"]["enabled"] = False
+                    plugin_conf["summary"]["enabled"] = False
+                    return plugin_conf
+        except Exception as e:
+            logger.exception(e)
     def get_help_text(self, **kwargs):
         help_text = "存储聊天记录到数据库"
         return help_text
