@@ -52,6 +52,8 @@ def _append_know( user_session, know):
             break;
     return count;
 
+# 匹配用户知识库,从服务器拉取知识库并更新到本地
+
 
 def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: EventContext):
     try:
@@ -60,8 +62,8 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
             msg = ctx.get("msg")
 
             isgroup =  ctx.get("isgroup", False)
-            if isgroup: user= itchat.update_friend(msg.actual_user_id)
-            else: user= msg._rawmsg.user
+            if isgroup: user_UserName = msg.actual_user_id
+            else: user_UserName= msg._rawmsg.user.UserName
 
             session_id = ctx.get("session_id")
             all_sessions = Bridge().get_bot("chat").sessions
@@ -71,11 +73,16 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
             #已经使用过知识库了
             if sess_len > 0:
                 #使用知识库如果超过1天了,那么再更新下.
-                if user_manager.should_update(user.UserName) == False:
-                    know = user_manager.get_knowledge(user.UserName)
+                if user_manager.should_update(user_UserName) :
+                    know = user_manager.get_knowledge(user_UserName)
                     _append_know(user_session, know)
-                    return False
-                logger.info("===>原知识库已经超过24小时,更新知识库...")
+
+                    logger.info("===>原知识库已经超过24小时,更新知识库...")
+                return False
+
+            isgroup =  ctx.get("isgroup", False)
+            if isgroup: user= itchat.update_friend(msg.actual_user_id) #刷新用户信息，不可频繁操作
+            else: user= msg._rawmsg.user
             # 从groupx 获取know
             data = groupx.get_myknowledge(robot_account, {
                 "isgroup": isgroup,
@@ -104,10 +111,10 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
 
                     logger.warn("新用户,初始化user session")
 
-                user_manager.update_knowledge(user.UserName, know)
-                count = _append_know(user_session, know)
+                    user_manager.update_knowledge(user.UserName, know)
+                    count = _append_know(user_session, know)
 
-            logger.warn(f"=====>添加({user.NickName})的医生({data.get('doctorProName')})的知识库成功,共({count})条知识库")
+                    logger.warn(f"=====>添加({user.NickName})的医生({data.get('doctorProName')})的知识库成功,共({count})条知识库")
             return False
     except Exception as e:
         logger.error(e)

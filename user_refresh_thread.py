@@ -71,7 +71,7 @@ class UserRefreshThread(object):
                 self.update_friends_groups()
 
             #time.sleep(int(100*60)) # 100*60秒(100分钟)检测一次
-            time.sleep(int(self.check_login_second_interval)) 
+            time.sleep(int(self.check_login_second_interval))
 
     #定时检查,检测机器人是否重新登录了(服务器重启时变化)
     def timer_check(self):
@@ -196,7 +196,11 @@ class UserRefreshThread(object):
         logger.info(f"post friends have account :{len(filtered_data)}")
         # 遍历字典的所有子项，为每个子项设置account字段
         for friend in filtered_data:
-            _usr = itchat.update_friend(friend.get('friendUserName'))
+            friendUserName = friend.get('friendUserName')
+            # _usr = itchat.update_friend(friend.get('friendUserName'))
+            _usr = itchat.search_friends(userName=friendUserName)
+            if(_usr is None): _usr = itchat.update_friend(friendUserName)
+            
             account = _usr.get('RemarkName', None)
             #ethAddr存在到RemarkName 中
             retAccount = friend.get('friendAccount', None)
