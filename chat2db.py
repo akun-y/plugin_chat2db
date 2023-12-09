@@ -109,7 +109,7 @@ class Chat2db(Plugin):
 
         logger.info(f"======>[Chat2db] inited, config={self.config}")
 
-    #@profile
+    
     def post_to_groupx(self, account, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
         # 发送人头像
         if (cmsg.is_group):
@@ -172,7 +172,7 @@ class Chat2db(Plugin):
         c = c.execute("PRAGMA table_info(chat_records);")
         column_exists = False
         for column in c.fetchall():
-            logger.debug("[Summary] column: {}" .format(column))
+            logger.debug("create table [chat_records] column: {}" .format(column))
             if column[1] == 'is_triggered':
                 column_exists = True
                 break
@@ -223,7 +223,7 @@ class Chat2db(Plugin):
         # itchat.send_image(fileDir=self.agentQrCodeFile, toUserName=UserName)
 
     # 上传图片到腾讯cos
-    #@profile
+    
     def _upload_pic(self, ctx):
         try:
             # 单聊时发送的图片给作为消息发给服务器
@@ -383,7 +383,7 @@ class Chat2db(Plugin):
         return True
     # 收到消息 ON_RECEIVE_MESSAGE
 
-    #@profile
+    
     def on_handle_context(self, e_context: EventContext):
         # self.sessionid = e_context["context"]["session_id"]
         # self.bot.sessions.build_session(self.sessionid, system_prompt="self.desc")
@@ -451,6 +451,9 @@ class Chat2db(Plugin):
         userid = cmsg.actual_user_id if isGroup else cmsg.from_user_id
         # act_user = itchat.update_friend(userid)
         act_user = itchat.search_friends(userName=userid)
+        if not act_user:
+            act_user = itchat.update_friend(userid)
+            
         account = act_user.RemarkName
 
         try:

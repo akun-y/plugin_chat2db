@@ -62,6 +62,7 @@ class CustomReply:
             reply.content = welcome_msg
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            logger.info(f"reply_join_group: {welcome_msg}")
             return True
         return False
     def _patpat_config_message(self,  e_context: EventContext):
@@ -70,6 +71,7 @@ class CustomReply:
             reply.content =self.patpat_message
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            logger.info(f"reply_patpat: {self.patpat_message}")
             return True
     def reply_patpat(self, e_context: EventContext):
         ctx = e_context["context"]
