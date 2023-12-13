@@ -97,15 +97,7 @@
         "documentation": {}
     },
     {
-        "label": "makeGroupReq",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
+        "label": "is_eth_address",
         "importPath": "plugins.plugin_chat2db.comm",
         "description": "plugins.plugin_chat2db.comm",
         "isExtraImport": true,
@@ -138,6 +130,30 @@
     },
     {
         "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "makeGroupReq",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_chat2db.comm",
+        "description": "plugins.plugin_chat2db.comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.comm",
+        "documentation": {}
+    },
+    {
+        "label": "is_eth_address",
         "importPath": "plugins.plugin_chat2db.comm",
         "description": "plugins.plugin_chat2db.comm",
         "isExtraImport": true,
@@ -336,6 +352,158 @@
         "documentation": {}
     },
     {
+        "label": "LLMChain",
+        "importPath": "chatgpt_tool_hub.chains.llm",
+        "description": "chatgpt_tool_hub.chains.llm",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.chains.llm",
+        "documentation": {}
+    },
+    {
+        "label": "LLMChain",
+        "importPath": "chatgpt_tool_hub.chains.llm",
+        "description": "chatgpt_tool_hub.chains.llm",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.chains.llm",
+        "documentation": {}
+    },
+    {
+        "label": "LLMChain",
+        "importPath": "chatgpt_tool_hub.chains.llm",
+        "description": "chatgpt_tool_hub.chains.llm",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.chains.llm",
+        "documentation": {}
+    },
+    {
+        "label": "build_model_params",
+        "importPath": "chatgpt_tool_hub.models",
+        "description": "chatgpt_tool_hub.models",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models",
+        "documentation": {}
+    },
+    {
+        "label": "build_model_params",
+        "importPath": "chatgpt_tool_hub.models",
+        "description": "chatgpt_tool_hub.models",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models",
+        "documentation": {}
+    },
+    {
+        "label": "build_model_params",
+        "importPath": "chatgpt_tool_hub.models",
+        "description": "chatgpt_tool_hub.models",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models",
+        "documentation": {}
+    },
+    {
+        "label": "ModelFactory",
+        "importPath": "chatgpt_tool_hub.models.model_factory",
+        "description": "chatgpt_tool_hub.models.model_factory",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models.model_factory",
+        "documentation": {}
+    },
+    {
+        "label": "ModelFactory",
+        "importPath": "chatgpt_tool_hub.models.model_factory",
+        "description": "chatgpt_tool_hub.models.model_factory",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models.model_factory",
+        "documentation": {}
+    },
+    {
+        "label": "ModelFactory",
+        "importPath": "chatgpt_tool_hub.models.model_factory",
+        "description": "chatgpt_tool_hub.models.model_factory",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.models.model_factory",
+        "documentation": {}
+    },
+    {
+        "label": "PromptTemplate",
+        "importPath": "chatgpt_tool_hub.prompts",
+        "description": "chatgpt_tool_hub.prompts",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.prompts",
+        "documentation": {}
+    },
+    {
+        "label": "PromptTemplate",
+        "importPath": "chatgpt_tool_hub.prompts",
+        "description": "chatgpt_tool_hub.prompts",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.prompts",
+        "documentation": {}
+    },
+    {
+        "label": "PromptTemplate",
+        "importPath": "chatgpt_tool_hub.prompts",
+        "description": "chatgpt_tool_hub.prompts",
+        "isExtraImport": true,
+        "detail": "chatgpt_tool_hub.prompts",
+        "documentation": {}
+    },
+    {
+        "label": "profile",
+        "importPath": "memory_profiler",
+        "description": "memory_profiler",
+        "isExtraImport": true,
+        "detail": "memory_profiler",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageDraw",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageFont",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageDraw",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageFont",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
         "label": "plugins",
         "kind": 6,
         "isExtraImport": true,
@@ -369,22 +537,6 @@
         "documentation": {}
     },
     {
-        "label": "CustomReply",
-        "importPath": "plugins.plugin_chat2db.chat2db_reply",
-        "description": "plugins.plugin_chat2db.chat2db_reply",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.chat2db_reply",
-        "documentation": {}
-    },
-    {
-        "label": "CustomReply",
-        "importPath": "plugins.plugin_chat2db.chat2db_reply",
-        "description": "plugins.plugin_chat2db.chat2db_reply",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.chat2db_reply",
-        "documentation": {}
-    },
-    {
         "label": "bot_factory",
         "importPath": "bot",
         "description": "bot",
@@ -574,102 +726,6 @@
         "description": "channel.chat_message",
         "isExtraImport": true,
         "detail": "channel.chat_message",
-        "documentation": {}
-    },
-    {
-        "label": "LLMChain",
-        "importPath": "chatgpt_tool_hub.chains.llm",
-        "description": "chatgpt_tool_hub.chains.llm",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.chains.llm",
-        "documentation": {}
-    },
-    {
-        "label": "LLMChain",
-        "importPath": "chatgpt_tool_hub.chains.llm",
-        "description": "chatgpt_tool_hub.chains.llm",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.chains.llm",
-        "documentation": {}
-    },
-    {
-        "label": "LLMChain",
-        "importPath": "chatgpt_tool_hub.chains.llm",
-        "description": "chatgpt_tool_hub.chains.llm",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.chains.llm",
-        "documentation": {}
-    },
-    {
-        "label": "build_model_params",
-        "importPath": "chatgpt_tool_hub.models",
-        "description": "chatgpt_tool_hub.models",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.models",
-        "documentation": {}
-    },
-    {
-        "label": "build_model_params",
-        "importPath": "chatgpt_tool_hub.models",
-        "description": "chatgpt_tool_hub.models",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.models",
-        "documentation": {}
-    },
-    {
-        "label": "build_model_params",
-        "importPath": "chatgpt_tool_hub.models",
-        "description": "chatgpt_tool_hub.models",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.models",
-        "documentation": {}
-    },
-    {
-        "label": "ModelFactory",
-        "importPath": "chatgpt_tool_hub.models.model_factory",
-        "description": "chatgpt_tool_hub.models.model_factory",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.models.model_factory",
-        "documentation": {}
-    },
-    {
-        "label": "ModelFactory",
-        "importPath": "chatgpt_tool_hub.models.model_factory",
-        "description": "chatgpt_tool_hub.models.model_factory",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.models.model_factory",
-        "documentation": {}
-    },
-    {
-        "label": "ModelFactory",
-        "importPath": "chatgpt_tool_hub.models.model_factory",
-        "description": "chatgpt_tool_hub.models.model_factory",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.models.model_factory",
-        "documentation": {}
-    },
-    {
-        "label": "PromptTemplate",
-        "importPath": "chatgpt_tool_hub.prompts",
-        "description": "chatgpt_tool_hub.prompts",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.prompts",
-        "documentation": {}
-    },
-    {
-        "label": "PromptTemplate",
-        "importPath": "chatgpt_tool_hub.prompts",
-        "description": "chatgpt_tool_hub.prompts",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.prompts",
-        "documentation": {}
-    },
-    {
-        "label": "PromptTemplate",
-        "importPath": "chatgpt_tool_hub.prompts",
-        "description": "chatgpt_tool_hub.prompts",
-        "isExtraImport": true,
-        "detail": "chatgpt_tool_hub.prompts",
         "documentation": {}
     },
     {
@@ -842,6 +898,22 @@
         "documentation": {}
     },
     {
+        "label": "itchat",
+        "importPath": "lib",
+        "description": "lib",
+        "isExtraImport": true,
+        "detail": "lib",
+        "documentation": {}
+    },
+    {
+        "label": "update_friend",
+        "importPath": "lib.itchat.async_components.contact",
+        "description": "lib.itchat.async_components.contact",
+        "isExtraImport": true,
+        "detail": "lib.itchat.async_components.contact",
+        "documentation": {}
+    },
+    {
         "label": "FRIENDS",
         "importPath": "lib.itchat.content",
         "description": "lib.itchat.content",
@@ -898,91 +970,166 @@
         "documentation": {}
     },
     {
-        "label": "HeadImgManager",
-        "importPath": "plugins.plugin_chat2db.head_img_manager",
-        "description": "plugins.plugin_chat2db.head_img_manager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.head_img_manager",
-        "documentation": {}
-    },
-    {
-        "label": "HeadImgManager",
-        "importPath": "plugins.plugin_chat2db.head_img_manager",
-        "description": "plugins.plugin_chat2db.head_img_manager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.head_img_manager",
-        "documentation": {}
-    },
-    {
-        "label": "HeadImgManager",
-        "importPath": "plugins.plugin_chat2db.head_img_manager",
-        "description": "plugins.plugin_chat2db.head_img_manager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.head_img_manager",
-        "documentation": {}
-    },
-    {
-        "label": "HeadImgManager",
-        "importPath": "plugins.plugin_chat2db.head_img_manager",
-        "description": "plugins.plugin_chat2db.head_img_manager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.head_img_manager",
-        "documentation": {}
-    },
-    {
-        "label": "UserRefreshThread",
-        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
-        "description": "plugins.plugin_chat2db.user_refresh_thread",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.user_refresh_thread",
-        "documentation": {}
-    },
-    {
-        "label": "UserRefreshThread",
-        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
-        "description": "plugins.plugin_chat2db.user_refresh_thread",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.user_refresh_thread",
-        "documentation": {}
-    },
-    {
-        "label": "UserRefreshThread",
-        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
-        "description": "plugins.plugin_chat2db.user_refresh_thread",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.user_refresh_thread",
-        "documentation": {}
-    },
-    {
-        "label": "UserManager",
-        "importPath": "plugins.plugin_chat2db.UserManager",
-        "description": "plugins.plugin_chat2db.UserManager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.UserManager",
-        "documentation": {}
-    },
-    {
-        "label": "UserManager",
-        "importPath": "plugins.plugin_chat2db.UserManager",
-        "description": "plugins.plugin_chat2db.UserManager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.UserManager",
-        "documentation": {}
-    },
-    {
-        "label": "UserManager",
-        "importPath": "plugins.plugin_chat2db.UserManager",
-        "description": "plugins.plugin_chat2db.UserManager",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.UserManager",
-        "documentation": {}
-    },
-    {
         "label": "chat2db_refresh_knowledge",
         "importPath": "plugins.plugin_chat2db.chat2db_knowledge",
         "description": "plugins.plugin_chat2db.chat2db_knowledge",
         "isExtraImport": true,
         "detail": "plugins.plugin_chat2db.chat2db_knowledge",
+        "documentation": {}
+    },
+    {
+        "label": "CustomReply",
+        "importPath": "plugins.plugin_chat2db.chat2db_reply",
+        "description": "plugins.plugin_chat2db.chat2db_reply",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.chat2db_reply",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "HeadImgManager",
+        "importPath": "plugins.plugin_chat2db.head_img_manager",
+        "description": "plugins.plugin_chat2db.head_img_manager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.head_img_manager",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
+        "description": "plugins.plugin_chat2db.user_refresh_thread",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.user_refresh_thread",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
+        "description": "plugins.plugin_chat2db.user_refresh_thread",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.user_refresh_thread",
+        "documentation": {}
+    },
+    {
+        "label": "UserRefreshThread",
+        "importPath": "plugins.plugin_chat2db.user_refresh_thread",
+        "description": "plugins.plugin_chat2db.user_refresh_thread",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.user_refresh_thread",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "importPath": "plugins.plugin_chat2db.UserManager",
+        "description": "plugins.plugin_chat2db.UserManager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "importPath": "plugins.plugin_chat2db.UserManager",
+        "description": "plugins.plugin_chat2db.UserManager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "UserManager",
+        "importPath": "plugins.plugin_chat2db.UserManager",
+        "description": "plugins.plugin_chat2db.UserManager",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_chat2db.UserManager",
+        "documentation": {}
+    },
+    {
+        "label": "html_to_image",
+        "importPath": "plugins.plugin_report_work.mixedtext_to_image",
+        "description": "plugins.plugin_report_work.mixedtext_to_image",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_report_work.mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "is_html",
+        "importPath": "plugins.plugin_report_work.mixedtext_to_image",
+        "description": "plugins.plugin_report_work.mixedtext_to_image",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_report_work.mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "markdown_to_html",
+        "importPath": "plugins.plugin_report_work.mixedtext_to_image",
+        "description": "plugins.plugin_report_work.mixedtext_to_image",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_report_work.mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "pick_tables_from_markdown",
+        "importPath": "plugins.plugin_report_work.pick_tables_markdown",
+        "description": "plugins.plugin_report_work.pick_tables_markdown",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_report_work.pick_tables_markdown",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "markdown",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "markdown",
+        "description": "markdown",
+        "detail": "markdown",
+        "documentation": {}
+    },
+    {
+        "label": "imgkit",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "imgkit",
+        "description": "imgkit",
+        "detail": "imgkit",
+        "documentation": {}
+    },
+    {
+        "label": "BeautifulSoup",
+        "importPath": "bs4",
+        "description": "bs4",
+        "isExtraImport": true,
+        "detail": "bs4",
         "documentation": {}
     },
     {
@@ -1060,7 +1207,7 @@
         "kind": 6,
         "importPath": "chat2db",
         "description": "chat2db",
-        "peekOfCode": "class Chat2db(Plugin):\n    def __init__(self):\n        super().__init__()\n        self.config = super().load_config()\n        if not self.config:\n            # 未加载到配置，使用模板中的配置\n            self.config = self._load_config_template()\n        if self.config:\n            self.robot_account =  self.config.get(\"account\")\n            self.robot_name =  self.config.get(\"name\")",
+        "peekOfCode": "class Chat2db(Plugin):\n    def __init__(self):\n        super().__init__()\n        self.config = super().load_config()\n        if not self.config:\n            # 未加载到配置，使用模板中的配置\n            self.config = self._load_config_template()\n        if self.config:\n            self.robot_account = self.config.get(\"account\")\n            self.robot_name = self.config.get(\"name\")",
         "detail": "chat2db",
         "documentation": {}
     },
@@ -1069,7 +1216,7 @@
         "kind": 2,
         "importPath": "chat2db_knowledge",
         "description": "chat2db_knowledge",
-        "peekOfCode": "def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: EventContext):\n    try:\n        ctx = e_context['context']\n        if ctx.type == ContextType.TEXT:\n            msg = ctx.get(\"msg\")\n            isgroup =  ctx.get(\"isgroup\", False)\n            if isgroup: user= itchat.update_friend(msg.actual_user_id)\n            else: user= msg._rawmsg.user\n            session_id = ctx.get(\"session_id\")\n            all_sessions = Bridge().get_bot(\"chat\").sessions",
+        "peekOfCode": "def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: EventContext):\n    try:\n        ctx = e_context['context']\n        if ctx.type == ContextType.TEXT:\n            msg = ctx.get(\"msg\")\n            isgroup =  ctx.get(\"isgroup\", False)\n            if isgroup: user_UserName = msg.actual_user_id\n            else: user_UserName= msg._rawmsg.user.UserName\n            session_id = ctx.get(\"session_id\")\n            all_sessions = Bridge().get_bot(\"chat\").sessions",
         "detail": "chat2db_knowledge",
         "documentation": {}
     },
@@ -1078,7 +1225,7 @@
         "kind": 6,
         "importPath": "chat2db_reply",
         "description": "chat2db_reply",
-        "peekOfCode": "class CustomReply:\n    def __init__(self, config, groupx, user_manager):\n        self.config = config\n        self.groupx = groupx\n        self.user_manager = user_manager\n        self.robot_account =  self.config.get(\"account\")\n        self.robot_name =  self.config.get(\"name\")\n        self.robot_desc =  self.config.get(\"description\")\n    def reply_join_group(self, e_context: EventContext):\n        ctx = e_context[\"context\"]",
+        "peekOfCode": "class CustomReply:\n    def __init__(self, config, groupx, user_manager):\n        self.config = config\n        self.groupx = groupx\n        self.user_manager = user_manager\n        self.robot_account =  self.config.get(\"account\")\n        self.robot_name =  self.config.get(\"name\")\n        self.robot_desc =  self.config.get(\"description\")\n        self.patpat_message =  self.config.get(\"patpat_message\") #拍拍是否使用配置信息\n    def reply_join_group(self, e_context: EventContext):",
         "detail": "chat2db_reply",
         "documentation": {}
     },
@@ -1092,12 +1239,129 @@
         "documentation": {}
     },
     {
+        "label": "is_eth_address",
+        "kind": 2,
+        "importPath": "comm",
+        "description": "comm",
+        "peekOfCode": "def is_eth_address(address):\n    # 以太坊地址的正则表达式\n    ethereum_address_pattern = re.compile(r'^0x[1-9a-fA-F][0-9a-fA-F]{39}$')\n    # 使用正则表达式匹配\n    return bool(ethereum_address_pattern.match(address))\ndef test():\n    # 示例用法\n    valid_address = \"0x742d35Cc6634C0532925a3b844Bc454e4438f44e\"\n    invalid_address_all_zeros = \"0x0000000000000000000000000000000000000000\"\n    invalid_address_starting_with_zero = \"0x0123456789abcdef0123456789abcdef01234567\"",
+        "detail": "comm",
+        "documentation": {}
+    },
+    {
+        "label": "test",
+        "kind": 2,
+        "importPath": "comm",
+        "description": "comm",
+        "peekOfCode": "def test():\n    # 示例用法\n    valid_address = \"0x742d35Cc6634C0532925a3b844Bc454e4438f44e\"\n    invalid_address_all_zeros = \"0x0000000000000000000000000000000000000000\"\n    invalid_address_starting_with_zero = \"0x0123456789abcdef0123456789abcdef01234567\"\n    print(f\"{valid_address} 是否有效：{is_eth_address(valid_address)}\")\n    print(f\"{invalid_address_all_zeros} 是否有效：{is_eth_address(invalid_address_all_zeros)}\")\n    print(f\"{invalid_address_starting_with_zero} 是否有效：{is_eth_address(invalid_address_starting_with_zero)}\")\n    # 0x742d35Cc6634C0532925a3b844Bc454e4438f44e 是否有效：True\n    # 0x0000000000000000000000000000000000000000 是否有效：False",
+        "detail": "comm",
+        "documentation": {}
+    },
+    {
         "label": "EthZero",
         "kind": 5,
         "importPath": "comm",
         "description": "comm",
         "peekOfCode": "EthZero = \"0x0000000000000000000000000000000000000000\"",
         "detail": "comm",
+        "documentation": {}
+    },
+    {
+        "label": "is_html",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def is_html(content):\n    try:\n        soup = BeautifulSoup(content, 'html.parser')\n        return True\n    except:\n        return False\ndef is_markdown_table(content):\n    html = markdown.markdown(content, extensions=[\"tables\"])\n    soup = BeautifulSoup(html, \"html.parser\")\n    return soup.find(\"table\") is not None",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "is_markdown_table",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def is_markdown_table(content):\n    html = markdown.markdown(content, extensions=[\"tables\"])\n    soup = BeautifulSoup(html, \"html.parser\")\n    return soup.find(\"table\") is not None\ndef is_markdown(content):\n    markdown_pattern = r'[*_~`#>]|\\[(.*?)\\]\\((.*?)\\)'\n    match = re.search(markdown_pattern, content)\n    return bool(match)\ndef get_text_width2(html, font):\n    html = html.encode(\"utf-8\").decode(\"latin1\")",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "is_markdown",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def is_markdown(content):\n    markdown_pattern = r'[*_~`#>]|\\[(.*?)\\]\\((.*?)\\)'\n    match = re.search(markdown_pattern, content)\n    return bool(match)\ndef get_text_width2(html, font):\n    html = html.encode(\"utf-8\").decode(\"latin1\")\n    # html = re.sub(r'<[^>]*>', '\\r\\n', html)\n    img = Image.new('RGB', (800, 1200), color='white')\n    draw = ImageDraw.Draw(img)\n    box = draw.textbbox((0, 0), html, font=font)",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "get_text_width2",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def get_text_width2(html, font):\n    html = html.encode(\"utf-8\").decode(\"latin1\")\n    # html = re.sub(r'<[^>]*>', '\\r\\n', html)\n    img = Image.new('RGB', (800, 1200), color='white')\n    draw = ImageDraw.Draw(img)\n    box = draw.textbbox((0, 0), html, font=font)\n    # text_width, text_height = draw.textbbox((0, 0), html, font=font)\n    x = (img.width - box[2])\n    y = (img.height - box[3])\n    print(f\"get_text_width2:宽{x} - 高{y}\",x, y)",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "markdown_to_html",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def markdown_to_html(content):\n    #content = \"# 这是一个标题\\n这是一段正文。\"\n    html_text = markdown.markdown(content, extensions=[\"tables\"])\n    print(html_text)\n    return html_text\ndef html_to_image(html_content, output_path='output.png'):\n    try:\n        font = ImageFont.load_default()  # You can use a custom font if needed\n        # 根据字体及大小计算文字占用的长宽\n        # size = font.getbbox('test')",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "html_to_image",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def html_to_image(html_content, output_path='output.png'):\n    try:\n        font = ImageFont.load_default()  # You can use a custom font if needed\n        # 根据字体及大小计算文字占用的长宽\n        # size = font.getbbox('test')\n        # font_size = size[1]\n        # print(\"font_size:\", font_size)\n        # # 根据字体及大小计算文字占用的长宽\n        # font = ImageFont.truetype(\"yahei.ttf\", 36)\n        # size = font.getbbox('test')",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "test",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def test():\n    # Example usage:\n    text_with_html = \"\"\"html\n    <table>\n    <thead>\n    <tr>\n        <th>国家</th>\n        <th>首都</th>\n        <th>人口 (万人)</th>\n        <th>面积 (km²)</th>",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "mixed_text_to_image",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def mixed_text_to_image(content):\n    img_file = os.path.join(os.path.dirname(__file__),'saved') \n    img_file = os.path.join(img_file,'output.png')\n    if is_markdown_table(content) :\n        content = markdown_to_html(content)\n        return html_to_image(content,img_file)\n    if is_html(content):\n        return html_to_image(content,img_file)\n    return None;\ndef markdown_table_to_image(tb_content):",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "markdown_table_to_image",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def markdown_table_to_image(tb_content):\n    img_file = os.path.join(os.path.dirname(__file__),'saved') \n    img_file = os.path.join(img_file,f'md_table_{date()}.png')\n    if is_markdown_table(tb_content) :\n        content = markdown_to_html(content)\n        return html_to_image(content,img_file)\n    return None;\ndef split_tables():\n    text = \"\"\"\n    # 这是一个标题",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "split_tables",
+        "kind": 2,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "def split_tables():\n    text = \"\"\"\n    # 这是一个标题\n    这是一段正文。\n    | 姓名 | 年龄 | 性别 |\n    | ---- | ---- | ---- |\n    | 张三 | 18   | 男   |\n    | 李四 | 19   | 女   |\n    | 王五 | 20   | 男   |\n    \"\"\"",
+        "detail": "d__mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "test_in",
+        "kind": 5,
+        "importPath": "d__mixedtext_to_image",
+        "description": "d__mixedtext_to_image",
+        "peekOfCode": "test_in = \"\"\"\n@Akun~~~\n以下是根据您提供的信息从网页中提取的数据并以表格形式组织的HTML：\n| 国家 | 首 都 | 人口 (万) | 面积 (km²) |\n| :--: | :--: | :--: | :--: |\n| 中国 | 北京 | 14.11 | 963.78 |\n| 美国 | 华盛顿特区 | 3302.37 | 983623.78 |\n| 俄罗斯 | 莫斯科 | 1447.3 | 1709827.4 |\n| 印度 | 新德里 | 14687.4 | 3285636.47 |\n| 巴西 | 巴西利亚 | 22235.4 | 854724.39 |",
+        "detail": "d__mixedtext_to_image",
         "documentation": {}
     },
     {
@@ -1123,7 +1387,7 @@
         "kind": 6,
         "importPath": "UserManager",
         "description": "UserManager",
-        "peekOfCode": "class UserManager:\n    def __init__(self, groupx):\n        self.groupx = groupx\n        self.user_knowledge = {}\n        self.doctor_of_user={}\n        self.group_info ={}\n        self.users={}\n    def should_update(self, user_id):\n        if user_id in self.user_knowledge:\n            last_update_time = self.user_knowledge[user_id]['last_update']",
+        "peekOfCode": "class UserManager:\n    def __init__(self, groupx):\n        self.groupx = groupx\n        self.user_knowledge = {}\n        self.doctor_of_user={}\n        self.doctor_of_group={}\n        self.group_info ={}\n        self.users={}\n    def should_update(self, user_id):\n        if user_id in self.user_knowledge:",
         "detail": "UserManager",
         "documentation": {}
     },

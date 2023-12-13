@@ -162,3 +162,4 @@ cython_debug/
 saved/headimgs/
 config.json
 .wolf*
+saved/*
