@@ -34,7 +34,7 @@ from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager
 
 
-def _append_know( user_session, know):
+def _append_know(user_session, know):
     count = 0
     # 倒序遍历
     for index, value in enumerate(know[::-1]):
@@ -47,10 +47,10 @@ def _append_know( user_session, know):
             count += 1
             logger.info(f'user session append user {title}')
             logger.info(f'user session append assistant {content}')
-        if index >40:
+        if index > 40:
             logger.warn("知识库内容太多了,超过了40条")
-            break;
-    return count;
+            break
+    return count
 
 # 匹配用户知识库,从服务器拉取知识库并更新到本地
 
@@ -61,38 +61,45 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
         if ctx.type == ContextType.TEXT:
             msg = ctx.get("msg")
 
-            isgroup =  ctx.get("isgroup", False)
-            if isgroup: user_UserName = msg.actual_user_id
-            else: user_UserName= msg._rawmsg.user.UserName
+            isgroup = ctx.get("isgroup", False)
+            if isgroup:
+                user_UserName = msg.actual_user_id
+            else:
+                user_UserName = msg._rawmsg.user.UserName
 
             session_id = ctx.get("session_id")
             all_sessions = Bridge().get_bot("chat").sessions
             user_session = all_sessions.build_session(session_id).messages
             sess_len = len(user_session)
             logger.info(f"===>用户 user session 长度为{sess_len}")
-            #已经使用过知识库了
+            # 已经使用过知识库了
             if sess_len > 0:
-                #使用知识库如果超过1天了,那么再更新下.
-                if user_manager.should_update(user_UserName) :
+                # 使用知识库如果超过1天了,那么再更新下.
+                if user_manager.should_update(user_UserName):
                     know = user_manager.get_knowledge(user_UserName)
                     _append_know(user_session, know)
 
                     logger.info("===>原知识库已经超过24小时,更新知识库...")
                 return False
-
-            isgroup =  ctx.get("isgroup", False)
-            if isgroup: user= itchat.update_friend(msg.actual_user_id) #刷新用户信息，不可频繁操作
-            else: user= msg._rawmsg.user
+            # 构建知识库
+            group_info = None
+            isgroup = ctx.get("isgroup", False)
+            if isgroup:
+                user = itchat.update_friend(
+                    msg.actual_user_id)  # 刷新用户信息，不可频繁操作
+                group_info = user_manager.get_group_info(msg.from_user_id)
+            else:
+                user = msg._rawmsg.user
             # 从groupx 获取know
             data = groupx.get_myknowledge(robot_account, {
                 "isgroup": isgroup,
                 'group_name': msg.from_user_nickname if isgroup else None,
-                'group_id' : msg.from_user_id if isgroup else None,
-                'receiver' : robot_account,
-                'receiver_name' : msg.to_user_nickname,
+                'group_id': msg.from_user_id if isgroup else None,
+                'receiver': robot_account,
+                'receiver_name': msg.to_user_nickname,
                 "user": user
-                })
-            if not data :
+            })
+            if not data:
                 logger.warn("groupx api 返回数据为空")
                 return False
             know = data.get("knowledges", {})
@@ -101,20 +108,18 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
 
             count = 0
             if len(know) > 0:
-                if(len(user_session)<1): # 新用户,session为空
-                    user_session.append({
-                        'role': 'user',
-                        'content': '你好，我叫"'+user.NickName+'",后续我的提问请从会话中查询结果.如请优先使用会话中的内容做答疑解,不要在提问中说明你是机器人,引用会话时不要解释,不要有其他说明'})
-                    user_session.append({
-                        'role': 'assistant',
-                        'content': '好的,我记住了'})
-
+                if (len(user_session) < 1):  # 新用户,session为空
                     logger.warn("新用户,初始化user session")
-
+                    if (isgroup and len(group_info)):
+                        know.insert(1, {
+                            "title": f"你在的这个群名称是:{group_info.get('groupNickName')},群的基本介绍:{group_info.get('description')},后续有问需要了解群的基本信息，请以这个内容为依据。",
+                            "content": "好的，我记住了"
+                        })
                     user_manager.update_knowledge(user.UserName, know)
                     count = _append_know(user_session, know)
 
-                    logger.warn(f"=====>添加({user.NickName})的医生({data.get('doctorProName')})的知识库成功,共({count})条知识库")
+                    logger.warn(
+                        f"=====>添加({user.NickName})的医生({data.get('doctorProName')})的知识库成功,共({count})条知识库")
             return False
     except Exception as e:
         logger.error(e)
