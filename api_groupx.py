@@ -48,8 +48,8 @@ class ApiGroupx:
             logger.error(f"set_my_doctor_info 意外错误发生: {err}")
     # 获取我的医生
     def get_my_doctor_info(self, account, agent, user_id=None, user_name=None, doctor_name=None):
-        if not account : return None
-
+        #未注册用户account为空
+        
         url = f"{self.groupxHostUrl}/v1/chat/my-doctor/get/{account}"
         data = {'account': account,
                 'doctorName': doctor_name,

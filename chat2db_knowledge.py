@@ -61,12 +61,13 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
         if ctx.type == ContextType.TEXT:
             msg = ctx.get("msg")
 
-            isgroup = ctx.get("isgroup", False)
-            if isgroup:
-                user_UserName = msg.actual_user_id
+            is_group = ctx.get("isgroup", False)
+            if is_group:  # 知识库id为用户ID+群id组合
+                know_id = f"{msg.actual_user_id}_{msg.from_user_id}"
             else:
-                user_UserName = msg._rawmsg.user.UserName
+                know_id = msg._rawmsg.user.UserName
 
+            ctx["session_id"] = know_id
             session_id = ctx.get("session_id")
             all_sessions = Bridge().get_bot("chat").sessions
             user_session = all_sessions.build_session(session_id).messages
@@ -75,26 +76,23 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
             # 已经使用过知识库了
             if sess_len > 0:
                 # 使用知识库如果超过1天了,那么再更新下.
-                if user_manager.should_update(user_UserName):
-                    know = user_manager.get_knowledge(user_UserName)
+                if user_manager.should_update(know_id):
+                    know = user_manager.get_knowledge(know_id)
                     _append_know(user_session, know)
 
                     logger.info("===>原知识库已经超过24小时,更新知识库...")
                 return False
             # 构建知识库
             group_info = None
-            isgroup = ctx.get("isgroup", False)
-            if isgroup:
-                user = itchat.update_friend(
-                    msg.actual_user_id)  # 刷新用户信息，不可频繁操作
+            if is_group:
                 group_info = user_manager.get_group_info(msg.from_user_id)
-            else:
-                user = msg._rawmsg.user
+
+            user = msg._rawmsg.user
             # 从groupx 获取know
             data = groupx.get_myknowledge(robot_account, {
-                "isgroup": isgroup,
-                'group_name': msg.from_user_nickname if isgroup else None,
-                'group_id': msg.from_user_id if isgroup else None,
+                "isgroup": is_group,
+                'group_name': msg.from_user_nickname if is_group else None,
+                'group_id': msg.from_user_id if is_group else None,
                 'receiver': robot_account,
                 'receiver_name': msg.to_user_nickname,
                 "user": user
@@ -110,12 +108,12 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
             if len(know) > 0:
                 if (len(user_session) < 1):  # 新用户,session为空
                     logger.warn("新用户,初始化user session")
-                    if (isgroup and len(group_info)):
+                    if (is_group and len(group_info)):
                         know.insert(1, {
-                            "title": f"你在的这个群名称是:{group_info.get('groupNickName')},群的基本介绍:{group_info.get('description')},后续有问需要了解群的基本信息，请以这个内容为依据。",
+                            "title": f"你所在的这个群名称是:{group_info.get('groupNickName')},群的基本介绍:{group_info.get('description')};后续有问需要了解群的基本信息，请以这个内容为依据。",
                             "content": "好的，我记住了"
                         })
-                    user_manager.update_knowledge(user.UserName, know)
+                    user_manager.update_knowledge(know_id, know)
                     count = _append_know(user_session, know)
 
                     logger.warn(

@@ -260,11 +260,11 @@ class Chat2db(Plugin):
                     self.groupxHostUrl, img_file)
 
             account = cmsg._rawmsg.User.RemarkName
-            group_object_id=''
+            group_object_id = ''
             if cmsg.is_group:
                 group_object_id = cmsg._rawmsg.ToUserName
             logger.info("[save2db] on_handle_context. eth_addr: %s" % account)
-            return self.post_to_groupx(account,group_object_id,cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
+            return self.post_to_groupx(account, group_object_id, cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
         except Exception as e:
             logger.error(f"upload_img error: {e}")
             return None
@@ -374,12 +374,12 @@ class Chat2db(Plugin):
 
         if is_group:
             act_user = itchat.update_friend(msg.actual_user_id)
-            account = act_user.RemarkName
+            result = self.groupx.get_doctor_of_group(msg.from_user_id)
         else:
             act_user = itchat.update_friend(userid)
-            account = act_user.RemarkName
-
-        result = self.groupx.get_my_doctor_info(account, self.receiver, name)
+            account = act_user.RemarkName or EthZero
+            result = self.groupx.get_my_doctor_info(
+                account, self.receiver, userid, msg.from_user_nickname, name)
 
         logger.info("[save2db] doctor: %s " % result)
 
