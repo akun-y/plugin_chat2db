@@ -33,8 +33,15 @@ from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tentcent import ApiTencent
 from plugins.plugin_chat2db.chat2db_knowledge import chat2db_refresh_knowledge
 from plugins.plugin_chat2db.chat2db_reply import CustomReply
-from plugins.plugin_chat2db.comm import EthZero, is_eth_address, makeGroupReq
+from plugins.plugin_chat2db.comm import (
+    EthZero,
+    is_eth_address,
+    is_valid_json,
+    is_valid_string,
+    makeGroupReq,
+)
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
+from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager
 from plugins.plugin_report_work.mixedtext_to_image import (
@@ -259,7 +266,7 @@ class Chat2db(Plugin):
                 img_url = self.tencent.qcloud_upload_file(
                     self.groupxHostUrl, img_file)
 
-            account = cmsg._rawmsg.User.RemarkName
+            account = RemarkNameInfo(cmsg._rawmsg.User.RemarkName).get_account()
             group_object_id = ''
             if cmsg.is_group:
                 group_object_id = cmsg._rawmsg.ToUserName
@@ -342,7 +349,7 @@ class Chat2db(Plugin):
 
         userid = msg.from_user_id
         act_user = itchat.update_friend(userid)
-        account = act_user.RemarkName
+        account = RemarkNameInfo(act_user.RemarkName).get_account()
 
         result = self.groupx.set_my_doctor_info(account, self.receiver, name)
 
@@ -377,7 +384,7 @@ class Chat2db(Plugin):
             result = self.groupx.get_doctor_of_group(msg.from_user_id)
         else:
             act_user = itchat.update_friend(userid)
-            account = act_user.RemarkName or EthZero
+            account = RemarkNameInfo(act_user.RemarkName).get_account() or EthZero
             result = self.groupx.get_my_doctor_info(
                 account, self.receiver, userid, msg.from_user_nickname, name)
 
@@ -471,7 +478,9 @@ class Chat2db(Plugin):
         userid = cmsg.actual_user_id if is_group else cmsg.from_user_id
         # 获取微信用户信息
         act_user = self._get_user(userid)
-        account = act_user.RemarkName
+        rm = RemarkNameInfo(act_user.RemarkName)
+        old_account = rm.get_account()
+        old_user_object_id = rm.get_object_id()
         # 获取微信群信息
         group_id = ''
         group_object_id = ''
@@ -484,37 +493,48 @@ class Chat2db(Plugin):
             self._insert_record(session_id, cmsg.msg_id, username,
                                 recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
             # 保存到groupx
-            result = self.post_to_groupx(account, group_object_id, cmsg, session_id, "ask", "default", str(
+            result = self.post_to_groupx(old_account, group_object_id, cmsg, session_id, "ask", "default", str(
                 ctx.type), False, "user", recvMsg, replyMsg)
             if (result is not None):
                 logger.info(f"记录微信端用户信息成功===>{result}")
                 # ethAddr存在到RemarkName 中
                 ret_account = result.get('account', None)
                 group_object_id = result.get('groupObjectId', None)
+                user_object_id = result.get('userObjectId', None)
 
                 # 设置group的备注,object,account,方便下次找回.
                 if is_group and group_object_id:
                     group_user = self._get_user(group_id)
-                    old_object_id = group_user.RemarkName
+                    old_group_object_id = group_user.RemarkName
 
-                    if (old_object_id != group_object_id):
+                    if (old_group_object_id != group_object_id):
                         itchat.set_alias(group_id, group_object_id)
                         group_user.update()
                         itchat.dump_login_status()
                         logger.info(
-                            f"获得groupx提供的用户群objectId===>{old_object_id}")
-                # 设置user的备注,account 方便下次找回.
-                if is_eth_address(ret_account):
-                    if (account != ret_account):
-                        # 更新account到 RemarkName中
-                        itchat.set_alias(act_user.UserName, ret_account)
-                        act_user.update()
-                        itchat.dump_login_status()
-                        logger.info(f"获得groupx提供的用户account===>{ret_account}")
-                else:
-                    # 发送微信消息提醒点击登录或扫码
-                    self._send_reg_msg(cmsg.from_user_id,
-                                       username if is_group else None)
+                            f"获得groupx提供的用户群objectId===>{old_group_object_id}")
+                # 存储account,objectId 到user RemarkName中,方便下次找回.
+                update_remarkname_flag = False
+
+                if is_eth_address(ret_account) and (old_account != ret_account):
+                    # 更新account到 RemarkName中
+                    rm.set_account(ret_account)
+                    update_remarkname_flag = True
+                    logger.info(f"获得用户account===>{ret_account}")
+
+                if (is_valid_string(user_object_id) and old_user_object_id != user_object_id):
+                    rm.set_object_id(user_object_id)
+                    update_remarkname_flag = True
+                    logger.info(f"获得用户的objectId===>{user_object_id}")
+
+                if update_remarkname_flag:
+                    itchat.set_alias(act_user.UserName, rm.get_remark_name())
+                    act_user.update()
+                    itchat.dump_login_status()
+
+                # 发送微信消息提醒点击登录或扫码
+                # self._send_reg_msg(cmsg.from_user_id,
+                #                username if is_group else None)
 
                 self.user_manager.set_my_doctor(
                     userid, result.get('myDoctor', None))

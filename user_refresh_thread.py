@@ -17,6 +17,8 @@ import config as RobotConfig
 
 from plugins.plugin_chat2db.api_tentcent import ApiTencent
 import requests
+
+from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
 try:
     from channel.wechatnt.ntchat_channel import wechatnt
 except Exception as e:
@@ -177,24 +179,25 @@ class UserRefreshThread(object):
             print("好友列表, 错误发生")
 
     def postFriends2Groupx(self):
+        step = 50
         # 获取好友列表,每次100条,越界后又从0开始
         if (len(self.friends) < 1):
             self.friends = itchat.get_friends(update=True)
 
-        end = self.postFriendsPos + 100
+        end = self.postFriendsPos + step
         if (end > len(self.friends)):
             end = len(self.friends) - 1
         friends = self.friends[self.postFriendsPos:end]
         logger.info(
             f"post friends to groupx:{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}")
 
-        self.postFriendsPos += 100
-        if (len(friends) < 100):
+        self.postFriendsPos += step
+        if (len(friends) < step):
             # 全部好友都发送完成了
             self.postFriendsPos = 0
         else:
-            # 每隔5秒执行一次,直到好友列表全部发送完成
-            threading.Timer(5.0, self.postFriends2Groupx).start()
+            # 每隔15秒执行一次,直到好友列表全部发送完成
+            threading.Timer(3.0, self.postFriends2Groupx).start()
 
         ret = self.groupx.post_friends(
             self.robot_account, self.robot_user_nickname, self.robot_user_id, friends)
@@ -204,26 +207,27 @@ class UserRefreshThread(object):
         else:
             logger.info(f"post friends to groupx success")
 
-        filtered_data = [item for item in ret if item.get('friendAccount')]
-        logger.info(f"post friends have account :{len(filtered_data)}")
-        # 遍历字典的所有子项，为每个子项设置account字段
-        for friend in filtered_data:
-            friendUserName = friend.get('friendUserName')
-            # _usr = itchat.update_friend(friend.get('friendUserName'))
-            _usr = itchat.search_friends(userName=friendUserName)
-            if (_usr is None):
-                _usr = itchat.update_friend(friendUserName)
+        # filtered_data = [item for item in ret if item.get('account')]
+        # logger.info(f"post friends have account :{len(filtered_data)}")
+        # # 遍历字典的所有子项，为每个子项设置account字段
+        # for friend in filtered_data:
+        #     friendUserName = friend.get('UserName')
+        #     # _usr = itchat.update_friend(friend.get('friendUserName'))
+        #     _usr = itchat.search_friends(userName=friendUserName)
+        #     if (_usr is None):
+        #         _usr = itchat.update_friend(friendUserName)
 
-            account = _usr.get('RemarkName', None)
-            # ethAddr存在到RemarkName 中
-            retAccount = friend.get('friendAccount', None)
-            if (retAccount and account != retAccount):
-                # 更新account到 RemarkName中
-                logger.info(
-                    f'更新好友 {_usr.get("NickName")} account 为 {retAccount}')
-                _usr.set_alias(retAccount)
-                _usr.update()
-                itchat.dump_login_status()
+        #     account = _usr.get('RemarkName', None)
+        #     # ethAddr存在到RemarkName 中
+        #     retAccount = friend.get('account', None)
+        #     if (retAccount and account != retAccount):
+        #         # 更新account到 RemarkName中
+        #         logger.info(
+        #             f'更新好友 {_usr.get("NickName")} account 为 {retAccount}')
+        #         _usr.set_alias(retAccount)
+        #         _usr.update()
+        #         itchat.dump_login_status()
+                
 
         return ret
 
@@ -306,7 +310,7 @@ class UserRefreshThread(object):
                         f"从腾讯服务器获取群最新信息：{room2['NickName']} 成员:{len(room2['MemberList'])}个)")
 
             logger.info(
-                f'群: {value.NickName} ({len(chatrooms[index]["MemberList"])}) 头像:{value.HeadImgUrl}')
+                f'群: {value.NickName} ({len(chatrooms[index]["MemberList"])}) 头像:{value.HeadImgUrl[0:10]}')
         if update_chatroom > 0 or update_remark_name:
             logger.warn(
                 f"{len(chatrooms)} 个群更新 memberList:{update_chatroom}个,remarkName:{update_remark_name}个 成功,保存登录状态")
