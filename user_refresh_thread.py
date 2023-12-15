@@ -5,7 +5,7 @@ import json
 from types import MemberDescriptorType
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
+from plugins.plugin_chat2db.comm import EthZero, is_eth_address, makeGroupReq
 from common.log import logger
 import time
 import arrow
@@ -251,6 +251,16 @@ class UserRefreshThread(object):
         except Exception as err:
             print(f"发生意外错误: {err}")
 
+    def _merge_dict(self, dict1, dict2):
+        for key, value in dict2.items():
+            if key in dict1 and (not dict1[key] or (isinstance(dict1[key], (list, tuple, str, dict)) and len(dict1[key]) < 1)):
+                # 如果 dict1 中的值是空字符串或者 None，使用 dict2 中的值覆盖
+                dict1[key] = value
+            elif key not in dict1:
+                # 如果键在 dict1 中不存在，直接添加键值对
+                dict1[key] = value
+        return dict1
+
     def postGroups2Groupx(self):
         # 获取群列表,每次100条,越界后又从0开始
         if len(self.chatrooms) < 1:
@@ -265,34 +275,41 @@ class UserRefreshThread(object):
             threading.Timer(8.0, self.postGroups2Groupx).start()
 
         update_chatroom = 0
+        update_remark_name = 0
         for index, value in enumerate(chatrooms):
             value['HeadImgUrl'] = self.img_service.get_head_img_url(
                 value.get('UserName'), True)
-            # 通过search_friends,update_friend方法获取群信息时，会包括RemarkName
-            room = itchat.search_friends(userName=value['UserName'])
-            if not room:
-                room = itchat.update_friend(value['UserName'])
-            if room:
-                chatrooms[index] = room
-            else:
-                room = value
+
+            # 设置RemarkName,通过search_friends,update_friend方法获取群信息时，会包括RemarkName
+            if (len(value['RemarkName']) < 1):
+                room1 = itchat.search_friends(userName=value['UserName'])
+                if not room1:
+                    room1 = itchat.update_friend(value['UserName'])
+
+                if room1 and len(room1['RemarkName']) > 0:
+                    update_remark_name += 1
+                    chatrooms[index] = self._merge_dict(room1, value)
+                    chatrooms[index].update()
+                    logger.info(
+                        f"从腾讯服务获取群最新属性:{room1['NickName']} - {room1['RemarkName']} ")
+            # ----------------------------------------------
+            # 设置 memberList
             memberList = value['MemberList']
-            if len(memberList) == 0:
-                memberList = room['MemberList']
-            
-            if len(memberList) == 0:                
-                r = itchat.update_chatroom(value['UserName'], True)
-                if len(r['MemberList']) > 0:
-                    room['MemberList'] = r['MemberList']
-                chatrooms[index] = room
-                update_chatroom += 1
-                room.update()
-                logger.info(
-                    f"从腾讯服务器获取群最新信息：{room['NickName']} 成员:{len(room['MemberList'])}个)")
+            if len(memberList) < 1:
+                room2 = itchat.update_chatroom(value['UserName'], True)
+                if len(room2['MemberList']) > 0:
+                    update_chatroom += 1
+                    chatrooms[index] = self._merge_dict(
+                        room2, chatrooms[index])
+                    chatrooms[index].update()
+                    logger.info(
+                        f"从腾讯服务器获取群最新信息：{room2['NickName']} 成员:{len(room2['MemberList'])}个)")
+
             logger.info(
-                f'群:{value.NickName}({len(value["MemberList"])})头像:{value.HeadImgUrl}')
-        if update_chatroom > 0:
-            logger.info(f"更新{update_chatroom}个群信息成功,保存登录状态")
+                f'群: {value.NickName} ({len(chatrooms[index]["MemberList"])}) 头像:{value.HeadImgUrl}')
+        if update_chatroom > 0 or update_remark_name:
+            logger.warn(
+                f"{len(chatrooms)} 个群更新 memberList:{update_chatroom}个,remarkName:{update_remark_name}个 成功,保存登录状态")
             itchat.dump_login_status()
 
         ret = self.groupx.post_groups(
