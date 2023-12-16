@@ -192,9 +192,9 @@ def split_tables():
     # 使用 re.sub 方法，将匹配的行替换为空字符串，作为非表格内容
     non_table_text = re.sub(pattern, "", text, flags=re.M)
     # 输出结果
-    print("表格内容：")
+    print("表格内容2：")
     print(table_text)
-    print("非表格内容：")
+    print("非表格内容4：")
     print(non_table_text)
 
 split_tables()

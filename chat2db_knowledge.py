@@ -76,7 +76,7 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
             # 已经使用过知识库了
             if sess_len > 0:
                 # 使用知识库如果超过1天了,那么再更新下.
-                if user_manager.should_update(know_id):
+                if user_manager.should_update(know_id,user_session):
                     know = user_manager.get_knowledge(know_id)
                     _append_know(user_session, know)
 
@@ -98,7 +98,7 @@ def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: Ev
                 "user": user
             })
             if not data:
-                logger.warn("groupx api 返回数据为空")
+                logger.warn(f"====》get_myknowledge 从服务器获取知识库返回数据为空 {user.NickName}")
                 return False
             know = data.get("knowledges", {})
 
