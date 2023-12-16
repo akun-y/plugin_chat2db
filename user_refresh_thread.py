@@ -1,24 +1,25 @@
 # encoding:utf-8
 
-from hashlib import md5
 import json
-from types import MemberDescriptorType
-from plugins.plugin_chat2db.head_img_manager import HeadImgManager
-from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from plugins.plugin_chat2db.comm import EthZero, is_eth_address, makeGroupReq
-from common.log import logger
-import time
-import arrow
 import threading
+import time
+from hashlib import md5
+from types import MemberDescriptorType
 from typing import List
-from lib import itchat
-from lib.itchat.content import *
-import config as RobotConfig
 
-from plugins.plugin_chat2db.api_tentcent import ApiTencent
+import arrow
 import requests
 
+import config as RobotConfig
+from common.log import logger
+from lib import itchat
+from lib.itchat.content import *
+from plugins.plugin_chat2db.api_groupx import ApiGroupx
+from plugins.plugin_chat2db.api_tentcent import ApiTencent
+from plugins.plugin_chat2db.comm import EthZero, is_eth_address, makeGroupReq
+from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
+
 try:
     from channel.wechatnt.ntchat_channel import wechatnt
 except Exception as e:
@@ -44,7 +45,8 @@ class UserRefreshThread(object):
         self.robot_user_id = ""
         self.robot_user_nickname = ""  # config.get("name")
         self.check_login_second_interval = config.get(
-            "check_login_second_interval", 60*100)  # 默认100分钟
+            "check_login_second_interval", 60 * 100
+        )  # 默认100分钟
 
         self.is_relogin = False
 
@@ -70,7 +72,7 @@ class UserRefreshThread(object):
             self.timer_check()
             # 群组列表有没有增减
             chatrooms = itchat.get_chatrooms()
-            if (len(chatrooms) != len(self.chatrooms)):
+            if len(chatrooms) != len(self.chatrooms):
                 self.chatrooms = chatrooms
                 self.update_friends_groups()
 
@@ -83,13 +85,11 @@ class UserRefreshThread(object):
         self.check_is_relogin()
         # 重新登录、未登录，均跳过
         if self.is_relogin:
-            logger.warn(
-                f"=====》服务器已重新登录,Bot UserName 更新为 {self.robot_user_id}")
+            logger.warn(f"=====》服务器已重新登录,Bot UserName 更新为 {self.robot_user_id}")
             return
         logger.info(f"定时检测,bot UserName无变化 {self.robot_user_id}")
 
-
-# 检测是否重新登录了
+    # 检测是否重新登录了
 
     def check_is_relogin(self):
         # 机器人ID
@@ -102,8 +102,8 @@ class UserRefreshThread(object):
         elif channel_name == "ntchat":
             try:
                 login_info = wechatnt.get_login_info()
-                nickname = login_info['nickname']
-                user_id = login_info['wxid']
+                nickname = login_info["nickname"]
+                user_id = login_info["wxid"]
                 self.robot_user_id = user_id
                 self.robot_user_nickname = nickname
             except Exception as e:
@@ -127,7 +127,8 @@ class UserRefreshThread(object):
 
             # 取出好友中的机器人用户,
             myself = self._get_friend(
-                self.robot_user_nickname, self.robot_user_nickname)
+                self.robot_user_nickname, self.robot_user_nickname
+            )
             if myself is None:
                 myselfUserName = ""
             else:
@@ -153,25 +154,34 @@ class UserRefreshThread(object):
 
     def update_friends_groups(self):
         logger.info("更新用户ID,Friends, Groups")
-        if (self.postFriends2Groupx()):
+        if self.postFriends2Groupx():
             self.saveFriends2DB()
-        if (self.postGroups2Groupx()):
+        if self.postGroups2Groupx():
             self.saveGroups2DB()
 
     def saveFriends2DB(self):
         # 好友处理
         try:
             # 获取好友列表
-            if (len(self.friends) < 1):
+            if len(self.friends) < 1:
                 self.friends = itchat.get_friends(update=True)
 
             c = self._conn.cursor()
             logger.debug(
-                "[saveFriends2DB] insert record: {} 条" .format(len(self.friends)))
+                "[saveFriends2DB] insert record: {} 条".format(len(self.friends))
+            )
             for friend in self.friends:
-                c.execute("INSERT OR REPLACE INTO friends_records VALUES (?,?,?,?,?,?)", (
-                    self.robot_user_id, self.robot_user_nickname, '',
-                    friend.UserName, friend.NickName, friend.HeadImgUrl))
+                c.execute(
+                    "INSERT OR REPLACE INTO friends_records VALUES (?,?,?,?,?,?)",
+                    (
+                        self.robot_user_id,
+                        self.robot_user_nickname,
+                        "",
+                        friend.UserName,
+                        friend.NickName,
+                        friend.HeadImgUrl,
+                    ),
+                )
 
             self._conn.commit()
         except ZeroDivisionError:
@@ -181,26 +191,28 @@ class UserRefreshThread(object):
     def postFriends2Groupx(self):
         step = 50
         # 获取好友列表,每次100条,越界后又从0开始
-        if (len(self.friends) < 1):
+        if len(self.friends) < 1:
             self.friends = itchat.get_friends(update=True)
 
         end = self.postFriendsPos + step
-        if (end > len(self.friends)):
+        if end > len(self.friends):
             end = len(self.friends) - 1
-        friends = self.friends[self.postFriendsPos:end]
+        friends = self.friends[self.postFriendsPos : end]
         logger.info(
-            f"post friends to groupx:{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}")
+            f"post friends to groupx:{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}"
+        )
 
         self.postFriendsPos += step
-        if (len(friends) < step):
+        if len(friends) < step:
             # 全部好友都发送完成了
             self.postFriendsPos = 0
         else:
             # 每隔15秒执行一次,直到好友列表全部发送完成
-            threading.Timer(3.0, self.postFriends2Groupx).start()
+            threading.Timer(15.0, self.postFriends2Groupx).start()
 
         ret = self.groupx.post_friends(
-            self.robot_account, self.robot_user_nickname, self.robot_user_id, friends)
+            self.robot_account, self.robot_user_nickname,  friends
+        )
         if ret is False:
             logger.error(f"post friends to groupx failed")
             return False
@@ -227,7 +239,6 @@ class UserRefreshThread(object):
         #         _usr.set_alias(retAccount)
         #         _usr.update()
         #         itchat.dump_login_status()
-                
 
         return ret
 
@@ -239,13 +250,23 @@ class UserRefreshThread(object):
                 self.chatrooms = itchat.get_chatrooms()
 
             c = self._conn.cursor()
-            logger.debug("[saveGroups2DB] insert record: {} 条" .format(
-                len(self.chatrooms)))
+            logger.debug(
+                "[saveGroups2DB] insert record: {} 条".format(len(self.chatrooms))
+            )
             for chatroom in self.chatrooms:
-                c.execute("INSERT OR REPLACE INTO groups_records VALUES (?,?,?,?,?,?,?,?)", (
-                    chatroom.Self.UserName, chatroom.Self.NickName, chatroom.Self.DisplayName,
-                    chatroom.UserName, chatroom.NickName, chatroom.HeadImgUrl,
-                    chatroom.get('PYQuanPin'), chatroom.get('EncryChatRoomId')))
+                c.execute(
+                    "INSERT OR REPLACE INTO groups_records VALUES (?,?,?,?,?,?,?,?)",
+                    (
+                        chatroom.Self.UserName,
+                        chatroom.Self.NickName,
+                        chatroom.Self.DisplayName,
+                        chatroom.UserName,
+                        chatroom.NickName,
+                        chatroom.HeadImgUrl,
+                        chatroom.get("PYQuanPin"),
+                        chatroom.get("EncryChatRoomId"),
+                    ),
+                )
             self._conn.commit()
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
@@ -257,7 +278,13 @@ class UserRefreshThread(object):
 
     def _merge_dict(self, dict1, dict2):
         for key, value in dict2.items():
-            if key in dict1 and (not dict1[key] or (isinstance(dict1[key], (list, tuple, str, dict)) and len(dict1[key]) < 1)):
+            if key in dict1 and (
+                not dict1[key]
+                or (
+                    isinstance(dict1[key], (list, tuple, str, dict))
+                    and len(dict1[key]) < 1
+                )
+            ):
                 # 如果 dict1 中的值是空字符串或者 None，使用 dict2 中的值覆盖
                 dict1[key] = value
             elif key not in dict1:
@@ -270,66 +297,79 @@ class UserRefreshThread(object):
         if len(self.chatrooms) < 1:
             self.chatrooms = itchat.get_chatrooms(True, False)
 
-        chatrooms = self.chatrooms[self.postGroupsPos:self.postGroupsPos+100]
+        chatrooms = self.chatrooms[self.postGroupsPos : self.postGroupsPos + 100]
         self.postGroupsPos += 100
-        if (len(chatrooms) < 100):
+        if len(chatrooms) < 100:
             self.postGroupsPos = 0
         else:
-            # 每隔8秒执行一次,直到好友列表全部发送完成
+            # 每隔8秒执行一次,直到群列表全部发送完成
             threading.Timer(8.0, self.postGroups2Groupx).start()
 
         update_chatroom = 0
         update_remark_name = 0
         for index, value in enumerate(chatrooms):
-            value['HeadImgUrl'] = self.img_service.get_head_img_url(
-                value.get('UserName'), True)
+            try:
+                url = self.img_service.get_head_img_url(value.get("UserName"), True)
+                value["HeadImgUrl"] = url if url else value.get("HeadImgUrl")
 
-            # 设置RemarkName,通过search_friends,update_friend方法获取群信息时，会包括RemarkName
-            if (len(value['RemarkName']) < 1):
-                room1 = itchat.search_friends(userName=value['UserName'])
-                if not room1:
-                    room1 = itchat.update_friend(value['UserName'])
+                # 设置RemarkName,通过search_friends,update_friend方法获取群信息时，会包括RemarkName
+                if len(value["RemarkName"]) < 1:
+                    room1 = itchat.search_friends(userName=value["UserName"])
+                    if not room1:
+                        room1 = itchat.update_friend(value["UserName"])
 
-                if room1 and len(room1['RemarkName']) > 0:
-                    update_remark_name += 1
-                    chatrooms[index] = self._merge_dict(room1, value)
-                    chatrooms[index].update()
-                    logger.info(
-                        f"从腾讯服务获取群最新属性:{room1['NickName']} - {room1['RemarkName']} ")
-            # ----------------------------------------------
-            # 设置 memberList
-            memberList = value['MemberList']
-            if len(memberList) < 1:
-                room2 = itchat.update_chatroom(value['UserName'], True)
-                if len(room2['MemberList']) > 0:
-                    update_chatroom += 1
-                    chatrooms[index] = self._merge_dict(
-                        room2, chatrooms[index])
-                    chatrooms[index].update()
-                    logger.info(
-                        f"从腾讯服务器获取群最新信息：{room2['NickName']} 成员:{len(room2['MemberList'])}个)")
+                    if room1 and len(room1["RemarkName"]) > 0:
+                        update_remark_name += 1
+                        chatrooms[index] = self._merge_dict(room1, value)
+                        chatrooms[index].update()
+                        logger.info(
+                            f"从腾讯服务获取群最新属性:{room1['NickName']} - {room1['RemarkName']} "
+                        )
+                # ----------------------------------------------
+                # 设置 memberList
+                memberList = value["MemberList"]
+                if len(memberList) < 1:
+                    room2 = itchat.update_chatroom(value["UserName"], True)
+                    if len(room2["MemberList"]) > 0:
+                        update_chatroom += 1
+                        chatrooms[index] = self._merge_dict(room2, chatrooms[index])
+                        chatrooms[index].update()
+                        logger.info(
+                            f"从腾讯服务器获取群最新信息：{room2['NickName']} 成员:{len(room2['MemberList'])}个)"
+                        )
 
-            logger.info(
-                f'群: {value.NickName} ({len(chatrooms[index]["MemberList"])}) 头像:{value.HeadImgUrl[0:10]}')
+                v = chatrooms[index]
+                logger.info(
+                    f'群: {v.NickName} ({len(v["MemberList"])}) 头像:{v.HeadImgUrl[0:10]}'
+                )
+            except Exception as err:
+                logger.error(f"获取群信息失败:{err}, 群:{value.NickName}, {value.UserName}")
         if update_chatroom > 0 or update_remark_name:
             logger.warn(
-                f"{len(chatrooms)} 个群更新 memberList:{update_chatroom}个,remarkName:{update_remark_name}个 成功,保存登录状态")
+                f"{len(chatrooms)} 个群更新 memberList:{update_chatroom}个,remarkName:{update_remark_name}个 成功,保存登录状态"
+            )
             itchat.dump_login_status()
 
         ret = self.groupx.post_groups(
-            self.robot_account, self.robot_user_nickname, self.robot_user_id, chatrooms)
+            self.robot_account, self.robot_user_nickname, chatrooms
+        )
         logger.info(
-            f"post groups to groupx api:{self.postGroupsPos}, {len(chatrooms)}, {ret}")
+            f"post groups to groupx api:{self.postGroupsPos}, {len(chatrooms)}, {ret}"
+        )
         return ret
 
     def _get_friends(self, session_id, start_timestamp=0, limit=9999):
         c = self._conn.cursor()
-        c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?",
-                  (session_id, start_timestamp, limit))
+        c.execute(
+            "SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?",
+            (session_id, start_timestamp, limit),
+        )
         return c.fetchall()
 
     def _get_friend(self, selfNickName, NickName):
         c = self._conn.cursor()
-        c.execute("SELECT * FROM friends_records WHERE selfNickName=? and NickName=?",
-                  (selfNickName, NickName))
+        c.execute(
+            "SELECT * FROM friends_records WHERE selfNickName=? and NickName=?",
+            (selfNickName, NickName),
+        )
         return c.fetchone()

@@ -61,7 +61,6 @@ from plugins.plugin_report_work.pick_tables_markdown import pick_tables_from_mar
     author="akun.yunqi",
 )
 class Chat2db(Plugin):
-
     def __init__(self):
         super().__init__()
 
@@ -88,8 +87,7 @@ class Chat2db(Plugin):
         # 用于管理用户的知识库,确定是否可以更新.
         self.user_manager = UserManager(self.groupx)
         # 应答一些自定义的回复信息
-        self.my_reply = CustomReply(
-            self.config, self.groupx, self.user_manager)
+        self.my_reply = CustomReply(self.config, self.groupx, self.user_manager)
         # 字体文件
         self.tmp_dir = os.path.join(os.path.dirname(__file__), "saved")
         font_path = os.path.join(os.path.dirname(__file__), "yahei2.ttf")
@@ -97,12 +95,19 @@ class Chat2db(Plugin):
 
         self.model = conf().get("model")
         self.curdir = os.path.dirname(__file__)
-        self.saveFolder = os.path.join(self.curdir, 'saved')
-        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
-                               'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
+        self.saveFolder = os.path.join(self.curdir, "saved")
+        self.saveSubFolders = {
+            "webwxgeticon": "icons",
+            "webwxgetheadimg": "headimgs",
+            "webwxgetmsgimg": "msgimgs",
+            "webwxgetvideo": "videos",
+            "webwxgetvoice": "voices",
+            "_showQRCodeImg": "qrcodes",
+        }
 
-        self.conn = sqlite3.connect(os.path.join(
-            self.saveFolder, "chat2db.db"), check_same_thread=False)
+        self.conn = sqlite3.connect(
+            os.path.join(self.saveFolder, "chat2db.db"), check_same_thread=False
+        )
 
         self.s = requests.Session()
 
@@ -110,10 +115,16 @@ class Chat2db(Plugin):
         self._create_table_friends()
         self._create_table_groups()
 
-        btype = Bridge().btype['chat']
-        if btype not in [const.OPEN_AI, const.CHATGPT, const.CHATGPTONAZURE, const.BAIDU, const.LINKAI]:
+        btype = Bridge().btype["chat"]
+        if btype not in [
+            const.OPEN_AI,
+            const.CHATGPT,
+            const.CHATGPTONAZURE,
+            const.BAIDU,
+            const.LINKAI,
+        ]:
             raise Exception("[Summary] init failed, not supported bot type")
-        self.bot = bot_factory.create_bot(Bridge().btype['chat'])
+        self.bot = bot_factory.create_bot(Bridge().btype["chat"])
 
         # self.handlers[Event.ON_RECEIVE_MESSAGE] = self.on_handle_context
         self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
@@ -126,117 +137,145 @@ class Chat2db(Plugin):
 
         logger.info(f"======>[Chat2db] inited, config={self.config}")
 
-    def post_to_groupx(self, account, group_object_id, cmsg,  conversation_id: str, action: str, jailbreak: str, content_type: str, internet_access: bool, role, content, response: str):
+    def post_to_groupx(
+        self,
+        account,
+        group_object_id,
+        cmsg,
+        conversation_id: str,
+        action: str,
+        jailbreak: str,
+        content_type: str,
+        internet_access: bool,
+        role,
+        content,
+        response: str,
+    ):
         # 发送人头像
-        if (cmsg.is_group):
+        if cmsg.is_group:
             user_id = cmsg.actual_user_id
             avatar = self.img_service.get_head_img_url(user_id)
             nickName = cmsg.actual_user_nickname
             wxGroupId = cmsg.other_user_id
             wxGroupName = cmsg.other_user_nickname
 
-            user = {'account': account,
-                    'NickName': nickName,
-                    'UserName': user_id,
-                    'HeadImgUrl': avatar
-                    }
+            user = {
+                "account": account,
+                "NickName": nickName,
+                "UserName": user_id,
+                "HeadImgUrl": avatar,
+            }
         else:
             user_id = cmsg.from_user_id
             avatar = self.img_service.get_head_img_url(user_id)
             nickName = cmsg.from_user_nickname
-            user = {**cmsg._rawmsg.user,
-                    'account': account, 'HeadImgUrl': avatar}
-            wxGroupId = ''
-            wxGroupName = ''  # 用于判断是否群聊
+            user = {**cmsg._rawmsg.user, "account": account, "HeadImgUrl": avatar}
+            wxGroupId = ""
+            wxGroupName = ""  # 用于判断是否群聊
 
         # 接收人头像
         recvAvatar = self.img_service.get_head_img_url(cmsg.to_user_id)
         source = f"{self.systemName} {self.channel_type}"
-        query_json = makeGroupReq(account, {
-            'receiver': self.receiver,
-            'receiverName': cmsg.to_user_nickname,
-            'receiverAvatar': recvAvatar,
-
-            'conversationId': conversation_id,
-            'action': action,
-            'model': self.model,
-            'internetAccess': internet_access,
-            'aiResponse': response,
-
-            'userName': nickName,
-            'userAvatar': avatar,
-            'userId': user_id,
-            'message': content,
-            'messageId': cmsg.msg_id,
-            'messageType': content_type,
-
-            "wxReceiver": cmsg.to_user_id,
-            "wxUser": user,
-            "wxGroupId": wxGroupId,
-            "wxGroupName": wxGroupName,
-            "wxGroupObjectId": group_object_id,
-
-            "source": f"{source} group" if cmsg.is_group else f"{source} personal",
-        })
+        query_json = makeGroupReq(
+            account,
+            {
+                "receiver": self.receiver,
+                "receiverName": cmsg.to_user_nickname,
+                "receiverAvatar": recvAvatar,
+                "conversationId": conversation_id,
+                "action": action,
+                "model": self.model,
+                "internetAccess": internet_access,
+                "aiResponse": response,
+                "userName": nickName,
+                "userAvatar": avatar,
+                "userId": user_id,
+                "message": content,
+                "messageId": cmsg.msg_id,
+                "messageType": content_type,
+                "wxReceiver": cmsg.to_user_id,
+                "wxUser": user,
+                "wxGroupId": wxGroupId,
+                "wxGroupName": wxGroupName,
+                "wxGroupObjectId": group_object_id,
+                "source": f"{source} group" if cmsg.is_group else f"{source} personal",
+            },
+        )
         return self.groupx.post_chat_record(account, query_json)
 
     def _create_table(self):
         c = self.conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS chat_records
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS chat_records
                     (sessionid TEXT, msgid INTEGER, user TEXT,recv TEXT,reply TEXT, type TEXT, timestamp INTEGER, is_triggered INTEGER,
-                    PRIMARY KEY (timestamp, msgid))''')
+                    PRIMARY KEY (timestamp, msgid))"""
+        )
 
         # 后期增加了is_triggered字段，这里做个过渡，这段代码某天会删除
         c = c.execute("PRAGMA table_info(chat_records);")
         column_exists = False
         for column in c.fetchall():
-            logger.debug(
-                "create table [chat_records] column: {}" .format(column))
-            if column[1] == 'is_triggered':
+            logger.debug("create table [chat_records] column: {}".format(column))
+            if column[1] == "is_triggered":
                 column_exists = True
                 break
         if not column_exists:
             self.conn.execute(
-                "ALTER TABLE chat_records ADD COLUMN is_triggered INTEGER DEFAULT 0;")
+                "ALTER TABLE chat_records ADD COLUMN is_triggered INTEGER DEFAULT 0;"
+            )
             self.conn.execute("UPDATE chat_records SET is_triggered = 0;")
 
         self.conn.commit()
 
-    def _insert_record(self, session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered=0):
+    def _insert_record(
+        self, session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered=0
+    ):
         c = self.conn.cursor()
-        logger.debug("[chat_records] insert record: {} {} {} {} {} {} {} {}" .format(
-            session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
-        c.execute("INSERT OR REPLACE INTO chat_records VALUES (?,?,?,?,?,?,?,?)",
-                  (session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered))
+        logger.debug(
+            "[chat_records] insert record: {} {} {} {} {} {} {} {}".format(
+                session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered
+            )
+        )
+        c.execute(
+            "INSERT OR REPLACE INTO chat_records VALUES (?,?,?,?,?,?,?,?)",
+            (session_id, msg_id, user, recv, reply, msg_type, timestamp, is_triggered),
+        )
         self.conn.commit()
 
     def _get_records(self, session_id, start_timestamp=0, limit=9999):
         c = self.conn.cursor()
-        c.execute("SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?",
-                  (session_id, start_timestamp, limit))
+        c.execute(
+            "SELECT * FROM chat_records WHERE sessionid=? and timestamp>? ORDER BY timestamp DESC LIMIT ?",
+            (session_id, start_timestamp, limit),
+        )
         return c.fetchall()
 
     def _create_table_friends(self):
         c = self.conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS friends_records
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS friends_records
                     (selfUserName TEXT, selfNickName TEXT, selfHeadImgUrl TEXT,
                     UserName TEXT, NickName TEXT, HeadImgUrl TEXT,
-                    PRIMARY KEY (NickName))''')
+                    PRIMARY KEY (NickName))"""
+        )
         self.conn.commit()
 
     def _create_table_groups(self):
         c = self.conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS groups_records
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS groups_records
                     (selfUserName TEXT, selfNickName TEXT, selfDisplayName TEXT,
                     UserName TEXT, NickName TEXT, HeadImgUrl TEXT,
                     PYQuanPin TEXT, EncryChatRoomId TEXT,
-                    PRIMARY KEY (NickName))''')
+                    PRIMARY KEY (NickName))"""
+        )
         self.conn.commit()
+
     # 发送微信消息提醒用户登录或扫码
 
     def _send_reg_msg(self, UserName, ActNickName):
-        msg = f'点击链接或扫码登录,有效提高答疑质量. \n {self.registerUrl} '
-        msg = f'@{ActNickName} {msg}' if ActNickName else msg
+        msg = f"点击链接或扫码登录,有效提高答疑质量. \n {self.registerUrl} "
+        msg = f"@{ActNickName} {msg}" if ActNickName else msg
         itchat.send_msg(msg, toUserName=UserName)
         itchat.send_image(fileDir=self.webQrCodeFile, toUserName=UserName)
         # itchat.send_image(fileDir=self.agentQrCodeFile, toUserName=UserName)
@@ -246,15 +285,21 @@ class Chat2db(Plugin):
     def _upload_pic(self, ctx):
         try:
             # 单聊时发送的图片给作为消息发给服务器
-            cmsg: ChatMessage = ctx['msg']
-            logger.info("[save2db] on_handle_context. content: %s" %
-                        cmsg.content)
+            cmsg: ChatMessage = ctx["msg"]
+            logger.info("[save2db] on_handle_context. content: %s" % cmsg.content)
 
             user = cmsg.from_user_nickname
-            session_id = ctx.get('session_id')
+            session_id = ctx.get("session_id")
 
-            self._insert_record(session_id, cmsg.msg_id, user,
-                                cmsg.content, "", str(ctx.type), cmsg.create_time)
+            self._insert_record(
+                session_id,
+                cmsg.msg_id,
+                user,
+                cmsg.content,
+                "",
+                str(ctx.type),
+                cmsg.create_time,
+            )
 
             # 上传图片到腾讯cos
             # 文件处理
@@ -263,15 +308,26 @@ class Chat2db(Plugin):
             img_url = "12"
             img_file = os.path.abspath(cmsg.content)
             if os.path.exists(img_file):
-                img_url = self.tencent.qcloud_upload_file(
-                    self.groupxHostUrl, img_file)
+                img_url = self.tencent.qcloud_upload_file(self.groupxHostUrl, img_file)
 
             account = RemarkNameInfo(cmsg._rawmsg.User.RemarkName).get_account()
-            group_object_id = ''
+            group_object_id = ""
             if cmsg.is_group:
                 group_object_id = cmsg._rawmsg.ToUserName
             logger.info("[save2db] on_handle_context. eth_addr: %s" % account)
-            return self.post_to_groupx(account, group_object_id, cmsg, session_id, "recv", "default", str(ctx.type), False, "user",  img_url, '')
+            return self.post_to_groupx(
+                account,
+                group_object_id,
+                cmsg,
+                session_id,
+                "recv",
+                "default",
+                str(ctx.type),
+                False,
+                "user",
+                img_url,
+                "",
+            )
         except Exception as e:
             logger.error(f"upload_img error: {e}")
             return None
@@ -279,13 +335,13 @@ class Chat2db(Plugin):
     # 当收到好友请求时，执行以下函数
     # @itchat.msg_register(FRIENDS)
     # def add_friend(msg):
-        # aa = itchat.accept_friend(msg['Text'])
-        # msg.User.verify()
-        # logger.info(f"接受好友请求 {msg.user.UserName} - {aa}")
-        # 接受好友请求
-        # msg.user.verify()
-        # 向新好友发送问候消息
-        # msg.user.send('Nice to meet you!')
+    # aa = itchat.accept_friend(msg['Text'])
+    # msg.User.verify()
+    # logger.info(f"接受好友请求 {msg.user.UserName} - {aa}")
+    # 接受好友请求
+    # msg.user.verify()
+    # 向新好友发送问候消息
+    # msg.user.send('Nice to meet you!')
     # Hello
     def _reply_sharing(self, ctx):
         pass
@@ -317,7 +373,7 @@ class Chat2db(Plugin):
 
     # 过滤掉原有命令
     def _filter_command(self, e_context: EventContext):
-        ctx = e_context['context']
+        ctx = e_context["context"]
         if ctx.type not in [ContextType.TEXT]:
             return
         content = ctx.content
@@ -328,10 +384,10 @@ class Chat2db(Plugin):
             return True
         if content.startswith(self.prefix_cmd):
             logger.info("[save2db] _filter_command. 接力: %s" % content)
-            new_content = content[len(self.prefix_cmd):]
+            new_content = content[len(self.prefix_cmd) :]
             # 过滤并还原回原有命令
             e_context.content = new_content
-            e_context['context']['content'] = new_content
+            e_context["context"]["content"] = new_content
             e_context.action = EventAction.CONTINUE
             return True
         return False
@@ -341,7 +397,7 @@ class Chat2db(Plugin):
         if is_group:
             return False  # 群中不允许设置医生
 
-        ctx = e_context['context']
+        ctx = e_context["context"]
         msg = ctx.get("msg")
         content = ctx.content
 
@@ -359,21 +415,25 @@ class Chat2db(Plugin):
             doctor = result
             if doctor:
                 itchat.send_msg(
-                    f"医生对接成功!\n----------------\n医生:{name}({doctor.get('department')})\n{doctor.get('intro')}\n擅长:{doctor.get('skill')}", toUserName=userid)
+                    f"医生对接成功!\n----------------\n医生:{name}({doctor.get('department')})\n{doctor.get('intro')}\n擅长:{doctor.get('skill')}",
+                    toUserName=userid,
+                )
             else:
                 name = result.get("professionalName") or result.get("name")
-                department = result.get("department", '')
+                department = result.get("department", "")
                 itchat.send_msg(
-                    f"医生对接失败!\n----------------\n先前已自动对接医生:{name}({department})", toUserName=userid)
+                    f"医生对接失败!\n----------------\n先前已自动对接医生:{name}({department})",
+                    toUserName=userid,
+                )
         else:
-            itchat.send_msg(
-                f"没找到你要对接的医生:‘{name}’\n请确认医生真实姓名.", toUserName=userid)
+            itchat.send_msg(f"没找到你要对接的医生:‘{name}’\n请确认医生真实姓名.", toUserName=userid)
         e_context.action = EventAction.BREAK_PASS
         return True
+
     # 查询已经分配的医生
 
     def _get_my_doctor(self, e_context: EventContext, is_group: bool):
-        ctx = e_context['context']
+        ctx = e_context["context"]
         msg = ctx.get("msg")
         content = ctx.content
         name = content[3:]
@@ -386,23 +446,29 @@ class Chat2db(Plugin):
             act_user = itchat.update_friend(userid)
             account = RemarkNameInfo(act_user.RemarkName).get_account() or EthZero
             result = self.groupx.get_my_doctor_info(
-                account, self.receiver, userid, msg.from_user_nickname, name)
+                account, self.receiver, userid, msg.from_user_nickname, name
+            )
 
         logger.info("[save2db] doctor: %s " % result)
 
         if result:
             doctorName = result.get("professionalName") or result.get("name")
-            doctorDepartment = result.get("department", '')
+            doctorDepartment = result.get("department", "")
             if is_group:
                 itchat.send_msg(
-                    f"@{act_user.NickName}\n查询医生成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=userid)
+                    f"@{act_user.NickName}\n查询医生成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’",
+                    toUserName=userid,
+                )
             else:
                 itchat.send_msg(
-                    f"查询成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’", toUserName=userid)
+                    f"查询成功!\n----------------\n你的医生是‘{doctorName}({doctorDepartment})’",
+                    toUserName=userid,
+                )
         else:
             itchat.send_msg(f"没找到你的医生.", toUserName=userid)
         e_context.action = EventAction.BREAK_PASS
         return True
+
     # 收到消息 ON_RECEIVE_MESSAGE
 
     def on_handle_context(self, e_context: EventContext):
@@ -413,7 +479,9 @@ class Chat2db(Plugin):
             return
 
         # 匹配用户知识库,从服务器拉取知识库并更新到本地
-        if chat2db_refresh_knowledge(self.groupx, self.robot_account, self.user_manager, e_context):
+        if chat2db_refresh_knowledge(
+            self.groupx, self.robot_account, self.user_manager, e_context
+        ):
             return
 
         # 处理一些问候性提问及测试提问
@@ -426,21 +494,21 @@ class Chat2db(Plugin):
         if self.my_reply.reply_patpat(e_context):
             return
 
-        ctx = e_context['context']
+        ctx = e_context["context"]
         if ctx.type not in [ContextType.IMAGE, ContextType.TEXT]:
             return
 
         content = ctx.content
         is_group = ctx.get("isgroup", False)
         if is_group:
-            if (content.startswith('@医生')):
+            if content.startswith("@医生"):
                 self._get_my_doctor(e_context, is_group)
             return  # 群聊天不处理图片,不处理医生分配
         # 处理图片相关内容
         if ctx.type == ContextType.IMAGE:  # 处理图片
             upload = self._upload_pic(ctx)
             logger.info("[save2db] upload image: %s " % upload)
-        if ctx.type == ContextType.TEXT and content.startswith('@医生'):  # 对接医生
+        if ctx.type == ContextType.TEXT and content.startswith("@医生"):  # 对接医生
             name = content[3:].strip()
             if len(name) < 1:
                 self._get_my_doctor(e_context, is_group)
@@ -455,23 +523,24 @@ class Chat2db(Plugin):
         if not user:
             user = itchat.update_friend(user_id)
         return user if user else {}
-     # 发送回复前
+
+    # 发送回复前
 
     def on_send_reply(self, e_context: EventContext):
-
         if e_context["reply"].type not in [ReplyType.TEXT]:
             return
 
-        ctx = e_context['context']
+        ctx = e_context["context"]
         reply = e_context["reply"]
         recvMsg = ctx.content
         replyMsg = reply.content
-        logger.debug("[save2db] on_decorate_reply. content: %s==>%s" %
-                     (recvMsg, replyMsg))
+        logger.debug(
+            "[save2db] on_decorate_reply. content: %s==>%s" % (recvMsg, replyMsg)
+        )
 
-        cmsg: ChatMessage = e_context['context']['msg']
+        cmsg: ChatMessage = e_context["context"]["msg"]
 
-        session_id = ctx.get('session_id')
+        session_id = ctx.get("session_id")
         is_group = ctx.get("isgroup", False)
 
         username = cmsg.actual_user_nickname if is_group else cmsg.from_user_nickname
@@ -482,37 +551,59 @@ class Chat2db(Plugin):
         old_account = rm.get_account()
         old_user_object_id = rm.get_object_id()
         # 获取微信群信息
-        group_id = ''
-        group_object_id = ''
+        group_id = ""
+        group_object_id = ""
         if is_group:
             group_id = cmsg.from_user_id
             group_user = self._get_user(cmsg.from_user_id)
             group_object_id = group_user.RemarkName
 
         try:
-            self._insert_record(session_id, cmsg.msg_id, username,
-                                recvMsg, replyMsg, str(ctx.type), cmsg.create_time)
+            self._insert_record(
+                session_id,
+                cmsg.msg_id,
+                username,
+                recvMsg,
+                replyMsg,
+                str(ctx.type),
+                cmsg.create_time,
+            )
             # 保存到groupx
-            result = self.post_to_groupx(old_account, group_object_id, cmsg, session_id, "ask", "default", str(
-                ctx.type), False, "user", recvMsg, replyMsg)
-            if (result is not None):
+            result = self.post_to_groupx(
+                old_account,
+                group_object_id,
+                cmsg,
+                session_id,
+                "ask",
+                "default",
+                str(ctx.type),
+                False,
+                "user",
+                recvMsg,
+                replyMsg,
+            )
+            if result is not None:
                 logger.info(f"记录微信端用户信息成功===>{result}")
                 # ethAddr存在到RemarkName 中
-                ret_account = result.get('account', None)
-                group_object_id = result.get('groupObjectId', None)
-                user_object_id = result.get('userObjectId', None)
+                ret_account = result.get("account", None)
+                group_object_id = result.get("groupObjectId", None)
+                user_object_id = result.get("userObjectId", None)
 
                 # 设置group的备注,object,account,方便下次找回.
                 if is_group and group_object_id:
                     group_user = self._get_user(group_id)
                     old_group_object_id = group_user.RemarkName
 
-                    if (old_group_object_id != group_object_id):
+                    if old_group_object_id != group_object_id:
                         itchat.set_alias(group_id, group_object_id)
                         group_user.update()
                         itchat.dump_login_status()
-                        logger.info(
-                            f"获得groupx提供的用户群objectId===>{old_group_object_id}")
+                        self.groupx.post_groups(
+                            self.robot_account,
+                            self.robot_name,
+                            [group_user],
+                        )
+                        logger.info(f"获得groupx提供的用户群objectId===>{old_group_object_id}")
                 # 存储account,objectId 到user RemarkName中,方便下次找回.
                 update_remarkname_flag = False
 
@@ -522,7 +613,10 @@ class Chat2db(Plugin):
                     update_remarkname_flag = True
                     logger.info(f"获得用户account===>{ret_account}")
 
-                if (is_valid_string(user_object_id) and old_user_object_id != user_object_id):
+                if (
+                    is_valid_string(user_object_id)
+                    and old_user_object_id != user_object_id
+                ):
                     rm.set_object_id(user_object_id)
                     update_remarkname_flag = True
                     logger.info(f"获得用户的objectId===>{user_object_id}")
@@ -531,19 +625,24 @@ class Chat2db(Plugin):
                     itchat.set_alias(act_user.UserName, rm.get_remark_name())
                     act_user.update()
                     itchat.dump_login_status()
+                    self.groupx.post_friends(
+                        self.robot_account, self.robot_name, [act_user]
+                    )
 
                 # 发送微信消息提醒点击登录或扫码
                 # self._send_reg_msg(cmsg.from_user_id,
                 #                username if is_group else None)
 
-                self.user_manager.set_my_doctor(
-                    userid, result.get('myDoctor', None))
+                self.user_manager.set_my_doctor(userid, result.get("myDoctor", None))
                 self.user_manager.update_knowledge(userid, replyMsg)
             # 处理应答信息中markdown html
-            img_sent = self._proc_html_markdown(replyMsg, cmsg.from_user_id,
-                                                cmsg.actual_user_id,
-                                                cmsg.actual_user_nickname,
-                                                is_group)
+            img_sent = self._proc_html_markdown(
+                replyMsg,
+                cmsg.from_user_id,
+                cmsg.actual_user_id,
+                cmsg.actual_user_nickname,
+                is_group,
+            )
             if img_sent:
                 e_context.action = EventAction.BREAK_PASS
                 reply.action = EventAction.BREAK_PASS
@@ -553,7 +652,9 @@ class Chat2db(Plugin):
 
         e_context.action = EventAction.CONTINUE
 
-    def _proc_html_markdown(self, reply_msg, to_user_id, actual_user_id, actual_user_nickname, is_group):
+    def _proc_html_markdown(
+        self, reply_msg, to_user_id, actual_user_id, actual_user_nickname, is_group
+    ):
         output_image_path = os.path.join(self.tmp_dir, f"{to_user_id}-img.png")
 
         img_files = []
@@ -564,8 +665,7 @@ class Chat2db(Plugin):
                 if len(md_table) == 0:
                     continue
                 html_content = markdown_to_html(md_table)
-                md_file_path = os.path.join(
-                    self.tmp_dir, f'md_table_{index}.png')
+                md_file_path = os.path.join(self.tmp_dir, f"md_table_{index}.png")
                 img_file = html_to_image(html_content, md_file_path, self.font)
                 if img_file:
                     img_files.append(img_file)
@@ -580,7 +680,7 @@ class Chat2db(Plugin):
         # 有图片生成，发送图片
         if img_files:
             if other_text:
-                msg = f'@{actual_user_nickname} ' if actual_user_nickname else ''
+                msg = f"@{actual_user_nickname} " if actual_user_nickname else ""
                 msg = msg + other_text
                 if msg:
                     itchat.send_msg(msg, toUserName=to_user_id)
@@ -595,10 +695,10 @@ class Chat2db(Plugin):
 
     def _load_config_template(self):
         logger.error(
-            "No Chat2db plugin config.json, use plugins/plugin_Chat2db/config.json.template")
+            "No Chat2db plugin config.json, use plugins/plugin_Chat2db/config.json.template"
+        )
         try:
-            plugin_config_path = os.path.join(
-                os.getcwd(), "config.json.template")
+            plugin_config_path = os.path.join(os.getcwd(), "config.json.template")
             if os.path.exists(plugin_config_path):
                 with open(plugin_config_path, "r", encoding="utf-8") as f:
                     plugin_conf = json.load(f)
