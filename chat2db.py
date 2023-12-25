@@ -44,12 +44,12 @@ from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager
-from plugins.plugin_report_work.mixedtext_to_image import (
+from plugins.plugin_comm.mixedtext_to_image import (
     html_to_image,
     is_html,
     markdown_to_html,
 )
-from plugins.plugin_report_work.pick_tables_markdown import pick_tables_from_markdown
+from plugins.plugin_comm.pick_tables_markdown import pick_tables_from_markdown
 
 
 @plugins.register(
@@ -58,7 +58,7 @@ from plugins.plugin_report_work.pick_tables_markdown import pick_tables_from_mar
     hidden=False,
     desc="存储及同步聊天记录",
     version="0.4.20231119",
-    author="akun.yunqi",
+    author="akun.yunqi"
 )
 class Chat2db(Plugin):
     def __init__(self):
