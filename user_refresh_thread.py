@@ -15,8 +15,8 @@ from common.log import logger
 from lib import itchat
 from lib.itchat.content import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from plugins.plugin_chat2db.api_tentcent import ApiTencent
-from plugins.plugin_chat2db.comm import EthZero, is_eth_address, makeGroupReq
+from plugins.plugin_chat2db.api_tencent import ApiTencent
+from plugins.plugin_comm.comm import EthZero, is_eth_address, make_chat_sign_req
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
 
@@ -71,7 +71,7 @@ class UserRefreshThread(object):
             # 定时检测
             self.timer_check()
             # 群组列表有没有增减
-            chatrooms = itchat.get_chatrooms()
+            chatrooms = itchat.get_chatrooms(True,True)
             if len(chatrooms) != len(self.chatrooms):
                 self.chatrooms = chatrooms
                 self.update_friends_groups()

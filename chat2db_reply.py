@@ -24,7 +24,7 @@ from common.tmp_dir import TmpDir
 from config import conf, global_config, load_config
 from plugins import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from plugins.plugin_chat2db.comm import EthZero, makeGroupReq
+from plugins.plugin_comm.comm import EthZero, make_chat_sign_req
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager

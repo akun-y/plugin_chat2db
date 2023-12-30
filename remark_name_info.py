@@ -1,6 +1,6 @@
 import json
 
-from plugins.plugin_chat2db.comm import is_eth_address, is_valid_json
+from plugins.plugin_comm.comm import is_eth_address, is_valid_json
 
 
 class RemarkNameInfo(object):

@@ -5,7 +5,7 @@ import requests
 
 from lib import itchat
 from common.log import logger
-from plugins.plugin_chat2db.api_tentcent import ApiTencent
+from plugins.plugin_chat2db.api_tencent import ApiTencent
 from plugins.plugin_chat2db.file_store import MyFileStory
 
 

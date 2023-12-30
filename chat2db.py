@@ -30,15 +30,15 @@ from lib.itchat.async_components.contact import update_friend
 from lib.itchat.content import FRIENDS
 from plugins import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from plugins.plugin_chat2db.api_tentcent import ApiTencent
+from plugins.plugin_chat2db.api_tencent import ApiTencent
 from plugins.plugin_chat2db.chat2db_knowledge import chat2db_refresh_knowledge
 from plugins.plugin_chat2db.chat2db_reply import CustomReply
-from plugins.plugin_chat2db.comm import (
+from plugins.plugin_comm.comm import (
     EthZero,
     is_eth_address,
     is_valid_json,
     is_valid_string,
-    makeGroupReq,
+    make_chat_sign_req,
 )
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
@@ -176,7 +176,7 @@ class Chat2db(Plugin):
         # 接收人头像
         recvAvatar = self.img_service.get_head_img_url(cmsg.to_user_id)
         source = f"{self.systemName} {self.channel_type}"
-        query_json = makeGroupReq(
+        query_json = make_chat_sign_req(
             account,
             {
                 "receiver": self.receiver,

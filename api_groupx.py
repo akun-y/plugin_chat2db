@@ -1,14 +1,18 @@
-import requests
-from common.log import logger
-from plugins.plugin_chat2db.comm import makeGroupReq
-
-from plugins.plugin_chat2db.comm import EthZero
 from urllib.parse import quote
+
+import requests
+
+from common.log import logger
+from config import conf
+from plugins.plugin_comm.comm import EthZero, make_chat_sign_req
 
 
 class ApiGroupx:
-    def __init__(self, host) -> None:
-        self.groupxHostUrl = host
+    def __init__(self, host=None) -> None:
+        if host:
+            self.groupxHostUrl = host
+        else:
+            self.groupxHostUrl = conf().get("groupx_url")
 
     def post_chat_record(self, account, msg_json):
         account = (
@@ -29,6 +33,13 @@ class ApiGroupx:
             logger.error(f"意外错误发生: {err}")
             return None
 
+    # 获取我的医生
+    def post_weight_loss(self, account, msg_json):
+        # 未注册用户account为空
+        url = f"{self.groupxHostUrl}/v1/health/weight-loss/{account}"
+        
+        return self._request(url, account, msg_json)
+
     # 设置我的医生
     def set_my_doctor_info(self, account, agent, doctor_name):
         if not account:
@@ -36,7 +47,7 @@ class ApiGroupx:
 
         post_url = f"{self.groupxHostUrl}/v1/chat/my-doctor/{account}"
         try:
-            doctor_info = makeGroupReq(
+            doctor_info = make_chat_sign_req(
                 account,
                 {
                     "account": account,
@@ -84,7 +95,7 @@ class ApiGroupx:
         try:
             logger.info(f"_request url:{url}")
             if data:
-                data_req = makeGroupReq(account, data)
+                data_req = make_chat_sign_req(account, data)
                 response = requests.post(url, json=data_req, verify=False)
             else:
                 response = requests.get(url, verify=False)
@@ -99,7 +110,7 @@ class ApiGroupx:
     def post_friends(self, bot_account, bot_nickname, friends):
         # 好友处理
         try:
-            json_data = makeGroupReq(
+            json_data = make_chat_sign_req(
                 bot_account,
                 {
                     "account": bot_account,
@@ -125,7 +136,7 @@ class ApiGroupx:
 
     def post_groups(self, bot_account, bot_nickname, groups):
         try:
-            json_data = makeGroupReq(
+            json_data = make_chat_sign_req(
                 bot_account,
                 {
                     "account": bot_account,
@@ -150,7 +161,7 @@ class ApiGroupx:
 
     def get_myknowledge(self, bot_account, data):
         try:
-            json_data = makeGroupReq(
+            json_data = make_chat_sign_req(
                 bot_account,
                 {
                     "account": bot_account,
