@@ -4,11 +4,12 @@ import requests
 
 from common.log import logger
 from config import conf
-from plugins.plugin_comm.comm import EthZero, make_chat_sign_req
+from plugins.plugin_comm.plugin_comm import EthZero, make_chat_sign_req
 
 
 class ApiGroupx:
     def __init__(self, host=None) -> None:
+        self.agent = conf().get("bot_account") or "123112312"
         if host:
             self.groupxHostUrl = host
         else:
@@ -33,11 +34,16 @@ class ApiGroupx:
             logger.error(f"意外错误发生: {err}")
             return None
 
-    # 获取我的医生
+    # 获取我的减重信息
     def post_weight_loss(self, account, msg_json):
         # 未注册用户account为空
         url = f"{self.groupxHostUrl}/v1/health/weight-loss/{account}"
-        
+
+        return self._request(url, account, msg_json)
+    def post_weight_loss_last_data(self, account, msg_json):
+        # 未注册用户account为空
+        url = f"{self.groupxHostUrl}/v1/health/weight-loss/last-data/{account}"
+
         return self._request(url, account, msg_json)
 
     # 设置我的医生
@@ -65,6 +71,18 @@ class ApiGroupx:
             return None
         except Exception as err:
             logger.error(f"set_my_doctor_info 意外错误发生: {err}")
+
+    # 获取我的医生
+    def get_itchat_user_info(self, account, user_id=None, user_name=None):
+        # 未注册用户account为空
+        url = f"{self.groupxHostUrl}/v1/wechat/itchat/user/get/{account or EthZero}"
+        data = {
+            "account": account,
+            "agent": self.agent,
+            "UserName": user_id,
+            "NickName": user_name,
+        }
+        return self._request(url, account, data)
 
     # 获取我的医生
     def get_my_doctor_info(

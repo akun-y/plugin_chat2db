@@ -1,7 +1,7 @@
 import datetime
 
 from lib import itchat
-from plugins.plugin_comm.comm import EthZero, is_eth_address
+from plugins.plugin_comm.plugin_comm import EthZero, is_eth_address
 from common.log import logger
 
 

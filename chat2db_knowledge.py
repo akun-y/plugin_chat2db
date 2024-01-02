@@ -28,7 +28,7 @@ from lib.itchat.content import FRIENDS
 from plugins import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tencent import ApiTencent
-from plugins.plugin_comm.comm import EthZero, make_chat_sign_req
+from plugins.plugin_comm.plugin_comm import EthZero, make_chat_sign_req
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager

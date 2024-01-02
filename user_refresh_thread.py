@@ -16,9 +16,9 @@ from lib import itchat
 from lib.itchat.content import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tencent import ApiTencent
-from plugins.plugin_comm.comm import EthZero, is_eth_address, make_chat_sign_req
+from plugins.plugin_comm.plugin_comm import EthZero, is_eth_address, make_chat_sign_req
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
-from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
+from plugins.plugin_comm.remark_name_info import RemarkNameInfo
 
 try:
     from channel.wechatnt.ntchat_channel import wechatnt

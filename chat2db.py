@@ -33,23 +33,13 @@ from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tencent import ApiTencent
 from plugins.plugin_chat2db.chat2db_knowledge import chat2db_refresh_knowledge
 from plugins.plugin_chat2db.chat2db_reply import CustomReply
-from plugins.plugin_comm.comm import (
-    EthZero,
-    is_eth_address,
-    is_valid_json,
-    is_valid_string,
-    make_chat_sign_req,
-)
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
-from plugins.plugin_chat2db.remark_name_info import RemarkNameInfo
 from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
 from plugins.plugin_chat2db.UserManager import UserManager
-from plugins.plugin_comm.mixedtext_to_image import (
-    html_to_image,
-    is_html,
-    markdown_to_html,
-)
-from plugins.plugin_comm.pick_tables_markdown import pick_tables_from_markdown
+
+from plugins.plugin_comm import *
+from plugins.plugin_comm.remark_name_info import RemarkNameInfo
+from plugins.plugin_comm.plugin_comm import is_eth_address, is_valid_string, make_chat_sign_req
 
 
 @plugins.register(
@@ -58,12 +48,12 @@ from plugins.plugin_comm.pick_tables_markdown import pick_tables_from_markdown
     hidden=False,
     desc="存储及同步聊天记录",
     version="0.4.20231119",
-    author="akun.yunqi"
+    author="akun.yunqi",
 )
 class Chat2db(Plugin):
     def __init__(self):
         super().__init__()
-
+        self.path = os.path.dirname(__file__)
         self.config = super().load_config()
         if not self.config:
             # 未加载到配置，使用模板中的配置
@@ -377,7 +367,8 @@ class Chat2db(Plugin):
         if ctx.type not in [ContextType.TEXT]:
             return
         content = ctx.content
-
+        logger.info("-----------------")
+        logger.info(self.robot_account)
         if content[0] in self.prefix_deny:
             logger.info("[save2db] _filter_command. 拒绝: %s" % content)
             e_context.action = EventAction.BREAK_PASS
