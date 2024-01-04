@@ -13,7 +13,7 @@ class ApiGroupx:
         if host:
             self.groupxHostUrl = host
         else:
-            self.groupxHostUrl = conf().get("groupx_url")
+            self.groupxHostUrl = conf().get("groupx_url") or 'https://groupx.mfull.cn'
 
     def post_chat_record(self, account, msg_json):
         account = (
@@ -141,15 +141,15 @@ class ApiGroupx:
 
             response = requests.post(post_url, json=json_data, verify=False)
 
-            print("post friends to groupx api:", response.reason)
+            logger.info(f"post friends to groupx api:{ response.reason}")
             return response.json() if response.status_code == 200 else False
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
-            print("好友列表, 错误发生")
+            logger.error("好友列表, 错误发生")
         except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP错误发生: {http_err}")
+            logger.error(f"HTTP错误发生: {http_err}")
         except Exception as err:
-            print(f"发生意外错误: {err}")
+            logger.error(f"发生意外错误: {err}")
         return False
 
     def post_groups(self, bot_account, bot_nickname, groups):
@@ -170,11 +170,11 @@ class ApiGroupx:
             return response.json()
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
-            print("好友列表, 错误发生")
+            logger.error("好友列表, 错误发生")
         except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP错误发生: {http_err}")
+            logger.error(f"HTTP错误发生: {http_err}")
         except Exception as err:
-            print(f"发生意外错误: {err}")
+            logger.error(f"发生意外错误: {err}")
         return False
 
     def get_myknowledge(self, bot_account, data):
@@ -201,11 +201,11 @@ class ApiGroupx:
             return response.json()
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
-            print("好友列表, 错误发生")
+            logger.error("好友列表, 错误发生")
         except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP错误发生: {http_err}")
+            logger.error(f"HTTP错误发生: {http_err}")
         except Exception as err:
-            print(f"发生意外错误: {err}")
+            logger.error(f"发生意外错误: {err}")
         return False
 
     def qcloud_get_cos_policy(self, ext_name):

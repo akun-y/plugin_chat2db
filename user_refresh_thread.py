@@ -257,9 +257,9 @@ class UserRefreshThread(object):
                 c.execute(
                     "INSERT OR REPLACE INTO groups_records VALUES (?,?,?,?,?,?,?,?)",
                     (
-                        chatroom.Self.UserName,
-                        chatroom.Self.NickName,
-                        chatroom.Self.DisplayName,
+                        chatroom.UserName,
+                        chatroom.NickName,
+                        chatroom.DisplayName,
                         chatroom.UserName,
                         chatroom.NickName,
                         chatroom.HeadImgUrl,
@@ -270,11 +270,11 @@ class UserRefreshThread(object):
             self._conn.commit()
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
-            print("群聊列表, 错误发生")
+            logger.error("群聊列表, 错误发生")
         except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP错误发生: {http_err}")
+            logger.error(f"HTTP错误发生: {http_err}")
         except Exception as err:
-            print(f"发生意外错误: {err}")
+            logger.error(f"发生意外错误: {err}")
 
     def _merge_dict(self, dict1, dict2):
         for key, value in dict2.items():
