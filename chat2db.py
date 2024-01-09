@@ -39,7 +39,17 @@ from plugins.plugin_chat2db.UserManager import UserManager
 
 from plugins.plugin_comm import *
 from plugins.plugin_comm.remark_name_info import RemarkNameInfo
-from plugins.plugin_comm.plugin_comm import is_eth_address, is_valid_string, make_chat_sign_req
+from plugins.plugin_comm.plugin_comm import (
+    is_eth_address,
+    is_valid_string,
+    make_chat_sign_req,
+)
+from plugins.plugin_comm.pick_tables_markdown import pick_tables_from_markdown
+from plugins.plugin_comm.mixedtext_to_image import (
+    html_to_image,
+    is_html,
+    markdown_to_html,
+)
 
 
 @plugins.register(

@@ -88,6 +88,8 @@ class CustomReply:
         if is_group:
             result = self.user_manager.get_doctor_of_group(msg.from_user_id)
             if result:
+                logger.info(f"patpat doctor found:{is_group} - {msg.from_user_nickname}")
+                
                 extra_information = result.get("other")
                 introduction = result.get("intro")
                 department = result.get("department")
@@ -95,6 +97,7 @@ class CustomReply:
                 country = result.get("country")
 
                 intro = {introduction, name, department, extra_information, country}
+                logger.info(f"patpat doctor:{intro}")
         else :
             user_id= msg.from_user_id
             user_name = msg.from_user_nickname
@@ -138,22 +141,6 @@ class CustomReply:
                     )
                 else:
                     reply.content = f"Hello, {msg.from_user_nickname}"
-                    # reply.content = """以下是从提供的网页中提取的数据，并以表格形式呈现：
-                    
-                    
-                    #     | 国家 | 首都 | 人口 (km²) | 面积 (km²) |
-                    #     | :--: | :--: | :--: | :--: |
-                    #     | 中国 | 北京 | 144376万 (约) | 960万 (约) |
-                    #     | 美国 | 华盛顿特区 | 3317万 (约) | 973万 (约) |
-                    #     | 印度 | 新德里 | 13968万 (约) | 328万 (约) |
-                    #     | 巴西 | 巴西利亚 | 21247万 (约) | 85.9万 (约) |
-                    #     | 俄罗斯 | 莫斯科 | 1462万 (约) | 17.5万 (约) |
-                    #     | 加拿大 | 渥太华 | 3899万 (约) | 998万 (约) |
-                    #     | 澳大利亚 | 堪培拉 | 2569万 (约) | 76.8万 (约) |
-                    #     | 日本 | 东京都中心区（首府）*  |  *  |  *  |
-
-                    #     请注意，由于网页内容可能随时更改，因此某些数据可能存在变化。建议在获取最新数据时参考官方来源。此外，人口和面积数据仅供参考，具体数据可能存在误差。
-                    #     """
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
                 return True
@@ -177,6 +164,28 @@ class CustomReply:
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑，一般会覆写reply
                 return True
+            elif content.startswith("王医生文章"):
+                reply = Reply()
+                reply.type = ReplyType.TEXT
+                reply.content = "https://mp.weixin.qq.com/s/uqof_p_PE4XWA-7J3JBHKQ"
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS  # 事件结束，进入默认处理逻辑，一般会覆写reply
+                return True  
+            elif content.startswith("好医生"):
+                reply = Reply()
+                reply.type = ReplyType.IMAGE_URL
+                reply.content = "https://iknowm-1257847067.cos.ap-nanjing.myqcloud.com/images/202401/IMG_202401_330311.jpg"        
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS  # 事件结束，进入默认处理逻辑，一般会覆写reply
+                return True      
+            elif content.startswith("王医生"):
+                reply = Reply()
+                reply.type = ReplyType.IMAGE_URL
+                reply.content = "http://iknowm-1257847067.cos.ap-nanjing.myqcloud.com/images/202401/IMG_202401_288557.jpg"
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS  # 事件结束，进入默认处理逻辑，一般会覆写reply
+                return True
+
         except Exception as e:
             logger.error("_reply_hello: {}".format(e))
         return False
