@@ -343,7 +343,10 @@ class UserRefreshThread(object):
                     f'群: {v.NickName} ({len(v["MemberList"])}) 头像:{v.HeadImgUrl[0:10]}'
                 )
             except Exception as err:
-                logger.error(f"获取群信息失败:{err}, 群:{value.NickName}, {value.UserName}")
+                logger.error(f"获取群信息失败:{err}")
+                if value:
+                    logger.error(f"获取群信息失败,群:{value.get('NickName')}, {value.get('UserName')}")
+
         if update_chatroom > 0 or update_remark_name:
             logger.warn(
                 f"{len(chatrooms)} 个群更新 memberList:{update_chatroom}个,remarkName:{update_remark_name}个 成功,保存登录状态"

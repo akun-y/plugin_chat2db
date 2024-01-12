@@ -1,5 +1,13 @@
 [
     {
+        "label": "quote",
+        "importPath": "urllib.parse",
+        "description": "urllib.parse",
+        "isExtraImport": true,
+        "detail": "urllib.parse",
+        "documentation": {}
+    },
+    {
         "label": "requests",
         "kind": 6,
         "isExtraImport": true,
@@ -73,124 +81,221 @@
         "documentation": {}
     },
     {
-        "label": "makeGroupReq",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
+        "label": "logger",
+        "importPath": "common.log",
+        "description": "common.log",
         "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
+        "detail": "common.log",
         "documentation": {}
     },
     {
-        "label": "EthZero",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "is_eth_address",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "makeGroupReq",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "makeGroupReq",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "makeGroupReq",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "is_eth_address",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "makeGroupReq",
-        "importPath": "plugins.plugin_chat2db.comm",
-        "description": "plugins.plugin_chat2db.comm",
-        "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.comm",
-        "documentation": {}
-    },
-    {
-        "label": "quote",
-        "importPath": "urllib.parse",
-        "description": "urllib.parse",
-        "isExtraImport": true,
-        "detail": "urllib.parse",
-        "documentation": {}
-    },
-    {
-        "label": "sys",
+        "label": "config",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "sys",
-        "description": "sys",
-        "detail": "sys",
+        "importPath": "config",
+        "description": "config",
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "global_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "global_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "conf",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "global_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "config",
+        "description": "config",
+        "isExtraImport": true,
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "make_chat_sign_req",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "is_eth_address",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "is_valid_string",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "make_chat_sign_req",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "make_chat_sign_req",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "make_chat_sign_req",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "is_eth_address",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "EthZero",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "is_eth_address",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "make_chat_sign_req",
+        "importPath": "plugins.plugin_comm.plugin_comm",
+        "description": "plugins.plugin_comm.plugin_comm",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.plugin_comm",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
         "documentation": {}
     },
     {
@@ -203,12 +308,12 @@
         "documentation": {}
     },
     {
-        "label": "logging",
+        "label": "sys",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "logging",
-        "description": "logging",
-        "detail": "logging",
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
         "documentation": {}
     },
     {
@@ -777,87 +882,6 @@
         "documentation": {}
     },
     {
-        "label": "config",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "config",
-        "description": "config",
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "conf",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "global_config",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "load_config",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "conf",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "global_config",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "load_config",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "conf",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "global_config",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
-        "label": "load_config",
-        "importPath": "config",
-        "description": "config",
-        "isExtraImport": true,
-        "detail": "config",
-        "documentation": {}
-    },
-    {
         "label": "itchat",
         "importPath": "lib",
         "description": "lib",
@@ -939,34 +963,34 @@
     },
     {
         "label": "ApiTencent",
-        "importPath": "plugins.plugin_chat2db.api_tentcent",
-        "description": "plugins.plugin_chat2db.api_tentcent",
+        "importPath": "plugins.plugin_chat2db.api_tencent",
+        "description": "plugins.plugin_chat2db.api_tencent",
         "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "detail": "plugins.plugin_chat2db.api_tencent",
         "documentation": {}
     },
     {
         "label": "ApiTencent",
-        "importPath": "plugins.plugin_chat2db.api_tentcent",
-        "description": "plugins.plugin_chat2db.api_tentcent",
+        "importPath": "plugins.plugin_chat2db.api_tencent",
+        "description": "plugins.plugin_chat2db.api_tencent",
         "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "detail": "plugins.plugin_chat2db.api_tencent",
         "documentation": {}
     },
     {
         "label": "ApiTencent",
-        "importPath": "plugins.plugin_chat2db.api_tentcent",
-        "description": "plugins.plugin_chat2db.api_tentcent",
+        "importPath": "plugins.plugin_chat2db.api_tencent",
+        "description": "plugins.plugin_chat2db.api_tencent",
         "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "detail": "plugins.plugin_chat2db.api_tencent",
         "documentation": {}
     },
     {
         "label": "ApiTencent",
-        "importPath": "plugins.plugin_chat2db.api_tentcent",
-        "description": "plugins.plugin_chat2db.api_tentcent",
+        "importPath": "plugins.plugin_chat2db.api_tencent",
+        "description": "plugins.plugin_chat2db.api_tencent",
         "isExtraImport": true,
-        "detail": "plugins.plugin_chat2db.api_tentcent",
+        "detail": "plugins.plugin_chat2db.api_tencent",
         "documentation": {}
     },
     {
@@ -1066,35 +1090,59 @@
         "documentation": {}
     },
     {
-        "label": "html_to_image",
-        "importPath": "plugins.plugin_report_work.mixedtext_to_image",
-        "description": "plugins.plugin_report_work.mixedtext_to_image",
+        "label": "*",
+        "importPath": "plugins.plugin_comm",
+        "description": "plugins.plugin_comm",
         "isExtraImport": true,
-        "detail": "plugins.plugin_report_work.mixedtext_to_image",
+        "detail": "plugins.plugin_comm",
         "documentation": {}
     },
     {
-        "label": "is_html",
-        "importPath": "plugins.plugin_report_work.mixedtext_to_image",
-        "description": "plugins.plugin_report_work.mixedtext_to_image",
+        "label": "RemarkNameInfo",
+        "importPath": "plugins.plugin_comm.remark_name_info",
+        "description": "plugins.plugin_comm.remark_name_info",
         "isExtraImport": true,
-        "detail": "plugins.plugin_report_work.mixedtext_to_image",
+        "detail": "plugins.plugin_comm.remark_name_info",
         "documentation": {}
     },
     {
-        "label": "markdown_to_html",
-        "importPath": "plugins.plugin_report_work.mixedtext_to_image",
-        "description": "plugins.plugin_report_work.mixedtext_to_image",
+        "label": "RemarkNameInfo",
+        "importPath": "plugins.plugin_comm.remark_name_info",
+        "description": "plugins.plugin_comm.remark_name_info",
         "isExtraImport": true,
-        "detail": "plugins.plugin_report_work.mixedtext_to_image",
+        "detail": "plugins.plugin_comm.remark_name_info",
         "documentation": {}
     },
     {
         "label": "pick_tables_from_markdown",
-        "importPath": "plugins.plugin_report_work.pick_tables_markdown",
-        "description": "plugins.plugin_report_work.pick_tables_markdown",
+        "importPath": "plugins.plugin_comm.pick_tables_markdown",
+        "description": "plugins.plugin_comm.pick_tables_markdown",
         "isExtraImport": true,
-        "detail": "plugins.plugin_report_work.pick_tables_markdown",
+        "detail": "plugins.plugin_comm.pick_tables_markdown",
+        "documentation": {}
+    },
+    {
+        "label": "html_to_image",
+        "importPath": "plugins.plugin_comm.mixedtext_to_image",
+        "description": "plugins.plugin_comm.mixedtext_to_image",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "is_html",
+        "importPath": "plugins.plugin_comm.mixedtext_to_image",
+        "description": "plugins.plugin_comm.mixedtext_to_image",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.mixedtext_to_image",
+        "documentation": {}
+    },
+    {
+        "label": "markdown_to_html",
+        "importPath": "plugins.plugin_comm.mixedtext_to_image",
+        "description": "plugins.plugin_comm.mixedtext_to_image",
+        "isExtraImport": true,
+        "detail": "plugins.plugin_comm.mixedtext_to_image",
         "documentation": {}
     },
     {
@@ -1167,15 +1215,6 @@
         "documentation": {}
     },
     {
-        "label": "arrow",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "arrow",
-        "description": "arrow",
-        "detail": "arrow",
-        "documentation": {}
-    },
-    {
         "label": "threading",
         "kind": 6,
         "isExtraImport": true,
@@ -1185,21 +1224,38 @@
         "documentation": {}
     },
     {
+        "label": "MemberDescriptorType",
+        "importPath": "types",
+        "description": "types",
+        "isExtraImport": true,
+        "detail": "types",
+        "documentation": {}
+    },
+    {
+        "label": "arrow",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "arrow",
+        "description": "arrow",
+        "detail": "arrow",
+        "documentation": {}
+    },
+    {
         "label": "ApiGroupx",
         "kind": 6,
         "importPath": "api_groupx",
         "description": "api_groupx",
-        "peekOfCode": "class ApiGroupx:\n    def __init__(self, host) -> None:\n        self.groupxHostUrl = host\n    def post_chat_record(self, account, msg_json):\n        account = account.strip() if account else \"0x0000000000000000000000000000000000000000\"\n        post_url = f\"{self.groupxHostUrl}/v1/chat/{account}\"\n        logger.info(\"post url: {}\".format(post_url))\n        try:\n            response = requests.post(\n                post_url, json=msg_json, verify=False)",
+        "peekOfCode": "class ApiGroupx:\n    def __init__(self, host=None) -> None:\n        self.agent = conf().get(\"bot_account\") or \"123112312\"\n        if host:\n            self.groupxHostUrl = host\n        else:\n            self.groupxHostUrl = conf().get(\"groupx_url\") or 'https://groupx.mfull.cn'\n    def post_chat_record(self, account, msg_json):\n        account = (\n            account.strip() if account else \"0x0000000000000000000000000000000000000000\"",
         "detail": "api_groupx",
         "documentation": {}
     },
     {
         "label": "ApiTencent",
         "kind": 6,
-        "importPath": "api_tentcent",
-        "description": "api_tentcent",
-        "peekOfCode": "class ApiTencent(object):\n    def __init__(self, groupxHostUrl) -> None:\n        self.groupxHostUrl = groupxHostUrl\n        self.groupx = ApiGroupx(groupxHostUrl)\n    def qcloud_upload_bytes(self, data) :\n        files = {'file': data}  # 'file' 是服务器上接受文件的字段名\n        cos_policy= self.groupx.qcloud_get_cos_policy(\"jpg\")\n        formData = {\n            \"key\": cos_policy['cosKey'],\n            \"policy\": cos_policy['policy'],",
-        "detail": "api_tentcent",
+        "importPath": "api_tencent",
+        "description": "api_tencent",
+        "peekOfCode": "class ApiTencent(object):\n    def __init__(self, groupxHostUrl=None) -> None:\n        self.groupx = ApiGroupx()\n    def qcloud_upload_bytes(self, data):\n        files = {\"file\": data}  # 'file' 是服务器上接受文件的字段名\n        cos_policy = self.groupx.qcloud_get_cos_policy(\"jpg\")\n        formData = {\n            \"key\": cos_policy[\"cosKey\"],\n            \"policy\": cos_policy[\"policy\"],\n            \"success_action_status\": 200,",
+        "detail": "api_tencent",
         "documentation": {}
     },
     {
@@ -1207,7 +1263,7 @@
         "kind": 6,
         "importPath": "chat2db",
         "description": "chat2db",
-        "peekOfCode": "class Chat2db(Plugin):\n    def __init__(self):\n        super().__init__()\n        self.config = super().load_config()\n        if not self.config:\n            # 未加载到配置，使用模板中的配置\n            self.config = self._load_config_template()\n        if self.config:\n            self.robot_account = self.config.get(\"account\")\n            self.robot_name = self.config.get(\"name\")",
+        "peekOfCode": "class Chat2db(Plugin):\n    def __init__(self):\n        super().__init__()\n        self.path = os.path.dirname(__file__)\n        self.config = super().load_config()\n        if not self.config:\n            # 未加载到配置，使用模板中的配置\n            self.config = self._load_config_template()\n        if self.config:\n            self.robot_account = self.config.get(\"account\")",
         "detail": "chat2db",
         "documentation": {}
     },
@@ -1216,7 +1272,7 @@
         "kind": 2,
         "importPath": "chat2db_knowledge",
         "description": "chat2db_knowledge",
-        "peekOfCode": "def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: EventContext):\n    try:\n        ctx = e_context['context']\n        if ctx.type == ContextType.TEXT:\n            msg = ctx.get(\"msg\")\n            isgroup =  ctx.get(\"isgroup\", False)\n            if isgroup: user_UserName = msg.actual_user_id\n            else: user_UserName= msg._rawmsg.user.UserName\n            session_id = ctx.get(\"session_id\")\n            all_sessions = Bridge().get_bot(\"chat\").sessions",
+        "peekOfCode": "def chat2db_refresh_knowledge(groupx, robot_account, user_manager, e_context: EventContext):\n    try:\n        ctx = e_context['context']\n        if ctx.type == ContextType.TEXT:\n            msg = ctx.get(\"msg\")\n            is_group = ctx.get(\"isgroup\", False)\n            if is_group:  # 知识库id为用户ID+群id组合\n                know_id = f\"{msg.actual_user_id}_{msg.from_user_id}\"\n            else:\n                know_id = msg._rawmsg.user.UserName",
         "detail": "chat2db_knowledge",
         "documentation": {}
     },
@@ -1227,42 +1283,6 @@
         "description": "chat2db_reply",
         "peekOfCode": "class CustomReply:\n    def __init__(self, config, groupx, user_manager):\n        self.config = config\n        self.groupx = groupx\n        self.user_manager = user_manager\n        self.robot_account =  self.config.get(\"account\")\n        self.robot_name =  self.config.get(\"name\")\n        self.robot_desc =  self.config.get(\"description\")\n        self.patpat_message =  self.config.get(\"patpat_message\") #拍拍是否使用配置信息\n    def reply_join_group(self, e_context: EventContext):",
         "detail": "chat2db_reply",
-        "documentation": {}
-    },
-    {
-        "label": "makeGroupReq",
-        "kind": 2,
-        "importPath": "comm",
-        "description": "comm",
-        "peekOfCode": "def makeGroupReq(account,payload):\n    json_data = {\n        'payload': payload,\n        \"params\": {\n                \"addr\": account if account else \"0x0000000000000000000000000000000000000000\",\n                \"random\": \"a9a58d316a16206ca2529720d01f8a9d10779eb330902f4ec05cf358a3418a9f\",\n                \"nonce\": \"1a9b1b1d9e854196143504b776b65e9fb5c87fe4930466a8fe68763fa6e48aed\",\n                \"ts\": \"1680592645793\",\n                \"hash\": \"0xc324d54dc3f613b8b33ce60d3085b5fc16b9012fa1df733361b370fec663bc67\",\n                \"method\": 2,",
-        "detail": "comm",
-        "documentation": {}
-    },
-    {
-        "label": "is_eth_address",
-        "kind": 2,
-        "importPath": "comm",
-        "description": "comm",
-        "peekOfCode": "def is_eth_address(address):\n    # 以太坊地址的正则表达式\n    ethereum_address_pattern = re.compile(r'^0x[1-9a-fA-F][0-9a-fA-F]{39}$')\n    # 使用正则表达式匹配\n    return bool(ethereum_address_pattern.match(address))\ndef test():\n    # 示例用法\n    valid_address = \"0x742d35Cc6634C0532925a3b844Bc454e4438f44e\"\n    invalid_address_all_zeros = \"0x0000000000000000000000000000000000000000\"\n    invalid_address_starting_with_zero = \"0x0123456789abcdef0123456789abcdef01234567\"",
-        "detail": "comm",
-        "documentation": {}
-    },
-    {
-        "label": "test",
-        "kind": 2,
-        "importPath": "comm",
-        "description": "comm",
-        "peekOfCode": "def test():\n    # 示例用法\n    valid_address = \"0x742d35Cc6634C0532925a3b844Bc454e4438f44e\"\n    invalid_address_all_zeros = \"0x0000000000000000000000000000000000000000\"\n    invalid_address_starting_with_zero = \"0x0123456789abcdef0123456789abcdef01234567\"\n    print(f\"{valid_address} 是否有效：{is_eth_address(valid_address)}\")\n    print(f\"{invalid_address_all_zeros} 是否有效：{is_eth_address(invalid_address_all_zeros)}\")\n    print(f\"{invalid_address_starting_with_zero} 是否有效：{is_eth_address(invalid_address_starting_with_zero)}\")\n    # 0x742d35Cc6634C0532925a3b844Bc454e4438f44e 是否有效：True\n    # 0x0000000000000000000000000000000000000000 是否有效：False",
-        "detail": "comm",
-        "documentation": {}
-    },
-    {
-        "label": "EthZero",
-        "kind": 5,
-        "importPath": "comm",
-        "description": "comm",
-        "peekOfCode": "EthZero = \"0x0000000000000000000000000000000000000000\"",
-        "detail": "comm",
         "documentation": {}
     },
     {
@@ -1387,7 +1407,7 @@
         "kind": 6,
         "importPath": "UserManager",
         "description": "UserManager",
-        "peekOfCode": "class UserManager:\n    def __init__(self, groupx):\n        self.groupx = groupx\n        self.user_knowledge = {}\n        self.doctor_of_user={}\n        self.doctor_of_group={}\n        self.group_info ={}\n        self.users={}\n    def should_update(self, user_id):\n        if user_id in self.user_knowledge:",
+        "peekOfCode": "class UserManager:\n    def __init__(self, groupx):\n        self.groupx = groupx\n        self.user_knowledge = {}\n        self.doctor_of_user = {}\n        self.doctor_of_group = {}\n        self.group_info = {}\n        self.users = {}\n    def should_update(self, user_id, user_session=None):\n        if user_id in self.user_knowledge:",
         "detail": "UserManager",
         "documentation": {}
     },
@@ -1396,7 +1416,7 @@
         "kind": 6,
         "importPath": "user_refresh_thread",
         "description": "user_refresh_thread",
-        "peekOfCode": "class UserRefreshThread(object):\n    def __init__(self, conn, config):\n        super().__init__()\n        #保存定时任务回调\n        self._config = config\n        self._conn = conn\n        self.groupxHostUrl = self._config.get(\"groupx_host_url\")\n        self.groupx = ApiGroupx(self.groupxHostUrl)\n        self.tencent = ApiTencent(self.groupxHostUrl)\n        self.img_service = HeadImgManager(conn, self.groupxHostUrl)",
+        "peekOfCode": "class UserRefreshThread(object):\n    def __init__(self, conn, config):\n        super().__init__()\n        # 保存定时任务回调\n        self._config = config\n        self._conn = conn\n        self.groupxHostUrl = self._config.get(\"groupx_host_url\")\n        self.groupx = ApiGroupx(self.groupxHostUrl)\n        self.tencent = ApiTencent(self.groupxHostUrl)\n        self.img_service = HeadImgManager(conn, self.groupxHostUrl)",
         "detail": "user_refresh_thread",
         "documentation": {}
     }
