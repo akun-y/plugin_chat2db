@@ -257,12 +257,12 @@ class UserRefreshThread(object):
                 c.execute(
                     "INSERT OR REPLACE INTO groups_records VALUES (?,?,?,?,?,?,?,?)",
                     (
-                        chatroom.UserName,
-                        chatroom.NickName,
-                        chatroom.DisplayName,
-                        chatroom.UserName,
-                        chatroom.NickName,
-                        chatroom.HeadImgUrl,
+                        chatroom.get("UserName"),
+                        chatroom.get("NickName"),
+                        chatroom.get("DisplayName"),
+                        chatroom.get("UserName"),
+                        chatroom.get("NickName"),
+                        chatroom.get("HeadImgUrl"),
                         chatroom.get("PYQuanPin"),
                         chatroom.get("EncryChatRoomId"),
                     ),
