@@ -16,9 +16,17 @@ from lib import itchat
 from lib.itchat.content import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
 from plugins.plugin_chat2db.api_tencent import ApiTencent
-from plugins.plugin_comm.plugin_comm import EthZero, is_eth_address, make_chat_sign_req
+from plugins.plugin_comm.plugin_comm import (
+    EthZero,
+    get_itchat_group,
+    is_eth_address,
+    make_chat_sign_req,
+)
 from plugins.plugin_chat2db.head_img_manager import HeadImgManager
-from plugins.plugin_comm.remark_name_info import RemarkNameInfo
+from plugins.plugin_comm.remark_name_info import (
+    RemarkNameInfo,
+    set_chatroom_remark_name,
+)
 
 try:
     from channel.wechatnt.ntchat_channel import wechatnt
@@ -71,7 +79,7 @@ class UserRefreshThread(object):
             # 定时检测
             self.timer_check()
             # 群组列表有没有增减
-            chatrooms = itchat.get_chatrooms(True,True)
+            chatrooms = itchat.get_chatrooms(True, True)
             if len(chatrooms) != len(self.chatrooms):
                 self.chatrooms = chatrooms
                 self.update_friends_groups()
@@ -154,10 +162,13 @@ class UserRefreshThread(object):
 
     def update_friends_groups(self):
         logger.info("更新用户ID,Friends, Groups")
-        if self.postFriends2Groupx():
-            self.saveFriends2DB()
-        if self.postGroups2Groupx():
-            self.saveGroups2DB()
+        try:
+            if self.postFriends2Groupx():
+                self.saveFriends2DB()
+            if self.postGroups2Groupx():
+                self.saveGroups2DB()
+        except Exception as e:
+            logger.error(f"====>更新用户ID,Friends, Groups 失败: {e}")
 
     def saveFriends2DB(self):
         # 好友处理
@@ -199,7 +210,7 @@ class UserRefreshThread(object):
             end = len(self.friends) - 1
         friends = self.friends[self.postFriendsPos : end]
         logger.info(
-            f"post friends to groupx:{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}"
+            f"post friends to server :{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}"
         )
 
         self.postFriendsPos += step
@@ -211,13 +222,13 @@ class UserRefreshThread(object):
             threading.Timer(15.0, self.postFriends2Groupx).start()
 
         ret = self.groupx.post_friends(
-            self.robot_account, self.robot_user_nickname,  friends
+            self.robot_account, self.robot_user_nickname, friends
         )
         if ret is False:
-            logger.error(f"post friends to groupx failed")
+            logger.error(f"post friends to groupx failed ${ret}")
             return False
         else:
-            logger.info(f"post friends to groupx success")
+            logger.info(f"post friends to groupx success 用户数:{len(ret)}")
 
         # filtered_data = [item for item in ret if item.get('account')]
         # logger.info(f"post friends have account :{len(filtered_data)}")
@@ -292,73 +303,71 @@ class UserRefreshThread(object):
                 dict1[key] = value
         return dict1
 
+    # 根据服务器返回的group信息,更新RemarkName
+    def _set_remark_name_chatrooms(self, groups_from_srv):
+        for group in groups_from_srv:
+            group_id = group.get("groupUserName") or group.get("UserName")
+            set_chatroom_remark_name(group_id, group.get("objectId"))
+
+    def _refresh_group_info(self, chatroom2):
+        v = chatroom2
+        # ----------------------------------------------
+        # 设置RemarkName,通过search_friends,update_friend方法获取群信息时，会包括RemarkName
+        if len(v["RemarkName"]) < 1:
+            room1 = get_itchat_group(v["UserName"])
+            if len(room1["RemarkName"]) > 0:
+                v["RemarkName"] = room1["RemarkName"]
+                logger.info(f"更新群 {v['NickName']} remarkName 为 {v['RemarkName']}")
+        # ----------------------------------------------
+        # 设置 memberList
+        memberList = v["MemberList"]
+        if len(memberList) < 1:
+            room2 = itchat.update_chatroom(v["UserName"], True)
+            if len(room2["MemberList"]) > 0:
+                v["MemberList"] = room2["MemberList"]
+                logger.info(
+                    f"更新群 {v['NickName']} memberList 长度为 {len(v['MemberList'])}"
+                )
+        # ----------------------------------------------
+        # 头像更新,放在最后,否则会被覆盖
+        if v["HeadImgUrl"] is None or not v["HeadImgUrl"].startswith("http"):
+            url = self.img_service.get_head_img_url(v.get("UserName"), True)
+            if url and url.startswith("http"):
+                v["HeadImgUrl"] = url
+        # ----------------------------------------------
+        logger.info(
+            f"群:{v['NickName']} RM:{v['RemarkName']} 成员:({len(v['MemberList'])})个,头像:{v['HeadImgUrl'][0:10]}"
+        )
+        return v
+
     def postGroups2Groupx(self):
-        # 获取群列表,每次100条,越界后又从0开始
+        step = 30
+        # 获取群列表,每次30条,越界后又从0开始
         if len(self.chatrooms) < 1:
             self.chatrooms = itchat.get_chatrooms(True, False)
 
         chatrooms = self.chatrooms[self.postGroupsPos : self.postGroupsPos + 100]
-        self.postGroupsPos += 100
-        if len(chatrooms) < 100:
+        self.postGroupsPos += step
+        if len(chatrooms) < step:
             self.postGroupsPos = 0
         else:
             # 每隔8秒执行一次,直到群列表全部发送完成
             threading.Timer(8.0, self.postGroups2Groupx).start()
 
-        update_chatroom = 0
-        update_remark_name = 0
         for index, value in enumerate(chatrooms):
             try:
-                url = self.img_service.get_head_img_url(value.get("UserName"), True)
-                value["HeadImgUrl"] = url if url else value.get("HeadImgUrl")
-
-                # 设置RemarkName,通过search_friends,update_friend方法获取群信息时，会包括RemarkName
-                if len(value["RemarkName"]) < 1:
-                    room1 = itchat.search_friends(userName=value["UserName"])
-                    if not room1:
-                        room1 = itchat.update_friend(value["UserName"])
-
-                    if room1 and len(room1["RemarkName"]) > 0:
-                        update_remark_name += 1
-                        chatrooms[index] = self._merge_dict(room1, value)
-                        chatrooms[index].update()
-                        logger.info(
-                            f"从腾讯服务获取群最新属性:{room1['NickName']} - {room1['RemarkName']} "
-                        )
-                # ----------------------------------------------
-                # 设置 memberList
-                memberList = value["MemberList"]
-                if len(memberList) < 1:
-                    room2 = itchat.update_chatroom(value["UserName"], True)
-                    if len(room2["MemberList"]) > 0:
-                        update_chatroom += 1
-                        chatrooms[index] = self._merge_dict(room2, chatrooms[index])
-                        chatrooms[index].update()
-                        logger.info(
-                            f"从腾讯服务器获取群最新信息：{room2['NickName']} 成员:{len(room2['MemberList'])}个)"
-                        )
-
-                v = chatrooms[index]
-                logger.info(
-                    f'群: {v.NickName} ({len(v["MemberList"])}) 头像:{v.HeadImgUrl[0:10]}'
-                )
+                last_group = self._refresh_group_info(value)
+                chatrooms[index] = last_group
             except Exception as err:
-                logger.error(f"获取群信息失败:{err}")
-                if value:
-                    logger.error(f"获取群信息失败,群:{value.get('NickName')}, {value.get('UserName')}")
-
-        if update_chatroom > 0 or update_remark_name:
-            logger.warn(
-                f"{len(chatrooms)} 个群更新 memberList:{update_chatroom}个,remarkName:{update_remark_name}个 成功,保存登录状态"
-            )
-            itchat.dump_login_status()
+                logger.error(f"更新群信息失败:{err}")
 
         ret = self.groupx.post_groups(
             self.robot_account, self.robot_user_nickname, chatrooms
         )
         logger.info(
-            f"post groups to groupx api:{self.postGroupsPos}, {len(chatrooms)}, {ret}"
+            f"post groups to server:位置:{self.postGroupsPos}, 共:{len(chatrooms)}, 返回数组长度:{len(ret)}"
         )
+        self._set_remark_name_chatrooms(ret)
         return ret
 
     def _get_friends(self, session_id, start_timestamp=0, limit=9999):

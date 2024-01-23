@@ -115,17 +115,6 @@ class Chat2db(Plugin):
         self._create_table_friends()
         self._create_table_groups()
 
-        btype = Bridge().btype["chat"]
-        if btype not in [
-            const.OPEN_AI,
-            const.CHATGPT,
-            const.CHATGPTONAZURE,
-            const.BAIDU,
-            const.LINKAI,
-        ]:
-            raise Exception("[Summary] init failed, not supported bot type")
-        self.bot = bot_factory.create_bot(Bridge().btype["chat"])
-
         # self.handlers[Event.ON_RECEIVE_MESSAGE] = self.on_handle_context
         self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
         self.handlers[Event.ON_SEND_REPLY] = self.on_send_reply
@@ -473,9 +462,7 @@ class Chat2db(Plugin):
     # 收到消息 ON_RECEIVE_MESSAGE
 
     def on_handle_context(self, e_context: EventContext):
-        # self.sessionid = e_context["context"]["session_id"]
-        # self.bot.sessions.build_session(self.sessionid, system_prompt="self.desc")
-        # 过滤掉原有的一些命令
+            # 过滤掉原有的一些命令
         if self._filter_command(e_context):
             return
 
