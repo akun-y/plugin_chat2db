@@ -208,6 +208,7 @@ class UserRefreshThread(object):
         end = self.postFriendsPos + step
         if end > len(self.friends):
             end = len(self.friends) - 1
+            
         friends = self.friends[self.postFriendsPos : end]
         logger.info(
             f"post friends to server :{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}"
@@ -217,9 +218,10 @@ class UserRefreshThread(object):
         if len(friends) < step:
             # 全部好友都发送完成了
             self.postFriendsPos = 0
+            logger.info(f"好友列表发送完成,共{len(self.friends)}个好友")
         else:
-            # 每隔15秒执行一次,直到好友列表全部发送完成
-            threading.Timer(15.0, self.postFriends2Groupx).start()
+            # 每隔8秒执行一次,直到好友列表全部发送完成
+            threading.Timer(8.0, self.postFriends2Groupx).start()
 
         ret = self.groupx.post_friends(
             self.robot_account, self.robot_user_nickname, friends
@@ -341,18 +343,19 @@ class UserRefreshThread(object):
         return v
 
     def postGroups2Groupx(self):
-        step = 30
+        step = 2
         # 获取群列表,每次30条,越界后又从0开始
         if len(self.chatrooms) < 1:
             self.chatrooms = itchat.get_chatrooms(True, False)
 
-        chatrooms = self.chatrooms[self.postGroupsPos : self.postGroupsPos + 100]
+        chatrooms = self.chatrooms[self.postGroupsPos : self.postGroupsPos + step]
         self.postGroupsPos += step
         if len(chatrooms) < step:
             self.postGroupsPos = 0
+            logger.info(f"群列表已发送完成,共:{len(self.chatrooms)}")
         else:
-            # 每隔8秒执行一次,直到群列表全部发送完成
-            threading.Timer(8.0, self.postGroups2Groupx).start()
+            # 每隔20秒执行一次,直到群列表全部发送完成
+            threading.Timer(30.0, self.postGroups2Groupx).start()
 
         for index, value in enumerate(chatrooms):
             try:
@@ -365,7 +368,7 @@ class UserRefreshThread(object):
             self.robot_account, self.robot_user_nickname, chatrooms
         )
         logger.info(
-            f"post groups to server:位置:{self.postGroupsPos}, 共:{len(chatrooms)}, 返回数组长度:{len(ret)}"
+            f"post groups to server:位置:{self.postGroupsPos}, 共:{len(self.chatrooms)}, 返回数组长度:{len(ret)}"
         )
         self._set_remark_name_chatrooms(ret)
         return ret

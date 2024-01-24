@@ -40,6 +40,8 @@ from plugins.plugin_chat2db.UserManager import UserManager
 from plugins.plugin_comm import *
 from plugins.plugin_comm.remark_name_info import RemarkNameInfo
 from plugins.plugin_comm.plugin_comm import (
+    get_itchat_group,
+    get_itchat_user,
     is_eth_address,
     is_valid_string,
     make_chat_sign_req,
@@ -148,20 +150,14 @@ class Chat2db(Plugin):
             wxGroupId = cmsg.other_user_id
             wxGroupName = cmsg.other_user_nickname
 
-            user = {
-                "account": account,
-                "NickName": nickName,
-                "UserName": user_id,
-                "HeadImgUrl": avatar,
-            }
         else:
             user_id = cmsg.from_user_id
             avatar = self.img_service.get_head_img_url(user_id)
             nickName = cmsg.from_user_nickname
-            user = {**cmsg._rawmsg.user, "account": account, "HeadImgUrl": avatar}
             wxGroupId = ""
             wxGroupName = ""  # 用于判断是否群聊
-
+        # 发送人详情
+        user = get_itchat_user(user_id)
         # 接收人头像
         recvAvatar = self.img_service.get_head_img_url(cmsg.to_user_id)
         source = f"{self.systemName} {self.channel_type}"
