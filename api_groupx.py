@@ -15,24 +15,15 @@ class ApiGroupx:
         else:
             self.groupxHostUrl = conf().get("groupx_url") or "https://groupx.mfull.cn"
 
+    def post_chat_record_group_not_at(self, account, msg_json):
+        account = account.strip() if account else EthZero
+        url = f"{self.groupxHostUrl}/v1/chat/group-not-at/{account}"
+        return self._request(url, account, msg_json)
+
     def post_chat_record(self, account, msg_json):
-        account = (
-            account.strip() if account else "0x0000000000000000000000000000000000000000"
-        )
-        post_url = f"{self.groupxHostUrl}/v1/chat/{account}"
-        logger.info("post url: {}".format(post_url))
-        try:
-            response = requests.post(post_url, json=msg_json, verify=False)
-            logger.info(
-                f"post chat to group api:{response.reason} len:{len(response.content)}"
-            )
-            return response.json()
-        except requests.HTTPError as http_err:
-            logger.error(f"HTTP错误发生: {http_err}")
-            return None
-        except Exception as err:
-            logger.error(f"意外错误发生: {err}")
-            return None
+        account = account.strip() if account else EthZero
+        url = f"{self.groupxHostUrl}/v1/chat/{account}"
+        return self._request(url, account, msg_json)
 
     # 获取我的减重信息
     def post_weight_loss(self, account, msg_json):

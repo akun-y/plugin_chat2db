@@ -1,33 +1,12 @@
 # encoding:utf-8
-import logging
-import os
-import sqlite3
-import time
-import traceback
-from datetime import datetime, timedelta
-from lib import itchat
-import plugins
-import requests
-from bot import bot_factory
-from bridge.bridge import Bridge
+
+
 from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
-from channel.chat_channel import check_contain, check_prefix
 from channel.chat_message import ChatMessage
-from chatgpt_tool_hub.chains.llm import LLMChain
-from chatgpt_tool_hub.models import build_model_params
-from chatgpt_tool_hub.models.model_factory import ModelFactory
-from chatgpt_tool_hub.prompts import PromptTemplate
-from common import const
 from common.log import logger
-from common.tmp_dir import TmpDir
-from config import conf, global_config, load_config
+from lib import itchat
 from plugins import *
-from plugins.plugin_chat2db.api_groupx import ApiGroupx
-from plugins.plugin_comm.plugin_comm import EthZero, make_chat_sign_req
-from plugins.plugin_chat2db.head_img_manager import HeadImgManager
-from plugins.plugin_chat2db.user_refresh_thread import UserRefreshThread
-from plugins.plugin_chat2db.UserManager import UserManager
 
 # 应答一些自定义的回复信息,包括拍一拍，加群欢迎，Hello回复
 

@@ -1,32 +1,17 @@
 # encoding:utf-8
-import logging
 import os
 import sqlite3
-import time
-import traceback
-from datetime import datetime, timedelta
 
 import requests
-from chatgpt_tool_hub.chains.llm import LLMChain
-from chatgpt_tool_hub.models import build_model_params
-from chatgpt_tool_hub.models.model_factory import ModelFactory
-from chatgpt_tool_hub.prompts import PromptTemplate
-from memory_profiler import profile
-from PIL import Image, ImageDraw, ImageFont
+from PIL import ImageFont
 
 import plugins
-from bot import bot_factory
-from bridge.bridge import Bridge
 from bridge.context import ContextType
-from bridge.reply import Reply, ReplyType
-from channel.chat_channel import check_contain, check_prefix
+from bridge.reply import ReplyType
 from channel.chat_message import ChatMessage
-from common import const
 from common.log import logger
-from common.tmp_dir import TmpDir
-from config import conf, global_config, load_config
+from config import conf
 from lib import itchat
-from lib.itchat.async_components.contact import update_friend
 from lib.itchat.content import FRIENDS
 from plugins import *
 from plugins.plugin_chat2db.api_groupx import ApiGroupx
@@ -40,7 +25,6 @@ from plugins.plugin_chat2db.UserManager import UserManager
 from plugins.plugin_comm import *
 from plugins.plugin_comm.remark_name_info import RemarkNameInfo
 from plugins.plugin_comm.plugin_comm import (
-    get_itchat_group,
     get_itchat_user,
     is_eth_address,
     is_valid_string,
@@ -362,7 +346,6 @@ class Chat2db(Plugin):
         if ctx.type not in [ContextType.TEXT]:
             return
         content = ctx.content
-        logger.info("-----------------")
         logger.info(self.robot_account)
         if content[0] in self.prefix_deny:
             logger.info("[save2db] _filter_command. 拒绝: %s" % content)
@@ -458,7 +441,7 @@ class Chat2db(Plugin):
     # 收到消息 ON_RECEIVE_MESSAGE
 
     def on_handle_context(self, e_context: EventContext):
-            # 过滤掉原有的一些命令
+        # 过滤掉原有的一些命令
         if self._filter_command(e_context):
             return
 
