@@ -13,26 +13,17 @@ class ApiGroupx:
         if host:
             self.groupxHostUrl = host
         else:
-            self.groupxHostUrl = conf().get("groupx_url") or 'https://groupx.mfull.cn'
+            self.groupxHostUrl = conf().get("groupx_url") or "https://groupx.mfull.cn"
+
+    def post_chat_record_group_not_at(self, account, msg_json):
+        account = account.strip() if account else EthZero
+        url = f"{self.groupxHostUrl}/v1/chat/group-not-at/{account}"
+        return self._request(url, account, msg_json)
 
     def post_chat_record(self, account, msg_json):
-        account = (
-            account.strip() if account else "0x0000000000000000000000000000000000000000"
-        )
-        post_url = f"{self.groupxHostUrl}/v1/chat/{account}"
-        logger.info("post url: {}".format(post_url))
-        try:
-            response = requests.post(post_url, json=msg_json, verify=False)
-            logger.info(
-                f"post chat to group api:{response.reason} len:{len(response.content)}"
-            )
-            return response.json()
-        except requests.HTTPError as http_err:
-            logger.error(f"HTTP错误发生: {http_err}")
-            return None
-        except Exception as err:
-            logger.error(f"意外错误发生: {err}")
-            return None
+        account = account.strip() if account else EthZero
+        url = f"{self.groupxHostUrl}/v1/chat/{account}"
+        return self._request(url, account, msg_json)
 
     # 获取我的减重信息
     def post_weight_loss(self, account, msg_json):
@@ -40,6 +31,7 @@ class ApiGroupx:
         url = f"{self.groupxHostUrl}/v1/health/weight-loss/{account}"
 
         return self._request(url, account, msg_json)
+
     def post_weight_loss_last_data(self, account, msg_json):
         # 未注册用户account为空
         url = f"{self.groupxHostUrl}/v1/health/weight-loss/last-data/{account}"
@@ -73,15 +65,10 @@ class ApiGroupx:
             logger.error(f"set_my_doctor_info 意外错误发生: {err}")
 
     # 获取我的医生
-    def get_itchat_user_info(self, account, user_id=None, user_name=None):
+    def get_itchat_user_info(self, account, user=None):
         # 未注册用户account为空
         url = f"{self.groupxHostUrl}/v1/wechat/itchat/user/get/{account or EthZero}"
-        data = {
-            "account": account,
-            "agent": self.agent,
-            "UserName": user_id,
-            "NickName": user_name,
-        }
+        data = {"account": account, "agent": self.agent, "user": user}
         return self._request(url, account, data)
 
     # 获取我的医生
@@ -117,13 +104,18 @@ class ApiGroupx:
                 response = requests.post(url, json=data_req, verify=False)
             else:
                 response = requests.get(url, verify=False)
-            logger.info(f"_response:{response.reason} len:{len(response.content)}")
-            return response.json() if response.status_code == 200 else None
+            resp_len = len(response.content)
+            logger.info(f"_response:{response.reason} len:{resp_len}")
+            if resp_len > 0 and response.status_code == 200:
+                return response.json()
+
+            logger.warning(f"response:{response.reason} len:{resp_len}")
+            return None
         except requests.HTTPError as http_err:
             logger.error(f"HTTP错误发生: {http_err}")
             return None
         except Exception as err:
-            logger.error(f"set_my_doctor_info 意外错误发生: {err}")
+            logger.error(f"_request 意外错误发生: {err}")
 
     def post_friends(self, bot_account, bot_nickname, friends):
         # 好友处理
@@ -137,12 +129,12 @@ class ApiGroupx:
                 },
             )
             post_url = self.groupxHostUrl + "/v1/wechat/itchat/user/friends/"
-            logger.info("post url: {}".format(post_url))
+            # logger.info("post url: {}".format(post_url))
 
             response = requests.post(post_url, json=json_data, verify=False)
 
-            logger.info(f"post friends to groupx api:{ response.reason}")
-            return response.json() if response.status_code == 200 else False
+            logger.info(f"post_friends response:{ response.reason}")
+            return response.json() if response.status_code == 200 else []
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
             logger.error("好友列表, 错误发生")
@@ -150,7 +142,7 @@ class ApiGroupx:
             logger.error(f"HTTP错误发生: {http_err}")
         except Exception as err:
             logger.error(f"发生意外错误: {err}")
-        return False
+        return []
 
     def post_groups(self, bot_account, bot_nickname, groups):
         try:
@@ -164,18 +156,19 @@ class ApiGroupx:
             )
 
             post_url = self.groupxHostUrl + "/v1/wechat/itchat/user/groups/"
-            logger.info("post url: {}".format(post_url))
+            # logger.info("post url: {}".format(post_url))
 
             response = requests.post(post_url, json=json_data, verify=False)
-            return response.json()
+            logger.info(f"post_groups response:{ response.reason}")
+            return response.json() if response.status_code == 200 else []
         except ZeroDivisionError:
             # 捕获并处理 ZeroDivisionError 异常
-            logger.error("好友列表, 错误发生")
+            logger.error("群列表, 错误发生")
         except requests.exceptions.HTTPError as http_err:
             logger.error(f"HTTP错误发生: {http_err}")
         except Exception as err:
             logger.error(f"发生意外错误: {err}")
-        return False
+        return []
 
     def get_myknowledge(self, bot_account, data):
         try:
