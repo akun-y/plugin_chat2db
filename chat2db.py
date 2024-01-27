@@ -145,31 +145,29 @@ class Chat2db(Plugin):
         # 接收人头像
         recvAvatar = self.img_service.get_head_img_url(cmsg.to_user_id)
         source = f"{self.systemName} {self.channel_type}"
-        query_json = make_chat_sign_req(
-            account,
-            {
-                "receiver": self.receiver,
-                "receiverName": cmsg.to_user_nickname,
-                "receiverAvatar": recvAvatar,
-                "conversationId": conversation_id,
-                "action": action,
-                "model": self.model,
-                "internetAccess": internet_access,
-                "aiResponse": response,
-                "userName": nickName,
-                "userAvatar": avatar,
-                "userId": user_id,
-                "message": content,
-                "messageId": cmsg.msg_id,
-                "messageType": content_type,
-                "wxReceiver": cmsg.to_user_id,
-                "wxUser": user,
-                "wxGroupId": wxGroupId,
-                "wxGroupName": wxGroupName,
-                "wxGroupObjectId": group_object_id,
-                "source": f"{source} group" if cmsg.is_group else f"{source} personal",
-            },
-        )
+        query_json = {
+            "receiver": self.receiver,
+            "receiverName": cmsg.to_user_nickname,
+            "receiverAvatar": recvAvatar,
+            "conversationId": conversation_id,
+            "action": action,
+            "model": self.model,
+            "internetAccess": internet_access,
+            "aiResponse": response,
+            "userName": nickName,
+            "userAvatar": avatar,
+            "userId": user_id,
+            "message": content,
+            "messageId": cmsg.msg_id,
+            "messageType": content_type,
+            "wxReceiver": cmsg.to_user_id,
+            "wxUser": user,
+            "wxGroupId": wxGroupId,
+            "wxGroupName": wxGroupName,
+            "wxGroupObjectId": group_object_id,
+            "source": f"{source} group" if cmsg.is_group else f"{source} personal",
+        }
+
         return self.groupx.post_chat_record(account, query_json)
 
     def _create_table(self):
