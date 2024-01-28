@@ -1,14 +1,14 @@
 {
-  "groupx_host_url":"http://192.168.15.221:8986",
-  "account":"0x6eE597E2C48C7b4D2afe69329EDBf7129698dbA5",
-  "system_name":"iKnow-on-wechat",
-  "name":"健康小助理",
-  "register_url":"https://door.bbs.mfull.cn/#/pages/reg",
-  "web_qrcode_file":"/home/chatgpt/xuzijun/comm_images/qrcode-web.png",
-  "agent_qrcode_file":"/home/chatgpt/xuzijun/comm_images/qrcode-shizizuo.jpg",
-  "prefix_cmd":"a#",
-  "prefix_deny":["#","/","$"],
-  "description":"我是扁鹊子，中国古代医学的奠基人之一，被尊奉为神医。传说中，扁鹊子有治病救人的神奇能力，他的医术被誉为'扁鹊神术'。关于扁鹊的历史记载主要出现在史书和文献中，包括《史记》和《淮南子》等。他是中国古代著名的传统医学家，被后人尊奉为医学的祖师爷。在中国医学史上，扁鹊子被视为医学的始祖，他的医术和医德传承至今",
-  "patpat_message2":"输入: ***卡路里*** 即可查询卡路里\n输入：***摄入卡路里*** 即可记录今天摄入的卡路里，如：早上摄入卡路里300",
-  "check_login_second_interval2":15
+  "groupx_host_url": "http://192.168.15.221:8986",
+  "account": "0x6eE597E2C48C7b4D2afe69329EDBf7129698dbA5",
+  "system_name": "iKnow-on-wechat",
+  "name": "健康小助理",
+  "register_url": "https://door.bbs.mfull.cn/#/pages/reg",
+  "web_qrcode_file": "/home/chatgpt/xuzijun/comm_images/qrcode-web.png",
+  "agent_qrcode_file": "/home/chatgpt/xuzijun/comm_images/qrcode-shizizuo.jpg",
+  "prefix_cmd": "a#",
+  "prefix_deny": ["#", "/", "$"],
+  "description": "我是扁鹊子，中国古代医学的奠基人之一，被尊奉为神医。传说中，扁鹊子有治病救人的神奇能力，他的医术被誉为'扁鹊神术'。关于扁鹊的历史记载主要出现在史书和文献中，包括《史记》和《淮南子》等。他是中国古代著名的传统医学家，被后人尊奉为医学的祖师爷。在中国医学史上，扁鹊子被视为医学的始祖，他的医术和医德传承至今",
+  "patpat_message2": "输入: ***卡路里*** 即可查询卡路里\n输入：***摄入卡路里*** 即可记录今天摄入的卡路里，如：早上摄入卡路里300",
+  "check_login_second_interval2": 15
 }
