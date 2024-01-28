@@ -20,11 +20,11 @@ class UserManager:
             if user_session:
                 session_len = len(user_session)
                 logger.info(f"===>user_session 长度 {session_len}")
-                if session_len > 50:# 超过50条就删除2条并更新know
+                if session_len > 50:  # 超过50条就删除2条并更新know
                     user_session.pop(0)
                     user_session.pop(0)
                     logger.info("用户session超过50条，更新知识库！")
-                    return True 
+                    return True
 
             last_update_time = self.user_knowledge[user_id]["last_update"]
             time_difference = datetime.datetime.now() - last_update_time
@@ -40,7 +40,9 @@ class UserManager:
             self.cleanup()
 
     def get_knowledge(self, user_id):
-        return self.user_knowledge[user_id]["know"]
+        u_know = self.user_knowledge.get(user_id)
+
+        return u_know["know"] if u_know else {}
 
     def cleanup(self):
         current_time = datetime.datetime.now()
