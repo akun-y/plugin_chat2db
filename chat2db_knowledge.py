@@ -79,7 +79,7 @@ def chat2db_refresh_knowledge(
                 },
             )
             logger.info(
-                f"====》get_myknowledge {is_group} {user.NickName} {msg.from_user_nickname}"
+                f"====》get_myknowledge {know_id} {user.NickName} {msg.from_user_nickname}"
             )
             if not data:
                 logger.warn(f"====》get_myknowledge 从服务器获取知识库返回数据为空 {user.NickName}")
