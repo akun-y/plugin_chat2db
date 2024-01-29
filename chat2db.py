@@ -275,7 +275,7 @@ class Chat2db(Plugin):
             img_url = "12"
             img_file = os.path.abspath(cmsg.content)
             if os.path.exists(img_file):
-                img_url = self.tencent.qcloud_upload_file(self.groupxHostUrl, img_file)
+                img_url = self.tencent.qcloud_upload_file(img_file)
 
             account = RemarkNameInfo(cmsg._rawmsg.User.RemarkName).get_account()
             group_object_id = ""
