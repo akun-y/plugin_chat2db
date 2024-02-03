@@ -6,7 +6,7 @@ import time
 from hashlib import md5
 from types import MemberDescriptorType
 from typing import List
-
+from config import conf
 import arrow
 import requests
 
@@ -44,7 +44,7 @@ class UserRefreshThread(object):
         self._config = config
         self._conn = conn
 
-        self.groupxHostUrl = self._config.get("groupx_host_url")
+        self.groupxHostUrl = conf().get("groupx_url")
         self.groupx = ApiGroupx(self.groupxHostUrl)
         self.tencent = ApiTencent(self.groupxHostUrl)
         self.img_service = HeadImgManager(conn, self.groupxHostUrl)
@@ -208,7 +208,7 @@ class UserRefreshThread(object):
         end = self.postFriendsPos + step
         if end > len(self.friends):
             end = len(self.friends) - 1
-            
+
         friends = self.friends[self.postFriendsPos : end]
         logger.info(
             f"post friends to server :{self.postFriendsPos}->{end},本次:{len(friends)}个,总共:{len(self.friends)}"

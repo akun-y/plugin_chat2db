@@ -25,17 +25,22 @@ class ApiGroupx:
         url = f"{self.groupxHostUrl}/v1/chat/{account}"
         return self._request(url, account, msg_json)
 
-    # 获取我的减重信息
+    # 保存我的减重信息
     def post_weight_loss(self, account, msg_json):
-        # 未注册用户account为空
         url = f"{self.groupxHostUrl}/v1/health/weight-loss/{account}"
+        return self._request(url, account, msg_json)
 
+    # 保存我的睡眠信息
+    def post_sleep_record(self, account, msg_json):
+        url = f"{self.groupxHostUrl}/v1/health/sleep-record/{account}"
         return self._request(url, account, msg_json)
 
     def post_weight_loss_last_data(self, account, msg_json):
-        # 未注册用户account为空
         url = f"{self.groupxHostUrl}/v1/health/weight-loss/last-data/{account}"
+        return self._request(url, account, msg_json)
 
+    def get_sleep_last_data(self, account, msg_json):
+        url = f"{self.groupxHostUrl}/v1/health/sleep-record/last-data/{account}"
         return self._request(url, account, msg_json)
 
     # 设置我的医生
