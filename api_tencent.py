@@ -27,22 +27,25 @@ class ApiTencent(object):
             "q-key-time": cos_policy["qKeyTime"],
             "q-signature": cos_policy["qSignature"],
         }
-        # 构建HTTP请求
+        try:
+            # 构建HTTP请求
+            response = requests.post(
+                "https://" + cos_policy["cosHost"], files=files, data=formData
+            )
+            # 处理响应
+            if response.status_code == 200:
+                logger.info("文件上传成功!")
+                file_url = f"https://{cos_policy['cosHost']}/{cos_policy['cosKey'].replace('%2F', '/')}"
+            else:
+                logger.info(f"文件上传失败，状态码: {response.status_code}")
+                logger.info(response.text)  # 如果有错误信息，可以打印出来
+                file_url = ""
 
-        response = requests.post(
-            "https://" + cos_policy["cosHost"], files=files, data=formData
-        )
-
-        # 处理响应
-        if response.status_code == 200:
-            logger.info("文件上传成功!")
-            file_url = f"https://{cos_policy['cosHost']}/{cos_policy['cosKey'].replace('%2F', '/')}"
-        else:
-            logger.info(f"文件上传失败，状态码: {response.status_code}")
-            logger.info(response.text)  # 如果有错误信息，可以打印出来
-            file_url = ""
-
-        return file_url
+            return file_url
+        except Exception as e:
+            logger.error("qcloud_upload_bytes 上传失败:")
+            logger.error(e)
+            return ""
 
     def qcloud_upload_file(self, file_path):
         files = {"file": open(file_path, "rb")}  # 'file' 是服务器上接受文件的字段名
