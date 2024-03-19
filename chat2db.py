@@ -110,7 +110,7 @@ class Chat2db(Plugin):
         # 管理用户及群的头像
         self.img_service = HeadImgManager(self.conn, self.groupxHostUrl)
 
-        logger.info(f"======>[Chat2db] inited, config={self.config}")
+        logger.info(f"======>[Chat2db] inited")
 
     def post_to_groupx(
         self,

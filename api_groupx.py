@@ -216,3 +216,16 @@ class ApiGroupx:
             return response.json().get("data")
         else:
             return f"Error: {response.status_code}"
+
+    def consumeTokens(self, account, data):
+        json_data = make_chat_sign_req(account, data)
+        response = requests.post(
+            f"{self.groupxHostUrl}/v1/user/ai-tokens/consume/{account}",
+            json=json_data,
+            verify=False,
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"consumeTokens response:{ response.reason} - {response.status_code}")
+            return None
