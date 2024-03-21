@@ -92,7 +92,7 @@ def chat2db_refresh_knowledge(
             if len(know) > 0:
                 if len(user_session) < 1:  # 新用户,session为空
                     logger.warn("新用户,初始化user session")
-                    if is_group and len(group_info):
+                    if is_group and group_info and len(group_info):
                         know.insert(
                             1,
                             {
