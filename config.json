@@ -1,9 +1,7 @@
 {
-  "groupx_host_url":"https://groupx.mfull.cn",
   "account":"0x6eE597E2C48C7b4D2afe69329EDBf7129698dbA5",
   "system_name":"iKnow-on-wechat",
   "name":"扁鹊子",
-  "register_url":"https://geth.mfull.cn/#/pages/reg",
   "web_qrcode_file":"/home/chatgpt/chatgpt-on-wechat/src/plugins/plugin_chat2db/images/qrcode-reg.png",
   "agent_qrcode_file":"/home/chatgpt/chatgpt-on-wechat/src/plugins/plugin_chat2db/images/qrcode-bqz.jpg",
 

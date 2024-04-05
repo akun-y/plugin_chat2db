@@ -10,7 +10,7 @@ from plugins.plugin_chat2db.file_store import MyFileStory
 
 
 class HeadImgManager(object):
-    def __init__(self, conn, groupHostUrl):
+    def __init__(self, conn):
         super().__init__()
         self.curdir = os.path.dirname(__file__)
         self.saveFolder = os.path.join(self.curdir, 'saved')
@@ -19,7 +19,7 @@ class HeadImgManager(object):
         self._create_table_avatar()
 
         self.my_store = MyFileStory()
-        self.tencent = ApiTencent(groupHostUrl)
+        self.tencent = ApiTencent()
     # 存储头像到腾讯cos
     def _create_table_avatar(self):
         c = self.conn.cursor()

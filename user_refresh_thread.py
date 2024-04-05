@@ -44,10 +44,9 @@ class UserRefreshThread(object):
         self._config = config
         self._conn = conn
 
-        self.groupxHostUrl = conf().get("groupx_url")
-        self.groupx = ApiGroupx(self.groupxHostUrl)
-        self.tencent = ApiTencent(self.groupxHostUrl)
-        self.img_service = HeadImgManager(conn, self.groupxHostUrl)
+        self.groupx = ApiGroupx()
+        self.tencent = ApiTencent()
+        self.img_service = HeadImgManager(conn)
 
         self.robot_account = config.get("account")
         self.robot_user_id = ""

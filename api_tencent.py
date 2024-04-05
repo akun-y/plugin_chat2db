@@ -12,7 +12,7 @@ from plugins.plugin_chat2db.api_groupx import ApiGroupx
 
 
 class ApiTencent(object):
-    def __init__(self, groupxHostUrl=None) -> None:
+    def __init__(self) -> None:
         self.groupx = ApiGroupx()
 
     def qcloud_upload_bytes(self, data):

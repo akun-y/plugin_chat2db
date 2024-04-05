@@ -1,9 +1,9 @@
 {
-  "groupx_host_url": "http://192.168.15.223:8988",
+  
   "account": "0x6eE597E2C48C7b4D2afe69329EDBf7129698dbA5",
   "system_name": "iKnow-on-wechat",
   "name": "狮子座",
-  "register_url": "http://192.168.15.223:8080/#/pages/reg",
+  
   "web_qrcode_file": "M:\\dev\\iKnowModel\\qrcode-web.png",
   "agent_qrcode_file": "M:\\dev\\iKnowModel\\qrcode-shizizuo.jpg",
   "prefix_cmd": "a#",

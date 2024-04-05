@@ -57,10 +57,9 @@ class Chat2db(Plugin):
         if self.config:
             self.robot_account = self.config.get("account")
             self.robot_name = self.config.get("name")
-            self.groupxHostUrl = self.config.get("groupx_host_url")
             self.receiver = self.config.get("account")
             self.systemName = self.config.get("system_name")
-            self.registerUrl = self.config.get("register_url")
+            self.registerUrl =conf().get("iknow_reg_url")
             self.webQrCodeFile = self.config.get("web_qrcode_file")
             self.agentQrCodeFile = self.config.get("agent_qrcode_file")
             self.prefix_cmd = self.config.get("prefix_cmd")  # 修改后的命令前缀
@@ -68,8 +67,8 @@ class Chat2db(Plugin):
         # 全局配置
         self.channel_type = conf().get("channel_type", "wx")
 
-        self.groupx = ApiGroupx(self.groupxHostUrl)
-        self.tencent = ApiTencent(self.groupxHostUrl)
+        self.groupx = ApiGroupx()
+        self.tencent = ApiTencent()
         # 用于管理用户的知识库,确定是否可以更新.
         self.user_manager = UserManager(self.groupx)
         # 应答一些自定义的回复信息
@@ -108,7 +107,7 @@ class Chat2db(Plugin):
         UserRefreshThread(self.conn, self.config)
 
         # 管理用户及群的头像
-        self.img_service = HeadImgManager(self.conn, self.groupxHostUrl)
+        self.img_service = HeadImgManager(self.conn)
 
         logger.info(f"======>[Chat2db] inited")
 
