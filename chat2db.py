@@ -57,7 +57,7 @@ class Chat2db(Plugin):
             self.config = self._load_config_template()
         if self.config:
             self.robot_account = conf().get("bot_account", EthZero)
-            self.robot_name = self.config.get("name")
+            self.robot_name = conf().get("bot_name")
             self.receiver = conf().get("bot_account", EthZero)
             self.systemName = self.config.get("system_name")
             self.registerUrl = conf().get("iknow_reg_url")
