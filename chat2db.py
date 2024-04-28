@@ -25,6 +25,7 @@ from plugins.plugin_chat2db.UserManager import UserManager
 from plugins.plugin_comm import *
 from plugins.plugin_comm.remark_name_info import RemarkNameInfo
 from plugins.plugin_comm.plugin_comm import (
+    EthZero,
     get_itchat_user,
     is_eth_address,
     is_valid_string,
@@ -55,11 +56,11 @@ class Chat2db(Plugin):
             # 未加载到配置，使用模板中的配置
             self.config = self._load_config_template()
         if self.config:
-            self.robot_account = self.config.get("account")
+            self.robot_account = conf().get("bot_account", EthZero)
             self.robot_name = self.config.get("name")
-            self.receiver = self.config.get("account")
+            self.receiver = conf().get("bot_account", EthZero)
             self.systemName = self.config.get("system_name")
-            self.registerUrl =conf().get("iknow_reg_url")
+            self.registerUrl = conf().get("iknow_reg_url")
             self.webQrCodeFile = self.config.get("web_qrcode_file")
             self.agentQrCodeFile = self.config.get("agent_qrcode_file")
             self.prefix_cmd = self.config.get("prefix_cmd")  # 修改后的命令前缀
@@ -392,7 +393,9 @@ class Chat2db(Plugin):
                     toUserName=userid,
                 )
         else:
-            itchat.send_msg(f"没找到你要对接的医生:‘{name}’\n请确认医生真实姓名.", toUserName=userid)
+            itchat.send_msg(
+                f"没找到你要对接的医生:‘{name}’\n请确认医生真实姓名.", toUserName=userid
+            )
         e_context.action = EventAction.BREAK_PASS
         return True
 
@@ -567,7 +570,9 @@ class Chat2db(Plugin):
                             self.robot_name,
                             [group_user],
                         )
-                        logger.info(f"获得groupx提供的用户群objectId===>{old_group_object_id}")
+                        logger.info(
+                            f"获得groupx提供的用户群objectId===>{old_group_object_id}"
+                        )
                 # 存储account,objectId 到user RemarkName中,方便下次找回.
                 update_remarkname_flag = False
 
@@ -594,8 +599,7 @@ class Chat2db(Plugin):
                     )
 
                 # 发送微信消息提醒点击登录或扫码
-                # self._send_reg_msg(cmsg.from_user_id,
-                #                username if is_group else None)
+                self._send_reg_msg(cmsg.from_user_id, username if is_group else None)
 
                 self.user_manager.set_my_doctor(userid, result.get("myDoctor", None))
                 self.user_manager.update_knowledge(userid, replyMsg)

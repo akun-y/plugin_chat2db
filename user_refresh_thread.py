@@ -48,7 +48,7 @@ class UserRefreshThread(object):
         self.tencent = ApiTencent()
         self.img_service = HeadImgManager(conn)
 
-        self.robot_account = config.get("account")
+        self.robot_account = conf().get("bot_account")
         self.robot_user_id = ""
         self.robot_user_nickname = ""  # config.get("name")
         self.check_login_second_interval = config.get(

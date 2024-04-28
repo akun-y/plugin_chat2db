@@ -17,7 +17,7 @@ class CustomReply:
         self.groupx = groupx
         self.user_manager = user_manager
 
-        self.robot_account = self.config.get("account")
+        self.robot_account = conf().get("bot_account")
         self.robot_name = self.config.get("name")
         self.robot_desc = self.config.get("description")
         self.patpat_message = self.config.get("patpat_message")  # 拍拍是否使用配置信息

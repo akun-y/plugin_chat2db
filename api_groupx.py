@@ -35,6 +35,7 @@ class ApiGroupx:
         url = f"{self.groupxHostUrl}/v1/health/sleep-record/{account}"
         return self._request(url, account, msg_json)
 
+    #获取最近N天的汇总数据
     def post_weight_loss_last_data(self, account, msg_json):
         url = f"{self.groupxHostUrl}/v1/health/weight-loss/last-data/{account}"
         return self._request(url, account, msg_json)
