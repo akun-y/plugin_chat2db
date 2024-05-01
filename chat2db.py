@@ -599,7 +599,7 @@ class Chat2db(Plugin):
                     )
 
                 # 发送微信消息提醒点击登录或扫码
-                self._send_reg_msg(cmsg.from_user_id, username if is_group else None)
+                # self._send_reg_msg(cmsg.from_user_id, username if is_group else None)
 
                 self.user_manager.set_my_doctor(userid, result.get("myDoctor", None))
                 self.user_manager.update_knowledge(userid, replyMsg)
