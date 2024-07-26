@@ -485,12 +485,6 @@ class Chat2db(Plugin):
 
         e_context.action = EventAction.CONTINUE
 
-    def _get_user(self, user_id):
-        user = itchat.search_friends(userName=user_id)
-        if not user:
-            user = itchat.update_friend(user_id)
-        return user if user else {}
-
     # 发送回复前
 
     def on_send_reply(self, e_context: EventContext):
@@ -513,7 +507,7 @@ class Chat2db(Plugin):
         username = cmsg.actual_user_nickname if is_group else cmsg.from_user_nickname
         userid = cmsg.actual_user_id if is_group else cmsg.from_user_id
         # 获取微信用户信息
-        act_user = self._get_user(userid)
+        act_user = get_itchat_user(userid)
         rm = RemarkNameInfo(act_user.RemarkName)
         old_account = rm.get_account()
         old_user_object_id = rm.get_object_id()
@@ -522,7 +516,7 @@ class Chat2db(Plugin):
         group_object_id = ""
         if is_group:
             group_id = cmsg.from_user_id
-            group_user = self._get_user(cmsg.from_user_id)
+            group_user = get_itchat_user(cmsg.from_user_id)
             group_object_id = group_user.RemarkName
 
         try:
@@ -558,7 +552,7 @@ class Chat2db(Plugin):
 
                 # 设置group的备注,object,account,方便下次找回.
                 if is_group and group_object_id:
-                    group_user = self._get_user(group_id)
+                    group_user = get_itchat_user(group_id)
                     old_group_object_id = group_user.RemarkName
 
                     if old_group_object_id != group_object_id:

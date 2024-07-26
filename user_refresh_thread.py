@@ -342,7 +342,7 @@ class UserRefreshThread(object):
         return v
 
     def postGroups2Groupx(self):
-        step = 2
+        step = 12
         # 获取群列表,每次30条,越界后又从0开始
         if len(self.chatrooms) < 1:
             self.chatrooms = itchat.get_chatrooms(True, False)
